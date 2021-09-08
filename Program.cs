@@ -1,170 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿/// This program is a Level Generator that evolves levels via a MAP-Elites
+/// Genetic Algorithm. This algorithm is an extension of the level generator
+/// introduced by Pereira et al. [1]. The result of this program is a set of
+/// levels written in JSON files.
+///
+/// This level generator receives seven arguments:
+/// - [Optional] the separately save flag (`-s`);
+///   * if the flag `-s` is entered, then the levels on the final population
+///     will be written separately, each one in a single JSON file.
+/// - a random seed;
+/// - the number of generations;
+/// - the initial population size;
+/// - the mutation chance;
+/// - the crossover chance, and;
+/// - the number of tournament competitors.
+///
+/// Author: Breno M. F. Viana.
+///
+/// References
+///
+/// [1] Pereira, Leonardo Tortoro, et al. "Procedural generation of dungeons'
+/// maps and locked-door missions through an evolutionary algorithm validated
+/// with players." Expert Systems with Applications 180 (2021): 115009.
+
+using System;
 
 namespace LevelGenerator
 {
-    internal class LevelGenerator
+    class Program
     {
-        public static void Main(string[] args)
-        {
-            // Get arguments - example: dotnet run 20 4 1.5 -warn 0
-            int nV = int.Parse(args[0]);
-            int nM = int.Parse(args[1]);
-            float lCoef = float.Parse(args[2]);
-            // Build parameters
-            Parameters prs = new Parameters(nV, nM, nM, lCoef);
+        /// The minimum number of program parameters (arguments).
+        private const int NUMBER_OF_PARAMETERS = 6;
 
-            //Creates the first population of dungeons and generate their rooms
-            List<Dungeon> dungeons;
-            System.Diagnostics.Stopwatch watch;
-            for (int id = 0; id < 1; ++id) // ### 1000 rodadas
+        /// Flag of saving all levels separately.
+        private const string SAVE_SEPARATELY = "-s";
+
+        /// Error code for bad arguments.
+        private const int ERROR_BAD_ARGUMENTS = 0xA0;
+
+        static void Main(
+            string[] args
+        ) {
+            // Check if the expected number of parameters were entered
+            if (args.Length < NUMBER_OF_PARAMETERS)
             {
-                //Console.WriteLine("New round!");
-                watch = System.Diagnostics.Stopwatch.StartNew();
-
-                dungeons = new List<Dungeon>(Constants.POP_SIZE);
-                for (int i = 0; i < dungeons.Capacity; ++i) // Generate the first population
-                {
-                    Dungeon individual = new Dungeon();
-                    individual.GenerateRooms();
-                    dungeons.Add(individual);
-                }
-                //Console.WriteLine("Created");
-                double min = Double.MaxValue;
-                double actual;
-                Dungeon aux = dungeons[0];
-
-                //Evolve all the generations from the GA
-                for (int gen = 0; gen < Constants.GENERATIONS; ++gen)
-                {
-
-                    //Interface.PrintNumericalGridWithConnections(dungeons[0]);
-                    //Interface.PrintTree(dungeons[0].RoomList[0]);
-                    //Interface.PrintGrid(dungeons[0].roomGrid);
-                    //Console.WriteLine("NEW GENERATION: "+gen);
-                    /*Console.WriteLine("Will Print");
-                    for(int i = 0; i < dungeons.Count; ++i)
-                    {
-                        Interface.PrintNumericalGridWithConnections(dungeons[i]);
-                    }
-                    Console.WriteLine("Printed");*/
-
-                    foreach (Dungeon dun in dungeons)
-                    {
-                        //Interface.PrintNumericalGridWithConnections(dun);
-                        dun.fitness = GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef);
-                        //Console.ReadKey();
-                        //Console.Clear();
-                    }
-
-                    //Elitism
-                    aux = dungeons[0];
-                    foreach (Dungeon dun in dungeons)
-                    {
-                        //Interface.PrintNumericalGridWithConnections(dun);
-                        actual = dun.fitness;
-                        if (min > actual)
-                        {
-                            min = actual;
-                            aux = dun;
-                        }
-                    }
-
-                    //Create the child population by doing the crossover and mutation
-                    List<Dungeon> childPop = new List<Dungeon>(dungeons.Count);
-                    Parallel.For(0, (dungeons.Count / 2), (i) =>
-                    {
-                        int parentIdx1 = 0, parentIdx2 = 1;
-                        GA.Tournament(dungeons, ref parentIdx1, ref parentIdx2);
-                        //Console.WriteLine("Selected!");
-                        Dungeon parent1 = dungeons[parentIdx1].Copy();
-                        Dungeon parent2 = dungeons[parentIdx2].Copy();
-
-                        //GA.Crossover(ref parent1, ref parent2, ref child1, ref child2);
-                        //The children weren't used, so the method was changed, as the crossover happens in the parents' copies
-                        try
-                        {
-                            //Console.WriteLine("Will Cross");
-                            //Interface.PrintNumericalGridWithConnections(parent1);
-                            //Interface.PrintNumericalGridWithConnections(parent2);
-
-                            GA.Crossover(ref parent1, ref parent2);
-                            //Console.WriteLine("Crossed!");
-                            //Console.WriteLine("Crossed");
-                            //Interface.PrintNumericalGridWithConnections(parent1);
-                            //Interface.PrintNumericalGridWithConnections(parent2);
-
-                            //Mutation is disabled for now as it must be fixed
-                            aux = dungeons[0];
-                            GA.Mutation(ref parent1);
-                            GA.Mutation(ref parent2);
-                            //Console.WriteLine("Mutated");
-                            //aux.FixRoomList();
-                            parent1.FixRoomList();
-                            parent2.FixRoomList();
-                        }
-                        catch (System.Exception e)
-                        {
-                            System.Console.WriteLine(e.Message);
-                            Util.OpenUri("https://stackoverflow.com/search?q=" + e.Message);
-                            return;
-                        }
-                        //Calculate the average number of children from the rooms in each children
-                        parent1.CalcAvgChildren();
-                        parent2.CalcAvgChildren();
-                        //Console.WriteLine("Averaged");
-                        //Add the children to the new population
-                        childPop.Add(parent1);
-                        childPop.Add(parent2);
-                        //Console.WriteLine("Added");
-                    });
-
-                    //Elitism
-                    childPop[0] = aux;
-                    dungeons = childPop;
-                    //Console.WriteLine("Elit");
-                    //Console.WriteLine("GEN "+gen+" COMPLETED!");
-
-                }
-                /*
-                for (int i = 0; i < dungeons.Count; ++i)
-                {
-                    Interface.PrintNumericalGridWithConnections(dungeons[i]);
-                }*/
-                //Find the best individual in the final population and print it as the answer
-                min = Double.MaxValue;
-                aux = dungeons[0];
-                foreach (Dungeon dun in dungeons)
-                {
-                    GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef);
-                    actual = dun.fitness;
-                    if (min > actual)
-                    {
-                        min = actual;
-                        aux = dun;
-                    }
-                }
-                //Console.WriteLine("Found best");
-                watch.Stop();
-                long time = watch.ElapsedMilliseconds;
-                //Console.WriteLine("AVGChildren: " + aux.AvgChildren+ " desiredKeys: "+aux.DesiredKeys);
-                //Interface.PrintGridWithConnections(aux.roomGrid);
-                //Console.WriteLine("Fitness: "+min);
-
-                // Save CSV
-                // CSVManager.SaveCSVLevel(id, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, time, Constants.RESULTSFILE+"-"+prs.nV+"-" + prs.nK + "-" + prs.nL + "-" + prs.lCoef + ".csv");
-                CSVManager.SaveCSVLevel(id, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, time, Constants.RESULTSFILE+"-"+prs.nV+"-" + prs.nK + ".csv");
-
-                //Console.WriteLine("Saved!");
-                //Console.WriteLine("AVGChildren: " + aux.AvgChildren + "Fitness: " + min);
-                //Console.WriteLine("Locks: " + aux.nLocks + "Needed: " + aux.neededLocks);
-                Interface.PrintNumericalGridWithConnections(aux, prs);
-                //Console.WriteLine("OVER!");
-                //Console.ReadLine();
-                //AStar.FindRoute(aux);
-                dungeons.Clear();
+                Console.WriteLine("ERROR: Invalid number of parameters!");
+                System.Environment.Exit(ERROR_BAD_ARGUMENTS);
             }
+            // Has the separately save flag been entered?
+            bool separately = args[0] == SAVE_SEPARATELY;
+            // If so, then the evolutionary parameters are the next
+            int i = separately ? 1 : 0;
+            // Define the evolutionary parameters
+            Parameters prs = new Parameters(
+                int.Parse(args[i++]), // Random seed
+                int.Parse(args[i++]), // Number of generations
+                int.Parse(args[i++]), // Initial population size
+                int.Parse(args[i++]), // Mutation chance
+                int.Parse(args[i++]), // Crossover chance
+                int.Parse(args[i])    // Number of tournament competitors
+            );
+            // Prepare the evolutionary process
+            LevelGenerator generator = new LevelGenerator(prs);
+            // Start the generative process and generate a set of levels
+            generator.Evolve();
         }
     }
 }
