@@ -1,4 +1,32 @@
 # MAP-Elites Level Generator
 
-This program is a Level Generator that evolves enemies via a MAP-Elites GA.
+## Description
+
+This program is a Level Generator that evolves levels via a MAP-Elites Genetic
+Algorithm.
+This algorithm is an extension of the level generator introduced by Pereira
+et al. [1].
 The result of this program is a set of levels written in JSON files.
+
+## Program arguments
+
+This level generator receives seven arguments:
+- [Optional] the separately save flag (`-s`);
+  * if the flag `-s` is entered,  then the levels on the final population
+    will be written separately, each one in a single JSON file.
+- a random seed;
+- the number of generations;
+- the initial population size;
+- the mutation chance;
+- the crossover chance, and;
+- the number of tournament competitors.
+
+## Author
+
+- Breno M. F. Viana
+
+## References
+
+[1] Pereira, Leonardo Tortoro, et al. "Procedural generation of dungeons' maps
+and locked-door missions through an evolutionary algorithm validated with
+players." Expert Systems with Applications 180 (2021): 115009.
