@@ -86,8 +86,13 @@ namespace LevelGenerator
 
                         //Mutation is disabled for now as it must be fixed
                         aux = dungeons[0];
-                        Mutation.Apply(ref parent1, ref rand);
-                        Mutation.Apply(ref parent2, ref rand);
+
+                        if (rand.Next(101) <= Constants.MUTATION_RATE)
+                        {
+                            Mutation.Apply(ref parent1, ref rand);
+                            Mutation.Apply(ref parent2, ref rand);
+                        }
+
                         //Console.WriteLine("Mutated");
                         //aux.FixRoomList();
                         parent1.FixRoomList();
@@ -132,10 +137,10 @@ namespace LevelGenerator
             // // Save CSV
             // CSVManager.SaveCSVLevel(0, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, 0, Constants.RESULTSFILE+"-"+prs.nV+"-" + prs.nK + ".csv");
 
-            // //Console.WriteLine("Saved!");
-            // //Console.WriteLine("AVGChildren: " + aux.AvgChildren + "Fitness: " + min);
-            // //Console.WriteLine("Locks: " + aux.nLocks + "Needed: " + aux.neededLocks);
-            // Interface.PrintNumericalGridWithConnections(aux, prs);
+            //Console.WriteLine("Saved!");
+            //Console.WriteLine("AVGChildren: " + aux.AvgChildren + "Fitness: " + min);
+            //Console.WriteLine("Locks: " + aux.nLocks + "Needed: " + aux.neededLocks);
+            Interface.PrintNumericalGridWithConnections(aux, prs);
         }
     }
 }
