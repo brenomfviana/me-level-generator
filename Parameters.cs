@@ -12,7 +12,7 @@ namespace LevelGenerator
         /// The maximum number of generations.
         public int generations { get; }
         /// The initial population size.
-        public int initial { get; }
+        public int population { get; }
         /// The mutation chance.
         public int mutation { get; }
         /// The crossover chance.
@@ -24,7 +24,7 @@ namespace LevelGenerator
         public Parameters(
             int _seed,
             int _generations,
-            int _initial,
+            int _population,
             int _mutation,
             int _crossover,
             int _competitors
@@ -35,7 +35,7 @@ namespace LevelGenerator
             lCoef = 1.5f;
             seed = _seed;
             generations = _generations;
-            initial = _initial;
+            population = _population;
             mutation = _mutation;
             crossover = _crossover;
             competitors = _competitors;

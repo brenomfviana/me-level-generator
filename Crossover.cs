@@ -1,83 +1,18 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 
 namespace LevelGenerator
 {
-    class GA
+    /// This class holds the fitness operator.
+    public class Crossover
     {
-        public enum MutationOp
-        {
-            insertChild = 0,
-            removeLeaf = 1
-        };
-        /**
-         * Search the tree of rooms to find the number of special rooms. 
-         * The key room is saved in the list with its positive ID, while the locked room with its negative value of the ID
-         */
-        static private void FindNKLR(ref int nRooms, ref List<int> specialRooms, Room root)
-        {
-            Queue<Room> toVisit = new Queue<Room>();
-            specialRooms = new List<int>();
-            toVisit.Enqueue(root);
-            nRooms = 0;
-            while (toVisit.Count > 0)
-            {
-                nRooms++;
-                Room actualRoom = toVisit.Dequeue() as Room;
-                RoomType type;
-                type = actualRoom.RoomType;
-                if (type == RoomType.key)
-                    specialRooms.Add(actualRoom.KeyToOpen);
-                else if (type == RoomType.locked)
-                    specialRooms.Add(-actualRoom.KeyToOpen);
-                if (actualRoom.LeftChild != null)
-                    toVisit.Enqueue(actualRoom.LeftChild);
-                if (actualRoom.BottomChild != null)
-                    toVisit.Enqueue(actualRoom.BottomChild);
-                if (actualRoom.RightChild != null)
-                    toVisit.Enqueue(actualRoom.RightChild);
-            }
-        }
-
-        /**
-         * Changes the selected rooms between the parent dungeons
-         * To do so, changes in the parent who is their child to the correspondingo node
-         */
-        static public void ChangeChildren(ref Room cut1, ref Room cut2)
-        {
-            Room parent = cut1.Parent;
-            //Check which child is the cut Room (Right, Bottom, Left)
-            try
-            {
-                switch (cut1.ParentDirection)
-                {
-                    case Util.Direction.right:
-                        parent.RightChild = cut2;
-                        break;
-                    case Util.Direction.down:
-                        parent.BottomChild = cut2;
-                        break;
-                    case Util.Direction.left:
-                        parent.LeftChild = cut2;
-                        break;
-                    default:
-                        System.Console.WriteLine("Something went wrong in crossover!.\n");
-                        System.Console.WriteLine("Direction not supported:\n\tOnly Right, Down and Left are allowed.\n\n");
-                        break;
-                }
-            }
-            catch(System.Exception e)
-            {
-                System.Console.WriteLine("Something went wrong while changing the children!");
-                throw e;
-            }
-        }
         /*
          * Choose a random room to switch between the parents and arrange every aspect of the room needed after the change
          * Including the grid, and also the exceptions where the new nodes overlap the old ones
          */
         //static public void Crossover(ref Dungeon ind1, ref Dungeon ind2, ref Dungeon child1, ref Dungeon child2)
-        static public void Crossover(
+        public static void Apply(
             ref Dungeon indOriginal1,
             ref Dungeon indOriginal2,
             ref Random rand
@@ -284,148 +219,68 @@ namespace LevelGenerator
                 //System.Console.WriteLine("Fixed Branch");
             }
         }
-        
-        public static void Mutation(
-            ref Dungeon individual,
-            ref Random rand
-        ) {
+
+        /**
+         * Search the tree of rooms to find the number of special rooms. 
+         * The key room is saved in the list with its positive ID, while the locked room with its negative value of the ID
+         */
+        private static void FindNKLR(ref int nRooms, ref List<int> specialRooms, Room root)
+        {
+            Queue<Room> toVisit = new Queue<Room>();
+            specialRooms = new List<int>();
+            toVisit.Enqueue(root);
+            nRooms = 0;
+            while (toVisit.Count > 0)
+            {
+                nRooms++;
+                Room actualRoom = toVisit.Dequeue() as Room;
+                RoomType type;
+                type = actualRoom.RoomType;
+                if (type == RoomType.key)
+                    specialRooms.Add(actualRoom.KeyToOpen);
+                else if (type == RoomType.locked)
+                    specialRooms.Add(-actualRoom.KeyToOpen);
+                if (actualRoom.LeftChild != null)
+                    toVisit.Enqueue(actualRoom.LeftChild);
+                if (actualRoom.BottomChild != null)
+                    toVisit.Enqueue(actualRoom.BottomChild);
+                if (actualRoom.RightChild != null)
+                    toVisit.Enqueue(actualRoom.RightChild);
+            }
+        }
+
+                /**
+         * Changes the selected rooms between the parent dungeons
+         * To do so, changes in the parent who is their child to the correspondingo node
+         */
+        private static void ChangeChildren(ref Room cut1, ref Room cut2)
+        {
+            Room parent = cut1.Parent;
+            //Check which child is the cut Room (Right, Bottom, Left)
             try
             {
-                //Mutate keys, adding or removing a pair
-                bool willMutate = rand.Next(101) <= Constants.MUTATION_RATE;
-                MutationOp op;
-                if (willMutate)
+                switch (cut1.ParentDirection)
                 {
-                    op = rand.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
-                    switch (op)
-                    {
-                        case MutationOp.insertChild:
-                            individual.AddLockAndKey(ref rand);
-                            break;
-                        case MutationOp.removeLeaf:
-                            individual.RemoveLockAndKey(ref rand);
-                            break;  
-                    }
-                    individual.FixRoomList();
+                    case Util.Direction.right:
+                        parent.RightChild = cut2;
+                        break;
+                    case Util.Direction.down:
+                        parent.BottomChild = cut2;
+                        break;
+                    case Util.Direction.left:
+                        parent.LeftChild = cut2;
+                        break;
+                    default:
+                        System.Console.WriteLine("Something went wrong in crossover!.\n");
+                        System.Console.WriteLine("Direction not supported:\n\tOnly Right, Down and Left are allowed.\n\n");
+                        break;
                 }
-                //foreach(Room room in individual.RoomList){
-                /*for (int i = 0; i < individual.RoomList.Count; ++i)
-                {
-                    Room room = individual.RoomList[i];
-
-                    willMutate = rand.Next(101) <= Constants.MUTATION_RATE;
-                    if (willMutate)
-                    {
-                        op = rand.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
-                        switch (op)
-                        {
-                            case MutationOp.insertChild:
-                                if (room.LeftChild != null && room.BottomChild != null && room.RightChild != null) continue;
-                                bool found = false;
-                                Util.Direction dir;
-                                do
-                                {
-                                    dir = (Util.Direction)rand.Next(3);
-                                    if (dir == Util.Direction.left && room.LeftChild == null) found = true;
-                                    else if (dir == Util.Direction.down && room.BottomChild == null) found = true;
-                                    else if (dir == Util.Direction.right && room.RightChild == null) found = true;
-                                } while (!found);
-
-                                if (room.ValidateChild(dir, individual.roomGrid))
-                                {
-                                    //System.Console.WriteLine("Insertion!");
-                                    Room child = new Room();
-                                    room.InsertChild(dir, ref child, ref individual.roomGrid);
-                                    child.ParentDirection = dir;
-                                    individual.RoomList.Add(child);
-                                    individual.roomGrid[child.X, child.Y] = child;
-                                }
-                                break;
-                            case MutationOp.removeLeaf:
-                                if (room.LeftChild == null && room.RightChild == null && room.BottomChild == null && room.Type == Type.normal) // It's a leaf node, remove it from the dungeon
-                                {
-                                    dir = room.ParentDirection;
-                                    switch (dir)
-                                    {
-                                        case Util.Direction.right:
-                                            room.Parent.RightChild = null;
-                                            break;
-                                        case Util.Direction.left:
-                                            room.Parent.LeftChild = null;
-                                            break;
-                                        case Util.Direction.down:
-                                            room.Parent.BottomChild = null;
-                                            break;
-                                    }
-                                    individual.RemoveFromGrid(room);
-                                    individual.RoomList.Remove(room);
-                                }
-                                break;
-                        }
-                    }
-                }*/
-            
             }
-            catch (System.Exception e)
+            catch(System.Exception e)
             {
+                System.Console.WriteLine("Something went wrong while changing the children!");
                 throw e;
             }
-
-
-
-            //Mutation(ref individual.LeftChild);
-            //Mutation(ref individual.BottomChild);
-            //Mutation(ref individual.RightChild);
-        }
-        static public void Tournament(
-            List<Dungeon>pop,
-            ref int parent1,
-            ref int parent2,
-            ref Random rand
-        ) {
-            HashSet<int> posHash = new HashSet<int>();
-            List<int> parentPosL = new List<int>();
-            do
-            {
-                int pos = rand.Next(pop.Count);
-                if (posHash.Add(pos))
-                {
-                    parentPosL.Add(pos);
-                }
-            } while (posHash.Count != 4);
-            parent1 = pop[parentPosL[0]].fitness < pop[parentPosL[1]].fitness ? parentPosL[0] : parentPosL[1];
-            parent2 = pop[parentPosL[2]].fitness < pop[parentPosL[3]].fitness ? parentPosL[2] : parentPosL[3];
-        }
-        //Fitness is based in the number of rooms, number of keys and locks, the linear coefficient and the number of locks used by the A*
-        static public float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef, ref Random rand)
-        {
-            float avgUsedRoom = 0.0f;
-            //Only use the A* if there is a lock in the dungeon
-            if (ind.nLocks > 0)
-            {
-                //System.Console.WriteLine("Begin A*");
-                ind.neededLocks = AStar.FindRoute(ind);
-                for (int i = 0; i < 3; ++i)
-                {
-                    DFS dfs = new DFS(ind);
-                    dfs.FindRoute(ind, ref rand);
-                    avgUsedRoom += dfs.NVisitedRooms;
-                }
-                ind.neededRooms = avgUsedRoom / 3.0f;
-                //System.Console.WriteLine("Needed Rooms: " + ind.neededRooms);
-                if (ind.neededRooms > ind.RoomList.Count)
-                {
-                    System.Console.WriteLine("SOMETHING IS REALLY WRONG! Nrooms: " + ind.RoomList.Count + "  Used: " + ind.neededRooms);
-                    System.Console.ReadKey();
-                }
-                if (ind.neededLocks > ind.nLocks)
-                    System.Console.WriteLine("SOMETHING IS REALLY WRONG!");
-                return (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren)) + (ind.nLocks * 0.8f - ind.neededLocks) + (ind.RoomList.Count - ind.neededRooms));
-            }
-            else
-                return (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren)));
-            
-            //return System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren);
         }
     }
 }

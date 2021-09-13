@@ -34,26 +34,26 @@ namespace LevelGenerator
             // Initialize the random generator
             Random rand = new Random(prs.seed);
 
-            //Creates the first population of dungeons and generate their rooms
-            List<Dungeon> dungeons = new List<Dungeon>(Constants.POP_SIZE);
-            for (int i = 0; i < dungeons.Capacity; ++i) // Generate the first population
+            // Initialize the population
+            List<Dungeon> dungeons = new List<Dungeon>(prs.population);
+
+            // Generate the initial population
+            for (int i = 0; i < dungeons.Capacity; ++i)
             {
                 Dungeon individual = new Dungeon();
                 individual.GenerateRooms(ref rand);
                 dungeons.Add(individual);
             }
-            //Console.WriteLine("Created");
             double min = Double.MaxValue;
             double actual;
             Dungeon aux = dungeons[0];
 
-            //Evolve all the generations from the GA
-            for (int gen = 0; gen < Constants.GENERATIONS; ++gen)
+            // Evolve the population
+            for (int g = 0; g < prs.generations; g++)
             {
-
                 foreach (Dungeon dun in dungeons)
                 {
-                    dun.fitness = GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                    dun.fitness = Fitness.Calculate(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                 }
 
                 //Elitism
@@ -74,7 +74,7 @@ namespace LevelGenerator
                 for (int i = 0; i < (dungeons.Count / 2); i++)
                 {
                     int parentIdx1 = 0, parentIdx2 = 1;
-                    GA.Tournament(dungeons, ref parentIdx1, ref parentIdx2, ref rand);
+                    Selection.Tournament(dungeons, ref parentIdx1, ref parentIdx2, ref rand);
                     //Console.WriteLine("Selected!");
                     Dungeon parent1 = dungeons[parentIdx1].Copy();
                     Dungeon parent2 = dungeons[parentIdx2].Copy();
@@ -82,12 +82,12 @@ namespace LevelGenerator
                     //The children weren't used, so the method was changed, as the crossover happens in the parents' copies
                     try
                     {
-                        GA.Crossover(ref parent1, ref parent2, ref rand);
+                        Crossover.Apply(ref parent1, ref parent2, ref rand);
 
                         //Mutation is disabled for now as it must be fixed
                         aux = dungeons[0];
-                        GA.Mutation(ref parent1, ref rand);
-                        GA.Mutation(ref parent2, ref rand);
+                        Mutation.Apply(ref parent1, ref rand);
+                        Mutation.Apply(ref parent2, ref rand);
                         //Console.WriteLine("Mutated");
                         //aux.FixRoomList();
                         parent1.FixRoomList();
@@ -112,15 +112,15 @@ namespace LevelGenerator
                 childPop[0] = aux;
                 dungeons = childPop;
                 //Console.WriteLine("Elit");
-                //Console.WriteLine("GEN "+gen+" COMPLETED!");
+                //Console.WriteLine("GEN "+g+" COMPLETED!");
 
             }
-            //Find the best individual in the final population and print it as the answer
+            // Find the best individual in the final population and print it as the answer
             min = Double.MaxValue;
             aux = dungeons[0];
             foreach (Dungeon dun in dungeons)
             {
-                GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                Fitness.Calculate(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                 actual = dun.fitness;
                 if (min > actual)
                 {
@@ -128,23 +128,14 @@ namespace LevelGenerator
                     aux = dun;
                 }
             }
-            //Console.WriteLine("Found best");
-            //Console.WriteLine("AVGChildren: " + aux.AvgChildren+ " desiredKeys: "+aux.DesiredKeys);
-            //Interface.PrintGridWithConnections(aux.roomGrid);
-            //Console.WriteLine("Fitness: "+min);
 
-            // Save CSV
-            // CSVManager.SaveCSVLevel(id, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, time, Constants.RESULTSFILE+"-"+prs.nV+"-" + prs.nK + "-" + prs.nL + "-" + prs.lCoef + ".csv");
-            CSVManager.SaveCSVLevel(0, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, 0, Constants.RESULTSFILE+"-"+prs.nV+"-" + prs.nK + ".csv");
+            // // Save CSV
+            // CSVManager.SaveCSVLevel(0, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, 0, Constants.RESULTSFILE+"-"+prs.nV+"-" + prs.nK + ".csv");
 
-            //Console.WriteLine("Saved!");
-            //Console.WriteLine("AVGChildren: " + aux.AvgChildren + "Fitness: " + min);
-            //Console.WriteLine("Locks: " + aux.nLocks + "Needed: " + aux.neededLocks);
-            Interface.PrintNumericalGridWithConnections(aux, prs);
-            //Console.WriteLine("OVER!");
-            //Console.ReadLine();
-            //AStar.FindRoute(aux);
-            dungeons.Clear();
+            // //Console.WriteLine("Saved!");
+            // //Console.WriteLine("AVGChildren: " + aux.AvgChildren + "Fitness: " + min);
+            // //Console.WriteLine("Locks: " + aux.nLocks + "Needed: " + aux.neededLocks);
+            // Interface.PrintNumericalGridWithConnections(aux, prs);
         }
     }
 }
