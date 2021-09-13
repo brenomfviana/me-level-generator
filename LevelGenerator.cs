@@ -31,12 +31,15 @@ namespace LevelGenerator
         /// Perform the level evolution process.
         private void Evolution()
         {
+            // Initialize the random generator
+            Random rand = new Random(prs.seed);
+
             //Creates the first population of dungeons and generate their rooms
             List<Dungeon> dungeons = new List<Dungeon>(Constants.POP_SIZE);
             for (int i = 0; i < dungeons.Capacity; ++i) // Generate the first population
             {
                 Dungeon individual = new Dungeon();
-                individual.GenerateRooms();
+                individual.GenerateRooms(ref rand);
                 dungeons.Add(individual);
             }
             //Console.WriteLine("Created");
@@ -50,7 +53,7 @@ namespace LevelGenerator
 
                 foreach (Dungeon dun in dungeons)
                 {
-                    dun.fitness = GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef);
+                    dun.fitness = GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                 }
 
                 //Elitism
@@ -71,7 +74,7 @@ namespace LevelGenerator
                 for (int i = 0; i < (dungeons.Count / 2); i++)
                 {
                     int parentIdx1 = 0, parentIdx2 = 1;
-                    GA.Tournament(dungeons, ref parentIdx1, ref parentIdx2);
+                    GA.Tournament(dungeons, ref parentIdx1, ref parentIdx2, ref rand);
                     //Console.WriteLine("Selected!");
                     Dungeon parent1 = dungeons[parentIdx1].Copy();
                     Dungeon parent2 = dungeons[parentIdx2].Copy();
@@ -79,12 +82,12 @@ namespace LevelGenerator
                     //The children weren't used, so the method was changed, as the crossover happens in the parents' copies
                     try
                     {
-                        GA.Crossover(ref parent1, ref parent2);
+                        GA.Crossover(ref parent1, ref parent2, ref rand);
 
                         //Mutation is disabled for now as it must be fixed
                         aux = dungeons[0];
-                        GA.Mutation(ref parent1);
-                        GA.Mutation(ref parent2);
+                        GA.Mutation(ref parent1, ref rand);
+                        GA.Mutation(ref parent2, ref rand);
                         //Console.WriteLine("Mutated");
                         //aux.FixRoomList();
                         parent1.FixRoomList();
@@ -117,7 +120,7 @@ namespace LevelGenerator
             aux = dungeons[0];
             foreach (Dungeon dun in dungeons)
             {
-                GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef);
+                GA.Fitness(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                 actual = dun.fitness;
                 if (min > actual)
                 {

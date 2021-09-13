@@ -27,14 +27,15 @@ namespace LevelGenerator
         /*
          *  Creates a Room for the dungeon, defining if it is a normal room, a room with a key, or a locked room 
          */
-        public static Room CreateRoom()
-        {
+        public static Room CreateRoom(
+            ref Random rand
+        ) {
             float nodeProbPenalty = 0.0f;
             int keyToOpen;
             //int lockId;
             Room room;
             
-            int prob = Util.rnd.Next(101);
+            int prob = rand.Next(101);
             //If there are too many keys without locks, raises the chance to create a lock
             if (AvailableLockId.Count > 0)
             {
@@ -86,13 +87,16 @@ namespace LevelGenerator
          * Recreates a room, used after a crossover to fix the level
          * Only redefines the types of the room in order to make the new level a feasible one even with the changes
          */
-        public static void RecreateRoom(ref Room room, int desiredKeys)
-        {
+        public static void RecreateRoom(
+            ref Room room,
+            int desiredKeys,
+            ref Random rand
+        ) {
             float nodeProbPenalty = 0.0f;
             float desiredPenalty = 0.0f;
             int keyToOpen;
 
-            int prob = Util.rnd.Next(101);
+            int prob = rand.Next(101);
             desiredPenalty = (desiredKeys - availableLockId.Count + usedLockId.Count)*0.1f;
             //If there are too many keys without locks, raises the chance to create a lock
             if (AvailableLockId.Count > 0)

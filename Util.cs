@@ -4,8 +4,6 @@ namespace LevelGenerator
 {
     public static class Util
     {
-        public static Random rnd = new Random();
-
         public enum Direction
         {
             right = 0,

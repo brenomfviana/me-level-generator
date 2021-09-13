@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LevelGenerator
 {
@@ -77,8 +78,10 @@ namespace LevelGenerator
             return newRoom;
         }
         //Fix the newly inserted branch by reinserting in it the special rooms that were in the old branch while maintaining their order of appearence to guarantee the feasibility
-        public void FixBranch(List<int> specialRooms)
-        {
+        public void FixBranch(
+            List<int> specialRooms,
+            ref Random rand
+        ) {
             Queue<Room> toVisit = new Queue<Room>();
             Queue<Room> visited = new Queue<Room>();
             Queue<int> newSpecialRooms = new Queue<int>();
@@ -140,7 +143,7 @@ namespace LevelGenerator
             {
                 actualRoom = visited.Dequeue();
 
-                int prob = Util.rnd.Next(101);
+                int prob = rand.Next(101);
                 
                 //If there is a special room left, check the random number and see if it will be placed in the actual room or not
                 if (newSpecialRooms.Count > 0)

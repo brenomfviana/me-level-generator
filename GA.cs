@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace LevelGenerator
 {
@@ -76,14 +77,17 @@ namespace LevelGenerator
          * Including the grid, and also the exceptions where the new nodes overlap the old ones
          */
         //static public void Crossover(ref Dungeon ind1, ref Dungeon ind2, ref Dungeon child1, ref Dungeon child2)
-        static public void Crossover(ref Dungeon indOriginal1, ref Dungeon indOriginal2)
-        {
+        static public void Crossover(
+            ref Dungeon indOriginal1,
+            ref Dungeon indOriginal2,
+            ref Random rand
+        ) {
             Dungeon ind1, ind2;
             //The root of the branch that will be traded
             Room roomCut1, roomCut2;
             //List of rooms that were the root of the branch and led to an impossible crossover (Tabu List)
             List<Room> failedRooms;
-            int prob = Util.rnd.Next(100);
+            int prob = rand.Next(100);
             //List of special rooms in the branche to be traded of each parent
             List<int> specialRooms1 = new List<int>(), specialRooms2 = new List<int>();
             //List of special rooms in the traded brach after the crossover
@@ -113,7 +117,7 @@ namespace LevelGenerator
                         System.Console.WriteLine("Ind1 RoomLC:" + aux.LeftChild.RoomId);*/
 
                     //Get a random node from the parent, find the number of keys, locks and rooms and add it to the list of future failed rooms
-                    roomCut1 = ind1.RoomList[Util.rnd.Next(1, ind1.RoomList.Count)];
+                    roomCut1 = ind1.RoomList[rand.Next(1, ind1.RoomList.Count)];
                     FindNKLR(ref nRooms1, ref specialRooms1, roomCut1);
                     failedRooms = new List<Room>();
                     //System.Console.WriteLine("Ind2 size:" + ind2.RoomList.Count);
@@ -125,7 +129,7 @@ namespace LevelGenerator
                     {
                         do
                         {
-                            roomCut2 = ind2.RoomList[Util.rnd.Next(1, ind2.RoomList.Count)];
+                            roomCut2 = ind2.RoomList[rand.Next(1, ind2.RoomList.Count)];
                         } while (failedRooms.Contains(roomCut2));
                         failedRooms.Add(roomCut2);
                         if (failedRooms.Count == ind2.RoomList.Count - 1)
@@ -262,8 +266,8 @@ namespace LevelGenerator
                 if (!isImpossible)
                 {
                     //Replace locks and keys in the new branches
-                    roomCut2.FixBranch(specialRooms1);
-                    roomCut1.FixBranch(specialRooms2);
+                    roomCut2.FixBranch(specialRooms1, ref rand);
+                    roomCut1.FixBranch(specialRooms2, ref rand);
                     //System.Console.WriteLine("FIXEDBRANCHES");
                     //Fix the list of rooms
                     ind1.FixRoomList();
@@ -281,23 +285,25 @@ namespace LevelGenerator
             }
         }
         
-        public static void Mutation(ref Dungeon individual)
-        {
+        public static void Mutation(
+            ref Dungeon individual,
+            ref Random rand
+        ) {
             try
             {
                 //Mutate keys, adding or removing a pair
-                bool willMutate = Util.rnd.Next(101) <= Constants.MUTATION_RATE;
+                bool willMutate = rand.Next(101) <= Constants.MUTATION_RATE;
                 MutationOp op;
                 if (willMutate)
                 {
-                    op = Util.rnd.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
+                    op = rand.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
                     switch (op)
                     {
                         case MutationOp.insertChild:
-                            individual.AddLockAndKey();
+                            individual.AddLockAndKey(ref rand);
                             break;
                         case MutationOp.removeLeaf:
-                            individual.RemoveLockAndKey();
+                            individual.RemoveLockAndKey(ref rand);
                             break;  
                     }
                     individual.FixRoomList();
@@ -307,10 +313,10 @@ namespace LevelGenerator
                 {
                     Room room = individual.RoomList[i];
 
-                    willMutate = Util.rnd.Next(101) <= Constants.MUTATION_RATE;
+                    willMutate = rand.Next(101) <= Constants.MUTATION_RATE;
                     if (willMutate)
                     {
-                        op = Util.rnd.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
+                        op = rand.Next(101) <= Constants.MUTATION0_RATE ? MutationOp.insertChild : MutationOp.removeLeaf;
                         switch (op)
                         {
                             case MutationOp.insertChild:
@@ -319,7 +325,7 @@ namespace LevelGenerator
                                 Util.Direction dir;
                                 do
                                 {
-                                    dir = (Util.Direction)Util.rnd.Next(3);
+                                    dir = (Util.Direction)rand.Next(3);
                                     if (dir == Util.Direction.left && room.LeftChild == null) found = true;
                                     else if (dir == Util.Direction.down && room.BottomChild == null) found = true;
                                     else if (dir == Util.Direction.right && room.RightChild == null) found = true;
@@ -371,13 +377,17 @@ namespace LevelGenerator
             //Mutation(ref individual.BottomChild);
             //Mutation(ref individual.RightChild);
         }
-        static public void Tournament(List<Dungeon>pop, ref int parent1, ref int parent2)
-        {
+        static public void Tournament(
+            List<Dungeon>pop,
+            ref int parent1,
+            ref int parent2,
+            ref Random rand
+        ) {
             HashSet<int> posHash = new HashSet<int>();
             List<int> parentPosL = new List<int>();
             do
             {
-                int pos = Util.rnd.Next(pop.Count);
+                int pos = rand.Next(pop.Count);
                 if (posHash.Add(pos))
                 {
                     parentPosL.Add(pos);
@@ -387,7 +397,7 @@ namespace LevelGenerator
             parent2 = pop[parentPosL[2]].fitness < pop[parentPosL[3]].fitness ? parentPosL[2] : parentPosL[3];
         }
         //Fitness is based in the number of rooms, number of keys and locks, the linear coefficient and the number of locks used by the A*
-        static public float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef)
+        static public float Fitness(Dungeon ind, int nV, int nK, int nL, float lCoef, ref Random rand)
         {
             float avgUsedRoom = 0.0f;
             //Only use the A* if there is a lock in the dungeon
@@ -398,7 +408,7 @@ namespace LevelGenerator
                 for (int i = 0; i < 3; ++i)
                 {
                     DFS dfs = new DFS(ind);
-                    dfs.FindRoute(ind);
+                    dfs.FindRoute(ind, ref rand);
                     avgUsedRoom += dfs.NVisitedRooms;
                 }
                 ind.neededRooms = avgUsedRoom / 3.0f;

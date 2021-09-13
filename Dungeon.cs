@@ -109,11 +109,15 @@ namespace LevelGenerator
          *  If there is not a room in the grid at the given coordinates, create the room, add it to the room list
          *  and also enqueue it so it can be explored later
          */
-        public void InstantiateRoom(ref Room child, ref Room actualRoom, Util.Direction dir)
-        {
+        public void InstantiateRoom(
+            ref Room child,
+            ref Room actualRoom,
+            Util.Direction dir,
+            ref Random rand
+        ) {
             if (actualRoom.ValidateChild(dir, roomGrid))
             {
-                child = RoomFactory.CreateRoom();
+                child = RoomFactory.CreateRoom(ref rand);
                 //System.Console.WriteLine("Created! ID = " + child.RoomId);
                 actualRoom.InsertChild(dir, ref child, ref roomGrid);
                 //System.Console.WriteLine("Inserted! ID = " + child.RoomId);
@@ -205,8 +209,9 @@ namespace LevelGenerator
         /*
          * While a node (room) has not been visited, or while the max depth of the tree has not been reached, visit each node and create its children
          */
-        public void GenerateRooms()
-        {
+        public void GenerateRooms(
+            ref Random rand
+        ) {
             int prob;
             while (toVisit.Count > 0)
             {
@@ -219,7 +224,7 @@ namespace LevelGenerator
                     break;
                 }
                 //Check how many children the node will have, if any.
-                prob = Util.rnd.Next(100);
+                prob = rand.Next(100);
                 //Console.WriteLine(prob);
                 //The parent node has 100% chance to have children, then, at each height, 10% of chance to NOT have children is added.
                 //If a node has a child, create it with the RoomFactory, insert it as a child of the actual node in the right place
@@ -227,28 +232,28 @@ namespace LevelGenerator
                 if (prob <= (Constants.PROB_HAS_CHILD * (1 - actualDepth / (Constants.MAX_DEPTH + 1))))
                 {
                     Room child = null;
-                    Util.Direction dir = (Util.Direction)Util.rnd.Next(3);
-                    prob = Util.rnd.Next(101);
+                    Util.Direction dir = (Util.Direction) rand.Next(3);
+                    prob = rand.Next(101);
 
                     if (prob < Constants.PROB_1_CHILD)
                     {
-                        InstantiateRoom(ref child, ref actualRoom, dir);
+                        InstantiateRoom(ref child, ref actualRoom, dir, ref rand);
                     }
                     else if (prob < (Constants.PROB_1_CHILD + Constants.PROB_2_CHILD))
                     {
-                        InstantiateRoom(ref child, ref actualRoom, dir);
+                        InstantiateRoom(ref child, ref actualRoom, dir, ref rand);
                         Util.Direction dir2;
                         do
                         {
-                            dir2 = (Util.Direction)Util.rnd.Next(3);
+                            dir2 = (Util.Direction) rand.Next(3);
                         } while (dir == dir2);
-                        InstantiateRoom(ref child, ref actualRoom, dir2);
+                        InstantiateRoom(ref child, ref actualRoom, dir2, ref rand);
                     }
                     else
                     {
-                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.right);
-                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.down);
-                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.left);
+                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.right, ref rand);
+                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.down, ref rand);
+                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.left, ref rand);
                     }
                 }
             }
@@ -286,8 +291,9 @@ namespace LevelGenerator
          * Just edit the room types using a breadth-first search algorithm with a similar algorithm as the one used
          * to create the rooms
          */
-        public void FixIndividual()
-        {
+        public void FixIndividual(
+            ref Random rand
+        ) {
             Room actualRoom;
             Room child;
             actualRoom = roomList[0];
@@ -304,21 +310,21 @@ namespace LevelGenerator
                 if (child != null)
                     if (actualRoom.Equals(child.Parent))
                     {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys);
+                        RoomFactory.RecreateRoom(ref child, desiredKeys, ref rand);
                         toVisit.Enqueue(child);
                     }
                 child = actualRoom.BottomChild;
                 if (child != null)
                     if (actualRoom.Equals(child.Parent))
                     {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys);
+                        RoomFactory.RecreateRoom(ref child, desiredKeys, ref rand);
                         toVisit.Enqueue(child);
                     }
                 child = actualRoom.RightChild;
                 if (child != null)
                     if (actualRoom.Equals(child.Parent))
                     {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys);
+                        RoomFactory.RecreateRoom(ref child, desiredKeys, ref rand);
                         toVisit.Enqueue(child);
                     }
 
@@ -330,7 +336,7 @@ namespace LevelGenerator
         /*
          * Add lock and key
          */
-        public void AddLockAndKey()
+        public void AddLockAndKey(ref Random rand)
         {
             Room actualRoom;
             Room child;
@@ -346,8 +352,8 @@ namespace LevelGenerator
                 actualRoom = toVisit.Dequeue() as Room;
                 if (actualRoom.RoomType == RoomType.normal && !actualRoom.Equals(roomList[0]))
                 {
-                    //if (Util.rnd.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM + Convert.ToInt32(hasKey)*Constants.PROB_KEY_ROOM)
-                    if (Util.rnd.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM)
+                    //if (rand.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM + Convert.ToInt32(hasKey)*Constants.PROB_KEY_ROOM)
+                    if (rand.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM)
                     {
                         if (!hasKey)
                         {
@@ -392,9 +398,10 @@ namespace LevelGenerator
         /*
          * Add lock and key
          */
-        public void RemoveLockAndKey()
-        {
-            int removeKey = Util.rnd.Next(nKeys);
+        public void RemoveLockAndKey(
+            ref Random rand
+        ) {
+            int removeKey = rand.Next(nKeys);
             int removeLock = removeKey;
             Room actualRoom;
             Room child;
