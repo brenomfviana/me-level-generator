@@ -1,6 +1,6 @@
 ﻿/// This program is a Level Generator that evolves levels via a MAP-Elites
 /// Genetic Algorithm. This algorithm is an extension of the level generator
-/// introduced by Pereira et al. [1]. The result of this program is a set of
+/// introduced by Pereira et al. [1]. The output of this program is a set of
 /// levels written in JSON files.
 ///
 /// This level generator receives seven arguments:
