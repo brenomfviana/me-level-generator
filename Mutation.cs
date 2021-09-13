@@ -5,8 +5,8 @@ namespace LevelGenerator
     /// This class holds the mutation operator.
     public class Mutation
     {
-        /// The rate at which the mutation adds a new lock and key.
-        private static int MUTATION_RATE = 50;
+        /// The rate at which the mutation adds or removes a lock and a key.
+        private static int MUTATION_TYPE_RATE = 50;
 
         /// Reproduce a new individual by mutating a parent.
         public static Dungeon Apply(
@@ -16,7 +16,7 @@ namespace LevelGenerator
             // Clone parent
             Dungeon individual = _parent.Clone();
             // Choose randomly which mutation will be applied
-            if (MUTATION_RATE > Util.RandomPercent(ref _rand))
+            if (MUTATION_TYPE_RATE > Util.RandomPercent(ref _rand))
             {
                 // Add a new lock and a new key in the new individual
                 individual.AddLockAndKey(ref _rand);
