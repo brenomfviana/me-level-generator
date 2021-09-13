@@ -358,7 +358,7 @@ namespace LevelGenerator
                         if (!hasKey)
                         {
                             actualRoom.RoomType = RoomType.key;
-                            actualRoom.RoomId = Util.getNextId();
+                            actualRoom.RoomId = Room.getNextId();
                             actualRoom.KeyToOpen = actualRoom.RoomId;
                             lockId = actualRoom.RoomId;
                             hasKey = true;

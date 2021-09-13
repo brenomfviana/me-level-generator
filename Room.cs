@@ -16,6 +16,12 @@ namespace LevelGenerator
   
     public class Room
     {
+        private static int ID = 0;
+
+        public static int getNextId()
+        {
+            return ID++;
+        }
 
         //Room's children
         private Room leftChild = null;
@@ -48,7 +54,7 @@ namespace LevelGenerator
         public Room(RoomType roomType = RoomType.normal, int keyToOpen = -1, int id = -1)
         {
             if (id == -1)
-                RoomId = Util.getNextId();
+                RoomId = Room.getNextId();
             else
                 RoomId = id;
             RoomType = roomType;
@@ -99,7 +105,7 @@ namespace LevelGenerator
                 {
                     if(specialRooms[i] == -specialRooms[j])
                     {
-                        int aux = Util.getNextId();
+                        int aux = Room.getNextId();
                         if (specialRooms[i] > 0)
                             specialRooms[i] = aux;
                         else

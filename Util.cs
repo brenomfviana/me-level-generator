@@ -10,12 +10,5 @@ namespace LevelGenerator
             down = 1,
             left = 2
         };
-
-        private static int ID = 0;
-
-        public static int getNextId()
-        {
-            return ID++;
-        }
     }
 }

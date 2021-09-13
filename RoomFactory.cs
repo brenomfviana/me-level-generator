@@ -114,7 +114,7 @@ namespace LevelGenerator
                  * If the room has a key, then the key must have an id and this id is added to the list of available keys
                  */
                 room.RoomType = RoomType.key;
-                room.RoomId = Util.getNextId();
+                room.RoomId = Room.getNextId();
                 room.KeyToOpen = room.RoomId;
                 AvailableLockId.Add(room.RoomId);
             }
