@@ -166,10 +166,10 @@ namespace LevelGenerator
                 Room aux = newRoom.LeftChild;
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
-                    hasInserted = newRoom.ValidateChild(Util.Direction.left, roomGrid);
+                    hasInserted = newRoom.ValidateChild(Util.Direction.Left, roomGrid);
                     if (hasInserted)
                     {
-                        newRoom.InsertChild(Util.Direction.left, ref aux, ref roomGrid);
+                        newRoom.InsertChild(Util.Direction.Left, ref aux, ref roomGrid);
                         RefreshGrid(ref aux);
                     }
                     else
@@ -180,10 +180,10 @@ namespace LevelGenerator
                 aux = newRoom.BottomChild;
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
-                    hasInserted = newRoom.ValidateChild(Util.Direction.down, roomGrid);
+                    hasInserted = newRoom.ValidateChild(Util.Direction.Down, roomGrid);
                     if (hasInserted)
                     {
-                        newRoom.InsertChild(Util.Direction.down, ref aux, ref roomGrid);
+                        newRoom.InsertChild(Util.Direction.Down, ref aux, ref roomGrid);
                         RefreshGrid(ref aux);
                     }
                     else
@@ -194,10 +194,10 @@ namespace LevelGenerator
                 aux = newRoom.RightChild;
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
-                    hasInserted = newRoom.ValidateChild(Util.Direction.right, roomGrid);
+                    hasInserted = newRoom.ValidateChild(Util.Direction.Right, roomGrid);
                     if (hasInserted)
                     {
-                        newRoom.InsertChild(Util.Direction.right, ref aux, ref roomGrid);
+                        newRoom.InsertChild(Util.Direction.Right, ref aux, ref roomGrid);
                         RefreshGrid(ref aux);
                     }
                     else
@@ -251,9 +251,9 @@ namespace LevelGenerator
                     }
                     else
                     {
-                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.right, ref rand);
-                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.down, ref rand);
-                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.left, ref rand);
+                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.Right, ref rand);
+                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.Down, ref rand);
+                        InstantiateRoom(ref child, ref actualRoom, Util.Direction.Left, ref rand);
                     }
                 }
             }
@@ -495,7 +495,7 @@ namespace LevelGenerator
                     }
 
             }
-            
+
             nKeys -= Convert.ToInt32(hasKey);
             nLocks -= Convert.ToInt32(hasLock);
         }

@@ -175,13 +175,13 @@ namespace LevelGenerator
             // Set `_room2` as a child of the parent of `_room1`
             switch (_room1.ParentDirection)
             {
-                case Util.Direction.right:
+                case Util.Direction.Right:
                     _room1.Parent.RightChild = _room2;
                     break;
-                case Util.Direction.down:
+                case Util.Direction.Down:
                     _room1.Parent.BottomChild = _room2;
                     break;
-                case Util.Direction.left:
+                case Util.Direction.Left:
                     _room1.Parent.LeftChild = _room2;
                     break;
             }

@@ -13,7 +13,7 @@ namespace LevelGenerator
         key = 1 << 1,
         locked = 1 << 2
     };
-  
+
     public class Room
     {
         private static int ID = 0;
@@ -35,7 +35,7 @@ namespace LevelGenerator
         private int x = 0;
         private int y = 0;
         private int depth = 0;
-        //Rotation of the individual's parent position related to the normal cartesian orientation 
+        //Rotation of the individual's parent position related to the normal cartesian orientation
         //(with 0 meaning the parent is in the North of the child (Above), 90 being in the East (Right) and so on)
         //Will be later used to construct the grid of the room
         private int rotation = 0;
@@ -43,13 +43,13 @@ namespace LevelGenerator
         private Room parent = null;
         //Saves the direction of the parent (if it is right, bottom or left child)
         //Reduces operations at crossover
-        private Util.Direction parentDirection = Util.Direction.down;
+        private Util.Direction parentDirection = Util.Direction.Down;
 
         /*
          * Room constructor. The default is a normal room, without a lock so, without a key to open
          * and without a predefined id
          * If a key room defines the key to open as its id, and if a locked one, uses the id of the room which has the key that opens it
-         * 
+         *
          */
         public Room(RoomType roomType = RoomType.normal, int keyToOpen = -1, int id = -1)
         {
@@ -150,7 +150,7 @@ namespace LevelGenerator
                 actualRoom = visited.Dequeue();
 
                 int prob = rand.Next(101);
-                
+
                 //If there is a special room left, check the random number and see if it will be placed in the actual room or not
                 if (newSpecialRooms.Count > 0)
                 {
@@ -215,7 +215,7 @@ namespace LevelGenerator
             Room roomInGrid;
             switch (dir)
             {
-                case Util.Direction.right:
+                case Util.Direction.Right:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -247,7 +247,7 @@ namespace LevelGenerator
                     {
                         return false;
                     }
-                case Util.Direction.down:
+                case Util.Direction.Down:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -280,7 +280,7 @@ namespace LevelGenerator
                         return false;
                     }
 
-                case Util.Direction.left:
+                case Util.Direction.Left:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -322,25 +322,25 @@ namespace LevelGenerator
 
         /*
          * For each direction, calculates the X,Y position of the child room based on its rotation and the parent's coordinates
-         * and checks if a room already exists in that position. 
-         * 
-         * If it does, stop creating a room and gives a small chance 
-         * for the parent room to adopt the existing room as async shortcut child, 
-         * but does not change the child room's original parent. In this case, returns false, 
+         * and checks if a room already exists in that position.
+         *
+         * If it does, stop creating a room and gives a small chance
+         * for the parent room to adopt the existing room as async shortcut child,
+         * but does not change the child room's original parent. In this case, returns false,
          * so the existing room will not be added to the visiting rooms queue.
          *
          * If the grid position is empty, create the room in the desired position, with the right position and rotation,
-         * set the current room as its parent and returns true so that the new room is added 
+         * set the current room as its parent and returns true so that the new room is added
          * to the room list and visiting queue
          */
         public void InsertChild(Util.Direction dir, ref Room child, ref RoomGrid roomGrid)
         {
             Room roomInGrid;
             int shortcutChance;
-            
+
             switch (dir)
             {
-                case Util.Direction.right:
+                case Util.Direction.Right:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2)!=0)
                     {
@@ -369,7 +369,7 @@ namespace LevelGenerator
                         RightChild.SetParent(this);
                     }
                     break;
-                case Util.Direction.down:
+                case Util.Direction.Down:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -398,7 +398,7 @@ namespace LevelGenerator
                         BottomChild.SetParent(this);
                     }
                     break;
-                case Util.Direction.left:
+                case Util.Direction.Left:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -480,11 +480,11 @@ namespace LevelGenerator
         {
             switch (dir)
             {
-                case Util.Direction.down:
+                case Util.Direction.Down:
                     return BottomChild;
-                case Util.Direction.left:
+                case Util.Direction.Left:
                     return LeftChild;
-                case Util.Direction.right:
+                case Util.Direction.Right:
                     return RightChild;
             }
             return null;

@@ -11,9 +11,9 @@ namespace LevelGenerator
         /// during the room placement.
         public enum Direction
         {
-            right = 0,
-            down = 1,
-            left = 2
+            Right = 0,
+            Down = 1,
+            Left = 2
         };
 
         /// Return a random integer percentage (from 0 to 99, 100 numbers).
