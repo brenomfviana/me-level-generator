@@ -41,7 +41,7 @@ namespace LevelGenerator
          * Makes a deep copy of the dungeon, also sets right the parent, children and neighbors of the copied rooms
          * now that grid information is available
          */
-        public Dungeon Copy()
+        public Dungeon Clone()
         {
             Dungeon copyDungeon = new Dungeon();
             copyDungeon.toVisit = new Queue();

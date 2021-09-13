@@ -35,30 +35,30 @@ namespace LevelGenerator
             Random rand = new Random(prs.seed);
 
             // Initialize the population
-            List<Dungeon> dungeons = new List<Dungeon>(prs.population);
+            List<Dungeon> pop = new List<Dungeon>();
 
             // Generate the initial population
-            for (int i = 0; i < dungeons.Capacity; ++i)
+            for (int i = 0; i < prs.population; ++i)
             {
                 Dungeon individual = new Dungeon();
                 individual.GenerateRooms(ref rand);
-                dungeons.Add(individual);
+                pop.Add(individual);
             }
             double min = Double.MaxValue;
             double actual;
-            Dungeon aux = dungeons[0];
+            Dungeon aux = pop[0];
 
             // Evolve the population
             for (int g = 0; g < prs.generations; g++)
             {
-                foreach (Dungeon dun in dungeons)
+                foreach (Dungeon dun in pop)
                 {
                     dun.fitness = Fitness.Calculate(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                 }
 
                 //Elitism
-                aux = dungeons[0];
-                foreach (Dungeon dun in dungeons)
+                aux = pop[0];
+                foreach (Dungeon dun in pop)
                 {
                     //Interface.PrintNumericalGridWithConnections(dun);
                     actual = dun.fitness;
@@ -69,61 +69,56 @@ namespace LevelGenerator
                     }
                 }
 
-                //Create the child population by doing the crossover and mutation
-                List<Dungeon> childPop = new List<Dungeon>(dungeons.Count);
-                for (int i = 0; i < (dungeons.Count / 2); i++)
+                // Initialize the offspring list
+                List<Dungeon> offspring = new List<Dungeon>();
+
+                // Apply the evolutionary operators
+                if (prs.crossover > Util.RandomPercent(ref rand))
                 {
-                    int parentIdx1 = 0, parentIdx2 = 1;
-                    Selection.Tournament(dungeons, ref parentIdx1, ref parentIdx2, ref rand);
-                    //Console.WriteLine("Selected!");
-                    Dungeon parent1 = dungeons[parentIdx1].Copy();
-                    Dungeon parent2 = dungeons[parentIdx2].Copy();
-
-                    //The children weren't used, so the method was changed, as the crossover happens in the parents' copies
-                    try
+                    // Select two different parents
+                    Dungeon[] parents = Selection.Select(
+                        CROSSOVER_PARENTS, prs.competitors, pop, ref rand
+                    );
+                    // Apply crossover and get the resulting children
+                    Dungeon[] children = Crossover.Apply(
+                        parents[0], parents[1], ref rand
+                    );
+                    // Add the new individuals in the offspring list
+                    for (int i = 0; i < children.Length; i++)
                     {
-                        Crossover.Apply(ref parent1, ref parent2, ref rand);
-
-                        //Mutation is disabled for now as it must be fixed
-                        aux = dungeons[0];
-
-                        if (rand.Next(101) <= Constants.MUTATION_RATE)
-                        {
-                            Mutation.Apply(ref parent1, ref rand);
-                            Mutation.Apply(ref parent2, ref rand);
-                        }
-
-                        //Console.WriteLine("Mutated");
-                        //aux.FixRoomList();
-                        parent1.FixRoomList();
-                        parent2.FixRoomList();
+                        // Calculate the new individual fitness
+                        Fitness.Calculate(children[i], prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                        // Add the new individual in the offspring
+                        offspring.Add(children[i]);
                     }
-                    catch (System.Exception e)
-                    {
-                        System.Console.WriteLine(e.Message);
-                        return;
-                    }
-                    //Calculate the average number of children from the rooms in each children
-                    parent1.CalcAvgChildren();
-                    parent2.CalcAvgChildren();
-                    //Console.WriteLine("Averaged");
-                    //Add the children to the new population
-                    childPop.Add(parent1);
-                    childPop.Add(parent2);
-                    //Console.WriteLine("Added");
+                }
+                if (prs.mutation > Util.RandomPercent(ref rand))
+                {
+                    // Select and mutate a parent
+                    Dungeon parent = Selection.Select(
+                        MUTATION_PARENT, prs.competitors, pop, ref rand
+                    )[0];
+                    Dungeon individual = Mutation.Apply(parent, ref rand);
+                    // Calculate the new individual fitness
+                    Fitness.Calculate(individual, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                    // Add the new individual in the offspring
+                    offspring.Add(individual);
                 }
 
-                //Elitism
-                childPop[0] = aux;
-                dungeons = childPop;
-                //Console.WriteLine("Elit");
-                //Console.WriteLine("GEN "+g+" COMPLETED!");
+                foreach (Dungeon individual in offspring)
+                {
+                    individual.FixRoomList();
+                    pop.Add(individual);
+                }
 
+                // //Calculate the average number of children from the rooms in each children
+                // parent1.CalcAvgChildren();
+                // parent2.CalcAvgChildren();
             }
             // Find the best individual in the final population and print it as the answer
             min = Double.MaxValue;
-            aux = dungeons[0];
-            foreach (Dungeon dun in dungeons)
+            aux = pop[0];
+            foreach (Dungeon dun in pop)
             {
                 Fitness.Calculate(dun, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                 actual = dun.fitness;
