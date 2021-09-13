@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace LevelGenerator
 {
     /// This class represents the grid of rooms of levels.
     public class RoomGrid
     {
-        /// .
+        /// This matrix holds the grids of rooms corresponding to a Dungeon.
         private Room[,] grid;
 
-        /// .
+        /// Define the `[]` operator for the grid.
+        ///
+        /// `get`: Return the room of the given position (coordinate x and y).
+        /// `set`: Assign a room to the given position (coordinate x and y).
         public Room this[int X, int Y]
         {
             get => grid[
@@ -24,7 +24,7 @@ namespace LevelGenerator
                 ] = value;
         }
 
-        /// Room grid constructor.
+        /// Room Grid constructor.
         ///
         /// Initialize the room grid with the maximum matrix offset.
         public RoomGrid()

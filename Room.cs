@@ -336,7 +336,6 @@ namespace LevelGenerator
         public void InsertChild(Util.Direction dir, ref Room child, ref RoomGrid roomGrid)
         {
             Room roomInGrid;
-            int shortcutChance;
 
             switch (dir)
             {

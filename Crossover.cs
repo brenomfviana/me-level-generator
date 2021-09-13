@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace LevelGenerator
 {
-    /// This class holds the fitness operator.
+    /// This class holds the crossover operator.
     public class Crossover
     {
         /// Choose a random room to switch between the parents and arrange
