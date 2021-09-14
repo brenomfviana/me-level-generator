@@ -68,8 +68,7 @@ namespace LevelGenerator
             while (pop.Count() < prs.population)
             {
                 // Create a new random individual
-                Dungeon individual = new Dungeon();
-                individual.GenerateRooms(ref rand);
+                Individual individual = Individual.GetRandom(ref rand);
                 // Calculate the individual fitness
                 Fitness.Calculate(ref individual, ref rand);
                 // Place the individual in the MAP-Elites
@@ -80,17 +79,17 @@ namespace LevelGenerator
             for (int g = 0; g < prs.generations; g++)
             {
                 // Initialize the offspring list
-                List<Dungeon> offspring = new List<Dungeon>();
+                List<Individual> offspring = new List<Individual>();
 
                 // Apply the evolutionary operators
                 if (prs.crossover > Util.RandomPercent(ref rand))
                 {
                     // Select two different parents
-                    Dungeon[] parents = Selection.Select(
+                    Individual[] parents = Selection.Select(
                         CROSSOVER_PARENTS, prs.competitors, pop, ref rand
                     );
                     // Apply crossover and get the resulting children
-                    Dungeon[] children = Crossover.Apply(
+                    Individual[] children = Crossover.Apply(
                         parents[0], parents[1], ref rand
                     );
                     // Add the new individuals in the offspring list
@@ -105,19 +104,20 @@ namespace LevelGenerator
                 if (prs.mutation > Util.RandomPercent(ref rand))
                 {
                     // Select and mutate a parent
-                    Dungeon parent = Selection.Select(
+                    Individual parent = Selection.Select(
                         MUTATION_PARENT, prs.competitors, pop, ref rand
                     )[0];
-                    Dungeon individual = Mutation.Apply(parent, ref rand);
+                    Individual individual = Mutation.Apply(parent, ref rand);
                     // Calculate the new individual fitness
                     Fitness.Calculate(ref individual, ref rand);
                     // Add the new individual in the offspring
                     offspring.Add(individual);
                 }
 
-                foreach (Dungeon individual in offspring)
+                foreach (Individual individual in offspring)
                 {
-                    individual.FixRoomList();
+                    individual.dungeon.FixRoomList();
+                    individual.generation = g;
                     pop.PlaceIndividual(individual);
                 }
             }

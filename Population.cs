@@ -20,7 +20,7 @@ namespace LevelGenerator
         /// keys multiplied by the number of locked doors.
         public (int keys, int locks) dimension { get; }
         /// The MAP-Elites map (a matrix of individuals).
-        public Dungeon[,] map { get; }
+        public Individual[,] map { get; }
 
         /// Population constructor.
         public Population(
@@ -28,7 +28,7 @@ namespace LevelGenerator
             int _locks
         ) {
             dimension = (_keys, _locks);
-            map = new Dungeon[dimension.keys, dimension.locks];
+            map = new Individual[dimension.keys, dimension.locks];
         }
 
         /// Return the number of Elites of the population.
@@ -72,11 +72,11 @@ namespace LevelGenerator
         /// there. Otherwise, we compare the both old and new individuals, and
         /// the best individual is placed in the corresponding Elite.
         public void PlaceIndividual(
-            Dungeon _individual
+            Individual _individual
         ) {
             // Calculate the individual slot (Elite)
-            int k = (int) _individual.nKeys;
-            int l = (int) _individual.nLocks;
+            int k = (int) _individual.dungeon.nKeys;
+            int l = (int) _individual.dungeon.nLocks;
             // Check if the level is within the search space
             if (k >= dimension.keys || l >= dimension.locks)
             {
@@ -91,9 +91,9 @@ namespace LevelGenerator
         }
 
         /// Return a list with the population individuals.
-        public List<Dungeon> ToList()
+        public List<Individual> ToList()
         {
-            List<Dungeon> list = new List<Dungeon>();
+            List<Individual> list = new List<Individual>();
             for (int k = 0; k < dimension.keys; k++)
             {
                 for (int l = 0; l < dimension.locks; l++)
@@ -124,9 +124,9 @@ namespace LevelGenerator
                     // Print the Elite's attributes
                     else
                     {
-                        Dungeon d = map[k, l];
-                        Console.WriteLine("  R=" + map[k, l].neededRooms);
-                        Console.WriteLine("  L=" + map[k, l].neededLocks);
+                        Individual elite = map[k, l];
+                        Console.WriteLine("  R=" + elite.dungeon.neededRooms);
+                        Console.WriteLine("  L=" + elite.dungeon.neededLocks);
                     }
                     Console.WriteLine();
                 }

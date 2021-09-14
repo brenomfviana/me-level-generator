@@ -9,24 +9,24 @@ namespace LevelGenerator
         private static int MUTATION_TYPE_RATE = 50;
 
         /// Reproduce a new individual by mutating a parent.
-        public static Dungeon Apply(
-            Dungeon _parent,
+        public static Individual Apply(
+            Individual _parent,
             ref Random _rand
         ) {
-            // Clone parent
-            Dungeon individual = _parent.Clone();
+            // Clone the parent
+            Individual individual = _parent.Clone();
             // Choose randomly which mutation will be applied
             if (MUTATION_TYPE_RATE > Util.RandomPercent(ref _rand))
             {
                 // Add a new lock and a new key in the new individual
-                individual.AddLockAndKey(ref _rand);
+                individual.dungeon.AddLockAndKey(ref _rand);
             }
             else
             {
                 // Remove a lock and a key from the new individual randomly
-                individual.RemoveLockAndKey(ref _rand);
+                individual.dungeon.RemoveLockAndKey(ref _rand);
             }
-            // Return mutated individual
+            // Return the mutated individual
             return individual;
         }
     }

@@ -6,8 +6,9 @@ namespace LevelGenerator
 {
     public class Dungeon
     {
-
-        public int nKeys, nLocks, neededLocks;
+        public int nKeys;
+        public int nLocks;
+        public int neededLocks;
         public float neededRooms;
         private int desiredKeys;
         private float avgChildren;
@@ -21,7 +22,6 @@ namespace LevelGenerator
         public List<Room> RoomList { get => roomList; set => roomList = value; }
         public int DesiredKeys { get => desiredKeys; set => desiredKeys = value; }
         public float AvgChildren { get => avgChildren; set => avgChildren = value; }
-        public float fitness;
 
         public Dungeon()
         {
@@ -34,7 +34,6 @@ namespace LevelGenerator
             roomGrid[root.X, root.Y] = root;
             neededRooms = 0;
             neededLocks = 0;
-            fitness = -1;
         }
 
         /*
@@ -51,7 +50,6 @@ namespace LevelGenerator
             copyDungeon.nLocks = nLocks;
             copyDungeon.desiredKeys = desiredKeys;
             copyDungeon.avgChildren = avgChildren;
-            copyDungeon.fitness = fitness;
             Room aux;
             foreach (Room oldRoom in roomList)
             {

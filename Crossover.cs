@@ -11,13 +11,13 @@ namespace LevelGenerator
         /// every aspect of the room needed after the change. Including the
         /// grid, and also the exceptions where the new nodes overlap the old
         /// ones.
-        public static Dungeon[] Apply(
-            Dungeon _parent1,
-            Dungeon _parent2,
+        public static Individual[] Apply(
+            Individual _parent1,
+            Individual _parent2,
             ref Random _rand
         ) {
             // Initialize the two new individuals
-            Dungeon[] individuals = new Dungeon[2];
+            Individual[] individuals = new Individual[2];
 
             Dungeon ind1, ind2;
             //The root of the branch that will be traded
@@ -35,8 +35,8 @@ namespace LevelGenerator
 
             do
             {
-                ind1 = _parent1.Clone();
-                ind2 = _parent2.Clone();
+                ind1 = _parent1.dungeon.Clone();
+                ind2 = _parent2.dungeon.Clone();
                 //Get a random node from the parent, find the number of keys, locks and rooms and add it to the list of future failed rooms
                 roomCut1 = ind1.RoomList[_rand.Next(1, ind1.RoomList.Count)];
                 FindNKLR(ref nRooms1, ref specialRooms1, roomCut1);
@@ -114,8 +114,8 @@ namespace LevelGenerator
                 ind2.FixRoomList();
             }
 
-            individuals[0] = ind1;
-            individuals[1] = ind2;
+            individuals[0] = new Individual(ind1);
+            individuals[1] = new Individual(ind1);
 
             return individuals;
         }

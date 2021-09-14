@@ -8,15 +8,16 @@ namespace LevelGenerator
     {
         /// Fitness is based in the number of rooms, number of keys and locks, the linear coefficient and the number of locks used by the A*
         public static void Calculate(
-            ref Dungeon _individual,
-            ref Random rand
+            ref Individual _individual,
+            ref Random _rand
         ) {
+            Dungeon dungeon = _individual.dungeon;
             int nV = 20;
             int nK = 4;
             int nL = 4;
             float lCoef = 1.5f;
             // If the level has no locked door nor key
-            if (_individual.nKeys == 0 || _individual.nLocks == 0)
+            if (dungeon.nKeys == 0 || dungeon.nLocks == 0)
             {
                 _individual.fitness = -1f;
                 return;
@@ -24,28 +25,28 @@ namespace LevelGenerator
             float avgUsedRoom = 0.0f;
             // Only use the A* if there is a lock in the dungeon
             // System.Console.WriteLine("Begin A*");
-            _individual.neededLocks = AStar.FindRoute(_individual);
+            dungeon.neededLocks = AStar.FindRoute(dungeon);
             for (int i = 0; i < 3; ++i)
             {
-                DFS dfs = new DFS(_individual);
-                dfs.FindRoute(_individual, ref rand);
+                DFS dfs = new DFS(dungeon);
+                dfs.FindRoute(dungeon, ref _rand);
                 avgUsedRoom += dfs.NVisitedRooms;
             }
-            _individual.neededRooms = avgUsedRoom / 3.0f;
-            // System.Console.WriteLine("Needed Rooms: " + _individual.neededRooms);
-            if (_individual.neededRooms > _individual.RoomList.Count)
+            dungeon.neededRooms = avgUsedRoom / 3.0f;
+            // System.Console.WriteLine("Needed Rooms: " + dungeon.neededRooms);
+            if (dungeon.neededRooms > dungeon.RoomList.Count)
             {
-                Console.WriteLine("SOMETHING IS REALLY WRONG! Nrooms: " + _individual.RoomList.Count + "  Used: " + _individual.neededRooms);
+                Console.WriteLine("SOMETHING IS REALLY WRONG! Nrooms: " + dungeon.RoomList.Count + "  Used: " + dungeon.neededRooms);
                 Console.ReadKey();
             }
-            if (_individual.neededLocks > _individual.nLocks)
+            if (dungeon.neededLocks > dungeon.nLocks)
             {
                 Console.WriteLine("SOMETHING IS REALLY WRONG!");
-                Console.WriteLine(_individual.neededLocks);
-                Console.WriteLine(_individual.nLocks);
+                Console.WriteLine(dungeon.neededLocks);
+                Console.WriteLine(dungeon.nLocks);
             }
 
-            float fit = (2*(System.Math.Abs(nV - _individual.RoomList.Count) + System.Math.Abs(nK - _individual.nKeys) + System.Math.Abs(nL - _individual.nLocks) + System.Math.Abs(lCoef - _individual.AvgChildren)) + (_individual.nLocks * 0.8f - _individual.neededLocks) + (_individual.RoomList.Count - _individual.neededRooms));
+            float fit = (2*(System.Math.Abs(nV - dungeon.RoomList.Count) + System.Math.Abs(nK - dungeon.nKeys) + System.Math.Abs(nL - dungeon.nLocks) + System.Math.Abs(lCoef - dungeon.AvgChildren)) + (dungeon.nLocks * 0.8f - dungeon.neededLocks) + (dungeon.RoomList.Count - dungeon.neededRooms));
 
             _individual.fitness = fit;
         }
@@ -53,8 +54,8 @@ namespace LevelGenerator
         /// Return true if the first individual (`_i1`) is best than the second
         /// (`_i2`), and false otherwise.
         public static bool IsBest(
-            Dungeon _i1,
-            Dungeon _i2
+            Individual _i1,
+            Individual _i2
         ) {
             // Ensure that both enemies are not null.
             Debug.Assert(

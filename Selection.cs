@@ -18,7 +18,7 @@ namespace LevelGenerator
         /// population. Instead of selecting directly an individual, we select
         /// its coordinate from the auxiliary list and remove it then it is not
         /// available for the next selection.
-        public static Dungeon[] Select(
+        public static Individual[] Select(
             int _amount,
             int _competitors,
             Population _pop,
@@ -32,11 +32,11 @@ namespace LevelGenerator
                 Util.NOT_ENOUGH_COMPETITORS
             );
             // Select `_amount` individuals
-            Dungeon[] individuals = new Dungeon[_amount];
+            Individual[] individuals = new Individual[_amount];
             for (int i = 0; i < _amount; i++)
             {
                 // Perform tournament selection with `_competitors` competitors
-                (Coordinate coordinate, Dungeon individual) = Tournament(
+                (Coordinate coordinate, Individual individual) = Tournament(
                     _competitors, // Number of competitors
                     _pop,         // Population
                     avco,         // List of available competitors
@@ -56,7 +56,7 @@ namespace LevelGenerator
         /// This function ensures that the same individual will not be selected
         /// for the same tournament selection process. To do so, we apply the
         /// same process explained in `Select` function.
-        static (Coordinate, Dungeon) Tournament(
+        static (Coordinate, Individual) Tournament(
             int _competitors,
             Population _pop,
             List<Coordinate> _cs,
@@ -65,7 +65,7 @@ namespace LevelGenerator
             // List of available competitors
             List<Coordinate> avco = new List<Coordinate>(_cs);
             // Initialize the list of competitors
-            Dungeon[] competitors = new Dungeon[_competitors];
+            Individual[] competitors = new Individual[_competitors];
             // Initialize competitors' coordinates
             Coordinate[] coordinates = new Coordinate[_competitors];
             // Select competitors
@@ -81,7 +81,7 @@ namespace LevelGenerator
                 avco.Remove(rc);
             }
             // Find the tournament winner and its coordinate in the population
-            Dungeon winner = null;
+            Individual winner = null;
             Coordinate coordinate = (Util.UNKNOWN, Util.UNKNOWN);
             for (int i = 0; i < _competitors; i++)
             {
