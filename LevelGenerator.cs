@@ -15,25 +15,42 @@ namespace LevelGenerator
         private Parameters prs;
         /// The found MAP-Elites population.
         private Population solution;
+        /// The evolutionary process' collected data.
+        private Data data;
 
         /// Level Generator constructor.
         public LevelGenerator(
             Parameters _prs
         ) {
             prs = _prs;
+            // Initialize the data to be collected
+            data = new Data();
+            data.parameters = prs;
         }
 
-        /// Return the resulting MAP-Elites population.
+        /// Return the collected data from the evolutionary process.
+        public Data GetData()
+        {
+            return data;
+        }
+
+        /// Return the found MAP-Elites population.
         public Population GetSolution()
         {
             return solution;
         }
 
-        /// Generate and return a set of enemies.
+        /// Generate and return a set of levels.
         public Population Evolve()
         {
+            // Get starting time
+            DateTime start = DateTime.Now;
             // Run evolutionary process
             Evolution();
+            // Get ending time
+            DateTime end = DateTime.Now;
+            // Get the duration time
+            data.duration = (end - start).TotalSeconds;
             // Return the found individuals
             return solution;
         }
@@ -80,7 +97,7 @@ namespace LevelGenerator
                     for (int i = 0; i < children.Length; i++)
                     {
                         // Calculate the new individual fitness
-                        Fitness.Calculate(children[i], prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                        children[i].fitness = Fitness.Calculate(children[i], prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                         // Add the new individual in the offspring
                         offspring.Add(children[i]);
                     }
@@ -93,7 +110,7 @@ namespace LevelGenerator
                     )[0];
                     Dungeon individual = Mutation.Apply(parent, ref rand);
                     // Calculate the new individual fitness
-                    Fitness.Calculate(individual, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                    individual.fitness = Fitness.Calculate(individual, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
                     // Add the new individual in the offspring
                     offspring.Add(individual);
                 }
@@ -103,17 +120,10 @@ namespace LevelGenerator
                     individual.FixRoomList();
                     pop.PlaceIndividual(individual);
                 }
-
-                // //Calculate the average number of children from the rooms in each children
-                // parent1.CalcAvgChildren();
-                // parent2.CalcAvgChildren();
             }
 
             // Get the final population (solution)
             solution = pop;
-
-            // // Save CSV
-            // CSVManager.SaveCSVLevel(0, aux.nKeys, aux.nLocks, aux.RoomList.Count, aux.AvgChildren, aux.neededLocks, aux.neededRooms, min, 0, Constants.RESULTSFILE+"-"+prs.nV+"-" + prs.nK + ".csv");
         }
     }
 }

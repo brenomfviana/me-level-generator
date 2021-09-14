@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace LevelGenerator
@@ -12,11 +11,5 @@ namespace LevelGenerator
         public Parameters parameters { get; set; }
         [JsonInclude]
         public double duration { get; set; }
-        // [JsonInclude]
-        // public List<Individual> initial { get; set; }
-        // [JsonInclude]
-        // public List<Individual> intermediate { get; set; }
-        // [JsonInclude]
-        // public List<Individual> final { get; set; }
     }
 }

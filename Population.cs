@@ -11,12 +11,13 @@ namespace LevelGenerator
     /// The MAP-Elites population is an N-dimensional array of individuals,
     /// where each matrix's ax corresponds to a different feature.
     ///
-    /// This particular population is mapped into level's locks and keys. Each
-    /// Elite (or matrix cell) corresponds to a combination of different number
-    /// of keys and locks.
+    /// This particular population is mapped into level's locked doors and
+    /// keys. Each Elite (or matrix cell) corresponds to a combination of
+    /// different number of keys and locked doors.
     public struct Population
     {
-        /// The MAP-Elites dimension.
+        /// The MAP-Elites dimension. The dimension is defined by the number of
+        /// keys multiplied by the number of locked doors.
         public (int keys, int locks) dimension { get; }
         /// The MAP-Elites map (a matrix of individuals).
         public Dungeon[,] map { get; }
@@ -47,6 +48,23 @@ namespace LevelGenerator
             return count;
         }
 
+        /// Return a list corresponding to the Elites coordinates.
+        public List<Coordinate> GetElitesCoordinates()
+        {
+            List<Coordinate> coordinates = new List<Coordinate>();
+            for (int k = 0; k < dimension.keys; k++)
+            {
+                for (int l = 0; l < dimension.locks; l++)
+                {
+                    if (!(map[k, l] is null))
+                    {
+                        coordinates.Add((k, l));
+                    }
+                }
+            }
+            return coordinates;
+        }
+
         /// Add an individual in the MAP-Elites population.
         ///
         /// First, we identify which Elite the individual is classified in.
@@ -72,24 +90,7 @@ namespace LevelGenerator
             }
         }
 
-        /// Return a list corresponding to the Elites coordinates.
-        public List<Coordinate> GetElitesCoordinates()
-        {
-            List<Coordinate> coordinates = new List<Coordinate>();
-            for (int k = 0; k < dimension.keys; k++)
-            {
-                for (int l = 0; l < dimension.locks; l++)
-                {
-                    if (!(map[k, l] is null))
-                    {
-                        coordinates.Add((k, l));
-                    }
-                }
-            }
-            return coordinates;
-        }
-
-        /// Return a list with the individuals.
+        /// Return a list with the population individuals.
         public List<Dungeon> ToList()
         {
             List<Dungeon> list = new List<Dungeon>();
@@ -103,31 +104,33 @@ namespace LevelGenerator
             return list;
         }
 
-        /// Print the individuals of the MAP-Elites population.
-        // public void Debug()
-        // {
-        //     for (int d = 0; d < dimension.keys; d++)
-        //     {
-        //         for (int w = 0; w < dimension.locks; w++)
-        //         {
-        //             // Print the Elite's features
-        //             string log = "Elite ";
-        //             log += SearchSpace.AllDifficulties()[d] + "-";
-        //             log += ((WeaponType) w);
-        //             Console.WriteLine(log);
-        //             // Print empty if the Elite is null
-        //             if (map[k, l] is null)
-        //             {
-        //                 Console.WriteLine("  Empty");
-        //             }
-        //             // Print the Elite's attributes
-        //             else
-        //             {
-        //                 map[k, l].Debug();
-        //             }
-        //             Console.WriteLine();
-        //         }
-        //     }
-        // }
+        /// Print all the individuals of the MAP-Elites population.
+        public void Debug()
+        {
+            for (int k = 0; k < dimension.keys; k++)
+            {
+                for (int l = 0; l < dimension.locks; l++)
+                {
+                    // Print the Elite's coordinate
+                    string log = "Elite ";
+                    log += "" + k + "-";
+                    log += "" + l;
+                    Console.WriteLine(log);
+                    // Print "Empty" if the Elite is null
+                    if (map[k, l] is null)
+                    {
+                        Console.WriteLine("  Empty");
+                    }
+                    // Print the Elite's attributes
+                    else
+                    {
+                        Dungeon d = map[k, l];
+                        Console.WriteLine("  R=" + map[k, l].neededRooms);
+                        Console.WriteLine("  L=" + map[k, l].neededLocks);
+                    }
+                    Console.WriteLine();
+                }
+            }
+        }
     }
 }
