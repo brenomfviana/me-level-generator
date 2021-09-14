@@ -1,10 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace LevelGenerator
 {
     /// This class holds only utility functions and constants.
     public static class Util
     {
+        /// This constant defines unknown references.
+        public readonly static int UNKNOWN = -1;
+        /// This constant defines the error message of not enough competitors.
+        public readonly static string NOT_ENOUGH_COMPETITORS = "There are " +
+            "not enough individuals in the input population to perform this " +
+            "operation.";
+        /// This constant defines the error message of not enough competitors.
+        public readonly static string CANNOT_COMPARE_INDIVIDUALS = "There is " +
+            "no way of comparing two null individuals.";
+
         /// The directions in which a room may connect to other rooms.
         ///
         /// The direction `up` is not listed here to avoid positioning conflict
@@ -21,6 +32,14 @@ namespace LevelGenerator
             ref Random _rand
         ) {
             return _rand.Next(100);
+        }
+
+        /// Return a random element from the input list.
+        public static T RandomElementFromList<T>(
+            List<T> _range,
+            ref Random _rand
+        ) {
+            return _range[_rand.Next(0, _range.Count)];
         }
     }
 }

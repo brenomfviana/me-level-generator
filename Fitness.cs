@@ -41,8 +41,33 @@ namespace LevelGenerator
             }
             else
                 return (2*(System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren)));
-            
+
             //return System.Math.Abs(nV - ind.RoomList.Count) + System.Math.Abs(nK - ind.nKeys) + System.Math.Abs(nL - ind.nLocks) + System.Math.Abs(lCoef - ind.AvgChildren);
+        }
+
+        /// Return true if the first individual (`_i1`) is best than the second
+        /// (`_i2`), and false otherwise.
+        public static bool IsBest(
+            Dungeon _i1,
+            Dungeon _i2
+        ) {
+            // Ensure that both enemies are not null.
+            Debug.Assert(
+                _i1 != null || _i2 != null,
+                Util.CANNOT_COMPARE_INDIVIDUALS
+            );
+            // If `_i1` is null, then `_i2` is the best individual
+            if (_i1 == null)
+            {
+                return false;
+            }
+            // If `_i2` is null, then `_i1` is the best individual
+            if (_i2 == null)
+            {
+                return true;
+            }
+            // Check which individual is the best
+            return _i2.fitness > _i1.fitness;
         }
     }
 }
