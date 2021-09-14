@@ -7,9 +7,9 @@ namespace LevelGenerator
     public class LevelGenerator
     {
         /// The number of parents to be selected for crossover.
-        private readonly static int CROSSOVER_PARENTS = 2;
+        private static readonly int CROSSOVER_PARENTS = 2;
         /// The number of parents to be selected for mutation.
-        private readonly static int MUTATION_PARENT = 1;
+        private static readonly int MUTATION_PARENT = 1;
 
         /// The evolutionary parameters.
         private Parameters prs;

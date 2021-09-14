@@ -7,13 +7,13 @@ namespace LevelGenerator
     public static class Util
     {
         /// This constant defines unknown references.
-        public readonly static int UNKNOWN = -1;
+        public static readonly int UNKNOWN = -1;
         /// This constant defines the error message of not enough competitors.
-        public readonly static string NOT_ENOUGH_COMPETITORS = "There are " +
+        public static readonly string NOT_ENOUGH_COMPETITORS = "There are " +
             "not enough individuals in the input population to perform this " +
             "operation.";
         /// This constant defines the error message of not enough competitors.
-        public readonly static string CANNOT_COMPARE_INDIVIDUALS = "There is " +
+        public static readonly string CANNOT_COMPARE_INDIVIDUALS = "There is " +
             "no way of comparing two null individuals.";
 
         /// The directions in which a room may connect to other rooms.
