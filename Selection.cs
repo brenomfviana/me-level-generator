@@ -73,9 +73,9 @@ namespace LevelGenerator
             {
                 // Get a random available coordinate
                 (int x, int y) rc = Util.RandomElementFromList(avco, ref _rand);
-                // Get the competitor corresponding to the chosen coordinate
+                // Get the competitor corresponding to the chosen coordinate and
+                // add the individual to the chosen competitors list
                 competitors[i] = _pop.map[rc.x, rc.y];
-                // Add the individual to the chosen competitors list
                 coordinates[i] = rc;
                 // Remove the competitor from available competitors
                 avco.Remove(rc);
