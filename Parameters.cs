@@ -3,10 +3,6 @@ namespace LevelGenerator
     /// This struct holds the parameters of the evolutionary level generator.
     public struct Parameters
     {
-        // TODO: Remove
-        public int nV, nK, nL;
-        public float lCoef;
-
         /// The seed that initializes the random generator.
         public int seed { get; }
         /// The maximum number of generations.
@@ -29,10 +25,6 @@ namespace LevelGenerator
             int _crossover,
             int _competitors
         ) {
-            nV = 20;
-            nK = 4;
-            nL = 4;
-            lCoef = 1.5f;
             seed = _seed;
             generations = _generations;
             population = _population;

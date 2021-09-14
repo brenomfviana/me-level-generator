@@ -71,7 +71,7 @@ namespace LevelGenerator
                 Dungeon individual = new Dungeon();
                 individual.GenerateRooms(ref rand);
                 // Calculate the individual fitness
-                individual.fitness = Fitness.Calculate(individual, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                Fitness.Calculate(ref individual, ref rand);
                 // Place the individual in the MAP-Elites
                 pop.PlaceIndividual(individual);
             }
@@ -97,7 +97,7 @@ namespace LevelGenerator
                     for (int i = 0; i < children.Length; i++)
                     {
                         // Calculate the new individual fitness
-                        children[i].fitness = Fitness.Calculate(children[i], prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                        Fitness.Calculate(ref children[i], ref rand);
                         // Add the new individual in the offspring
                         offspring.Add(children[i]);
                     }
@@ -110,7 +110,7 @@ namespace LevelGenerator
                     )[0];
                     Dungeon individual = Mutation.Apply(parent, ref rand);
                     // Calculate the new individual fitness
-                    individual.fitness = Fitness.Calculate(individual, prs.nV, prs.nK, prs.nL, prs.lCoef, ref rand);
+                    Fitness.Calculate(ref individual, ref rand);
                     // Add the new individual in the offspring
                     offspring.Add(individual);
                 }

@@ -73,7 +73,7 @@ namespace LevelGenerator
             }
             Console.Write("\n");
         }
-        
+
         public static void PrintGrid(RoomGrid grid)
         {
             Room actualRoom;
@@ -225,7 +225,7 @@ namespace LevelGenerator
             {
                 Directory.CreateDirectory(folder);
             }
-            folder += "/" + prs.nV + "-" + prs.nK;
+            // folder += "/" + prs.nV + "-" + prs.nK;
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
@@ -264,7 +264,7 @@ namespace LevelGenerator
                 if (room.Y > maxY)
                     maxY = room.Y;
             }
-            
+
             //IEnumerable<Dictionary> orderedKeys;
             //System.Console.Write("XMin: " + minX + " Xmax: "+maxX+ " YMin: "+minY+" YMax: "+maxY+"\n");
             int sizeX = maxX - minX +1;
