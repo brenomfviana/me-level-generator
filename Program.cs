@@ -63,6 +63,9 @@ namespace LevelGenerator
             LevelGenerator generator = new LevelGenerator(prs);
             // Start the generative process and generate a set of levels
             generator.Evolve();
+
+            // Print MAP-Elites
+            generator.GetSolution().Debug();
         }
     }
 }

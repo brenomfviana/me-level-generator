@@ -26,12 +26,24 @@ namespace LevelGenerator
             dungeon = _dungeon;
         }
 
+        /// Return a clone of the individual.
         public Individual Clone()
         {
             Individual individual = new Individual(dungeon.Clone());
             individual.fitness = fitness;
             individual.generation = generation;
             return individual;
+        }
+
+        /// Print the individual attributes and the dungeon map.
+        public void Debug()
+        {
+            Console.WriteLine(LevelDebug.INDENT + "G=" + generation);
+            Console.WriteLine(LevelDebug.INDENT + "F=" + fitness);
+            Console.WriteLine(LevelDebug.INDENT + "MAP=");
+            LevelDebug.PrintMap(dungeon, LevelDebug.INDENT);
+            Console.WriteLine(LevelDebug.INDENT + "TREE=");
+            LevelDebug.PrintTree(dungeon, LevelDebug.INDENT);
         }
 
         /// Return a random individual.

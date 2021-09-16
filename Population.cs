@@ -119,14 +119,12 @@ namespace LevelGenerator
                     // Print "Empty" if the Elite is null
                     if (map[k, l] is null)
                     {
-                        Console.WriteLine("  Empty");
+                        Console.WriteLine(LevelDebug.INDENT + "Empty");
                     }
                     // Print the Elite's attributes
                     else
                     {
-                        Individual elite = map[k, l];
-                        Console.WriteLine("  R=" + elite.dungeon.neededRooms);
-                        Console.WriteLine("  L=" + elite.dungeon.neededLocks);
+                        map[k, l].Debug();
                     }
                     Console.WriteLine();
                 }
