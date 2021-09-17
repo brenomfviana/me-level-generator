@@ -66,6 +66,10 @@ namespace LevelGenerator
 
             // Print MAP-Elites
             generator.GetSolution().Debug();
+            Output.WriteData(
+                generator.GetSolution().ToList()[0],
+                generator.GetData()
+            );
         }
     }
 }

@@ -70,15 +70,6 @@ namespace LevelGenerator
             }
         }
 
-        // Define the room codes for printing purposes.
-        private enum RoomCode
-        {
-            N = 0,   // Room
-            C = 100, // Corridor
-            B = 101, // Boss room or dungeon exit
-            E = 102, // Empty space
-        }
-
         public static void PrintMap(
             Dungeon _dungeon,
             string _indent
@@ -118,7 +109,7 @@ namespace LevelGenerator
             {
                 for (int j = 0; j < 2 * sizeY; j++)
                 {
-                    map[i, j] = (int) RoomCode.E;
+                    map[i, j] = (int) Output.RoomCode.E;
                 }
             }
 
@@ -137,7 +128,7 @@ namespace LevelGenerator
                     {
                         if (current.RoomType == RoomType.normal)
                         {
-                            map[iep, jep] = (int) RoomCode.N;
+                            map[iep, jep] = (int) Output.RoomCode.N;
                         }
                         else if (current.RoomType == RoomType.key)
                         {
@@ -148,7 +139,8 @@ namespace LevelGenerator
                         {
                             int _lock = locks.IndexOf(current.KeyToOpen);
                             map[iep, jep] = _lock == locks.Count - 1 ?
-                                (int) RoomCode.B : (int) RoomCode.N;
+                                (int) Output.RoomCode.B :
+                                (int) Output.RoomCode.N;
                         }
                         // Get current room parent
                         Room parent = current.Parent;
@@ -167,7 +159,7 @@ namespace LevelGenerator
                             else
                             {
                                 // Otherwise it is an usual corridor
-                                map[x, y] = (int) RoomCode.C;
+                                map[x, y] = (int) Output.RoomCode.C;
                             }
                         }
                     }
@@ -183,7 +175,7 @@ namespace LevelGenerator
                     // Set the room color
                     SetRoomColor(map[i, j]);
                     // Check room cores and print the corresponding string code
-                    if (map[i, j] == (int) RoomCode.E)
+                    if (map[i, j] == (int) Output.RoomCode.E)
                     {
                         Console.Write("  ");
                     }
@@ -193,11 +185,11 @@ namespace LevelGenerator
                         {
                             Console.Write(" s");
                         }
-                        else if (map[i, j] == (int) RoomCode.C)
+                        else if (map[i, j] == (int) Output.RoomCode.C)
                         {
                             Console.Write(" c");
                         }
-                        else if (map[i, j] == (int) RoomCode.B)
+                        else if (map[i, j] == (int) Output.RoomCode.B)
                         {
                             Console.Write(" B");
                         }
@@ -215,36 +207,37 @@ namespace LevelGenerator
             }
         }
 
+        // Define the room color that will be printed on the console.
         private static void SetRoomColor(
-            int code
+            int _code
         ) {
             // If the room is a room
-            if (code == (int) RoomCode.N)
+            if (_code == (int) Output.RoomCode.N)
             {
                 Console.ForegroundColor = ConsoleColor.DarkCyan;
             }
             // If the room is a boss room
-            else if (code == (int) RoomCode.B)
+            else if (_code == (int) Output.RoomCode.B)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
             }
             // If the room is a corridor
-            else if (code == (int) RoomCode.C)
+            else if (_code == (int) Output.RoomCode.C)
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
             }
             // If there is no room
-            else if (code == (int) RoomCode.E)
+            else if (_code == (int) Output.RoomCode.E)
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
             // If the room has a key
-            else if (code > 0)
+            else if (_code > 0)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
             }
             // If the room is locked
-            else if (code < 0)
+            else if (_code < 0)
             {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
             }
