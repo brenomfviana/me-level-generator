@@ -98,12 +98,12 @@ namespace LevelGenerator
         public override bool Equals(
             object _obj
         ) {
-            if ((_obj == null) || (!GetType().Equals(_obj.GetType())))
+            if (_obj == null || !GetType().Equals(_obj.GetType()))
             {
                 return false;
             }
             Coordinates coordinates = (Coordinates) _obj;
-            return ((coordinates.x == x) && (coordinates.y == y));
+            return coordinates.x == x && coordinates.y == y;
         }
 
         public override string ToString()
