@@ -1,19 +1,25 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.IO;
+using System.Text.Json;
 using System.Collections.Generic;
 
 namespace LevelGenerator
 {
     class Output
     {
+        /// The JSON extension.
+        private static readonly string JSON = ".json";
         /// The operational system directory separator char.
         private static readonly char SEPARATOR = Path.DirectorySeparatorChar;
         /// The filename separator char.
         private static readonly char FILENAME_SEPARATOR = '-';
+        /// This constant defines that all files will be searched.
+        private static readonly string SEARCH_FOR = "*";
         /// This constant must be used to initialize empty strings or convert
         /// values of other types during concatenation.
         private static readonly string EMPTY_STR = "";
+        /// Define the JSON options.
+        private static readonly JsonSerializerOptions JSON_OPTIONS =
+            new JsonSerializerOptions(){ WriteIndented = true };
         /// Results folder name.
         /// This folder saves the collected data to evaluate the approach.
         private static readonly string DATA_FOLDER_NAME = @"results";
@@ -32,9 +38,6 @@ namespace LevelGenerator
             Individual _individual,
             Data _data
         ) {
-            // Get the dungeon component
-            Dungeon dungeon = _individual.dungeon;
-
             // Create target
             Directory.CreateDirectory(DATA_FOLDER_NAME);
             // Create the base name for the entered parameters
@@ -44,10 +47,43 @@ namespace LevelGenerator
             Directory.CreateDirectory(folder);
 
             // Calculate the number of files in the folder
-            int count = Directory.GetFiles(folder, "*.txt").Length;
+            int count = Directory.GetFiles(folder, SEARCH_FOR + JSON).Length;
             // Build the filename
-            string filename = folder + SEPARATOR + "level" + count + ".txt";
+            string filename = folder + SEPARATOR + "level" + count + JSON;
 
+            // Save the entered level
+            SaveLevel(_individual, filename);
+        }
+
+        /// Return the folder name for the entered parameters.
+        private static string GetFolderName(
+            Data _data
+        ) {
+            Parameters prs = _data.parameters;
+            string foldername = EMPTY_STR;
+            foldername += EMPTY_STR + prs.generations + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.population + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.mutation + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.crossover + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.competitors;
+            return foldername;
+        }
+
+        /// Return the number of files that are inside the entered folder and
+        /// have the entered extension.
+        private static int GetNumberOfFiles(
+            string _folder,
+            string _extension
+        ) {
+            return Directory.GetFiles(_folder, SEARCH_FOR + _extension).Length;
+        }
+
+        private static void SaveLevel(
+            Individual _individual,
+            string _filename
+        ) {
+            // Get the dungeon component
+            Dungeon dungeon = _individual.dungeon;
             // Initialize the grid bounds
             int minX = Util.LEVEL_GRID_OFFSET;
             int minY = Util.LEVEL_GRID_OFFSET;
@@ -140,54 +176,80 @@ namespace LevelGenerator
                 }
             }
 
-            using (StreamWriter writer = new StreamWriter(filename, false, Encoding.UTF8))
+            // Prepare the level to be written
+            IndividualFile ifile = new IndividualFile();
+            // Set the level dimensions
+            ifile.dimensions = new Dimensions(
+                2 * (maxX - minX + 1),
+                2 * (maxY - minY + 1)
+            );
+
+            // Set the list of rooms
+            for (int i = 0; i < sizeX * 2; ++i)
             {
-                writer.WriteLine(sizeX * 2);
-                writer.WriteLine(sizeY * 2);
-                for (int i = 0; i < sizeX * 2; ++i)
+                for (int j = 0; j < sizeY * 2; ++j)
                 {
-                    for (int j = 0; j < sizeY * 2; ++j)
+                    // Initialize non-existent room
+                    IndividualFile.Room room = null;
+                    if (map[i, j] != (int) Output.RoomCode.E)
                     {
-                        if (map[i, j] != (int) Output.RoomCode.E)
+                        // Create a new empty room
+                        room = new IndividualFile.Room
                         {
-                            writer.WriteLine(i);
-                            writer.WriteLine(j);
-                            if (i + minX * 2 == 0 && j + minY * 2 == 0)
-                            {
-                                writer.WriteLine("s");
-                            }
-                            else if (map[i, j] == (int) Output.RoomCode.C)
-                            {
-                                writer.WriteLine("c");
-                            }
-                            else if (map[i, j] == (int) Output.RoomCode.B)
-                            {
-                                writer.WriteLine("B");
-                            }
-                            else
-                            {
-                                writer.WriteLine(map[i, j]);
-                            }
+                            coordinates = new Coordinates(i, j)
+                        };
+                        if (i + minX * 2 == 0 && j + minY * 2 == 0)
+                        {
+                            // Set up the starting room
+                            room.type = "s";
+                            room.enemies = 0;
+                            room.treasures = 0;
+                            room.npcs = 0;
+                        }
+                        else if (map[i, j] == (int) Output.RoomCode.B)
+                        {
+                            // Set up the boss/goal room
+                            room.type = "B";
+                            room.enemies = 0;
+                            room.treasures = 0;
+                            room.npcs = 0;
+                        }
+                        else if (map[i, j] == (int) Output.RoomCode.C)
+                        {
+                            // Set up corridor
+                            room.type = "c";
+                        }
+                        else if (map[i, j] < 0)
+                        {
+                            // Set up the a locked corridor
+                            room.locks = new List<int> { map[i, j] };
+                        }
+                        else if (map[i, j] > 0)
+                        {
+                            // Set up a room with a key
+                            room.keys = new List<int> { map[i, j] };
+                            room.enemies = 0;
+                            room.treasures = 0;
+                            room.npcs = 0;
+                        }
+                        else
+                        {
+                            // Set up a normal room
+                            room.enemies = 0;
+                            room.treasures = 0;
+                            room.npcs = 0;
                         }
                     }
+                    // If the room exists, then add it to the list of rooms
+                    if (room != null)
+                    {
+                        ifile.rooms.Add(room);
+                    }
                 }
-                writer.Flush();
-                writer.Close();
             }
-        }
-
-        /// Return the folder name for the entered parameters.
-        private static string GetFolderName(
-            Data _data
-        ) {
-            Parameters prs = _data.parameters;
-            string foldername = EMPTY_STR;
-            foldername += EMPTY_STR + prs.generations + FILENAME_SEPARATOR;
-            foldername += EMPTY_STR + prs.population + FILENAME_SEPARATOR;
-            foldername += EMPTY_STR + prs.mutation + FILENAME_SEPARATOR;
-            foldername += EMPTY_STR + prs.crossover + FILENAME_SEPARATOR;
-            foldername += EMPTY_STR + prs.competitors;
-            return foldername;
+            // Serialize and write the level file
+            string json = JsonSerializer.Serialize(ifile, JSON_OPTIONS);
+            File.WriteAllText(_filename, json);
         }
     }
 }
