@@ -29,6 +29,15 @@ namespace LevelGenerator
             Left = 2
         };
 
+        // Define the room codes for printing purposes.
+        public enum RoomCode
+        {
+            N = 0,   // Room
+            C = 100, // Corridor
+            B = 101, // Boss room or dungeon exit
+            E = 102, // Empty space
+        }
+
         /// Return a random integer percentage (from 0 to 99, 100 numbers).
         public static int RandomPercent(
             ref Random _rand

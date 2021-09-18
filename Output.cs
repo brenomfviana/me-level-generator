@@ -22,37 +22,44 @@ namespace LevelGenerator
             new JsonSerializerOptions(){ WriteIndented = true };
         /// Results folder name.
         /// This folder saves the collected data to evaluate the approach.
-        private static readonly string DATA_FOLDER_NAME = @"results";
-
-        // Define the room codes for printing purposes.
-        public enum RoomCode
-        {
-            N = 0,   // Room
-            C = 100, // Corridor
-            B = 101, // Boss room or dungeon exit
-            E = 102, // Empty space
-        }
+        private static readonly string RESULTS_FOLDER_NAME = @"results";
+        /// Filename of the evolutionary process data.
+        private static readonly string DATA_FILENAME = @"data";
 
         /// Write the collected data from the evolutionary process.
         public static void WriteData(
-            Individual _individual,
+            Population _solution,
             Data _data
         ) {
-            // Create target
-            Directory.CreateDirectory(DATA_FOLDER_NAME);
-            // Create the base name for the entered parameters
-            string basename = GetFolderName(_data);
-            // Create the result folder for the entered parameters
-            string folder = DATA_FOLDER_NAME + SEPARATOR + basename;
-            Directory.CreateDirectory(folder);
-
-            // Calculate the number of files in the folder
-            int count = Directory.GetFiles(folder, SEARCH_FOR + JSON).Length;
-            // Build the filename
-            string filename = folder + SEPARATOR + "level" + count + JSON;
-
-            // Save the entered level
-            SaveLevel(_individual, filename);
+            // Create folder to store the results
+            Directory.CreateDirectory(RESULTS_FOLDER_NAME);
+            // Create the folder for the entered parameters
+            string basename = RESULTS_FOLDER_NAME + SEPARATOR;
+            basename += GetFolderName(_data);
+            Directory.CreateDirectory(basename);
+            // Calculate the number of directories in the folder
+            int count = Directory.GetDirectories(
+                basename, SEARCH_FOR, SearchOption.TopDirectoryOnly
+            ).Length;
+            // Create a folder for the resulting set of solutions
+            basename = basename + SEPARATOR + EMPTY_STR + count;
+            Directory.CreateDirectory(basename);
+            // Save the evolutionary process data
+            string datafn = basename + SEPARATOR + DATA_FILENAME + JSON;
+            string json = JsonSerializer.Serialize(_data, JSON_OPTIONS);
+            File.WriteAllText(datafn, json);
+            // Save each individual in the create folder
+            for (int k = 0; k < _solution.dimension.keys; k++)
+            {
+                for (int l = 0; l < _solution.dimension.locks; l++)
+                {
+                    Individual individual = _solution.map[k, l];
+                    if (individual != null)
+                    {
+                        SaveLevel(individual, basename, (k, l));
+                    }
+                }
+            }
         }
 
         /// Return the folder name for the entered parameters.
@@ -69,18 +76,10 @@ namespace LevelGenerator
             return foldername;
         }
 
-        /// Return the number of files that are inside the entered folder and
-        /// have the entered extension.
-        private static int GetNumberOfFiles(
-            string _folder,
-            string _extension
-        ) {
-            return Directory.GetFiles(_folder, SEARCH_FOR + _extension).Length;
-        }
-
         private static void SaveLevel(
             Individual _individual,
-            string _filename
+            string _basename,
+            (int x, int y) _coordinate
         ) {
             // Get the dungeon component
             Dungeon dungeon = _individual.dungeon;
@@ -119,7 +118,7 @@ namespace LevelGenerator
             {
                 for (int j = 0; j < 2 * sizeY; j++)
                 {
-                    map[i, j] = (int) RoomCode.E;
+                    map[i, j] = (int) Util.RoomCode.E;
                 }
             }
 
@@ -138,7 +137,7 @@ namespace LevelGenerator
                     {
                         if (current.RoomType == RoomType.normal)
                         {
-                            map[iep, jep] = (int) Output.RoomCode.N;
+                            map[iep, jep] = (int) Util.RoomCode.N;
                         }
                         else if (current.RoomType == RoomType.key)
                         {
@@ -149,8 +148,8 @@ namespace LevelGenerator
                         {
                             int _lock = locks.IndexOf(current.KeyToOpen);
                             map[iep, jep] = _lock == locks.Count - 1 ?
-                                (int) Output.RoomCode.B :
-                                (int) Output.RoomCode.N;
+                                (int) Util.RoomCode.B :
+                                (int) Util.RoomCode.N;
                         }
                         // Get current room parent
                         Room parent = current.Parent;
@@ -169,7 +168,7 @@ namespace LevelGenerator
                             else
                             {
                                 // Otherwise it is an usual corridor
-                                map[x, y] = (int) Output.RoomCode.C;
+                                map[x, y] = (int) Util.RoomCode.C;
                             }
                         }
                     }
@@ -191,7 +190,7 @@ namespace LevelGenerator
                 {
                     // Initialize non-existent room
                     IndividualFile.Room room = null;
-                    if (map[i, j] != (int) Output.RoomCode.E)
+                    if (map[i, j] != (int) Util.RoomCode.E)
                     {
                         // Create a new empty room
                         room = new IndividualFile.Room
@@ -206,7 +205,7 @@ namespace LevelGenerator
                             room.treasures = 0;
                             room.npcs = 0;
                         }
-                        else if (map[i, j] == (int) Output.RoomCode.B)
+                        else if (map[i, j] == (int) Util.RoomCode.B)
                         {
                             // Set up the boss/goal room
                             room.type = "B";
@@ -214,7 +213,7 @@ namespace LevelGenerator
                             room.treasures = 0;
                             room.npcs = 0;
                         }
-                        else if (map[i, j] == (int) Output.RoomCode.C)
+                        else if (map[i, j] == (int) Util.RoomCode.C)
                         {
                             // Set up corridor
                             room.type = "c";
@@ -247,9 +246,14 @@ namespace LevelGenerator
                     }
                 }
             }
+
+            // Build the filename
+            string filename = _basename + SEPARATOR +
+                "level" + FILENAME_SEPARATOR +
+                _coordinate.x + FILENAME_SEPARATOR + _coordinate.y + JSON;
             // Serialize and write the level file
             string json = JsonSerializer.Serialize(ifile, JSON_OPTIONS);
-            File.WriteAllText(_filename, json);
+            File.WriteAllText(filename, json);
         }
     }
 }
