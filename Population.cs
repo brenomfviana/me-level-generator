@@ -75,8 +75,8 @@ namespace LevelGenerator
             Individual _individual
         ) {
             // Calculate the individual slot (Elite)
-            int k = (int) _individual.dungeon.nKeys;
-            int l = (int) _individual.dungeon.nLocks;
+            int k = (int) _individual.dungeon.keys;
+            int l = (int) _individual.dungeon.locks;
             // Check if the level is within the search space
             if (k >= dimension.keys || l >= dimension.locks)
             {

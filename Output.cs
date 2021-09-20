@@ -84,10 +84,10 @@ namespace LevelGenerator
             // Get the dungeon component
             Dungeon dungeon = _individual.dungeon;
             // Initialize the grid bounds
-            int minX = Util.LEVEL_GRID_OFFSET;
-            int minY = Util.LEVEL_GRID_OFFSET;
-            int maxX = -Util.LEVEL_GRID_OFFSET;
-            int maxY = -Util.LEVEL_GRID_OFFSET;
+            int minX = RoomGrid.LEVEL_GRID_OFFSET;
+            int minY = RoomGrid.LEVEL_GRID_OFFSET;
+            int maxX = -RoomGrid.LEVEL_GRID_OFFSET;
+            int maxY = -RoomGrid.LEVEL_GRID_OFFSET;
             // The list of keys and locks in the level
             List<int> keys = new List<int>();
             List<int> locks = new List<int>();
@@ -123,7 +123,7 @@ namespace LevelGenerator
             }
 
             // Set the corridors, keys and locked rooms
-            RoomGrid grid = dungeon.roomGrid;
+            RoomGrid grid = dungeon.grid;
             for (int i = minX; i < maxX + 1; ++i)
             {
                 for (int j = minY; j < maxY + 1; ++j)

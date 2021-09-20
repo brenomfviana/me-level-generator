@@ -83,6 +83,7 @@ namespace LevelGenerator
 
             return newRoom;
         }
+
         //Fix the newly inserted branch by reinserting in it the special rooms that were in the old branch while maintaining their order of appearence to guarantee the feasibility
         public void FixBranch(
             List<int> specialRooms,
@@ -206,10 +207,11 @@ namespace LevelGenerator
             if (newSpecialRooms.Count > 0)
                 System.Console.WriteLine("STOOOOOP");
         }
-    /*
-     * Validates if a child node can be created in the given position or not
-     */
-    public bool ValidateChild(Util.Direction dir, RoomGrid roomGrid)
+
+        /*
+        * Validates if a child node can be created in the given position or not
+        */
+        public bool ValidateChild(Util.Direction dir, RoomGrid grid)
         {
             int X, Y;
             Room roomInGrid;
@@ -236,7 +238,7 @@ namespace LevelGenerator
                     //Checks the grid of room if the room is there, if not, create the room, add it in the grid and
                     //as the actual room's child, returning true
                     //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
-                    roomInGrid = roomGrid[X, Y];
+                    roomInGrid = grid[X, Y];
                     if (roomInGrid == null)
                     {
                         return true;
@@ -268,7 +270,7 @@ namespace LevelGenerator
                     //If it is in the grid, tries to make a shortcut between the actual room and the existing one
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
-                    roomInGrid = roomGrid[X, Y];
+                    roomInGrid = grid[X, Y];
                     if (roomInGrid == null)
                     {
                         return true;
@@ -301,7 +303,7 @@ namespace LevelGenerator
                     //If it is in the grid, tries to make a shortcut between the actual room and the existing one
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
-                    roomInGrid = roomGrid[X, Y];
+                    roomInGrid = grid[X, Y];
                     if (roomInGrid == null)
                     {
                         return true;
@@ -333,7 +335,7 @@ namespace LevelGenerator
          * set the current room as its parent and returns true so that the new room is added
          * to the room list and visiting queue
          */
-        public void InsertChild(Util.Direction dir, ref Room child, ref RoomGrid roomGrid)
+        public void InsertChild(Util.Direction dir, ref Room child, ref RoomGrid grid)
         {
             Room roomInGrid;
 
@@ -360,7 +362,7 @@ namespace LevelGenerator
                     //Checks the grid of room if the room is there, if not, create the room, add it in the grid and
                     //as the actual room's child, returning true
                     //System.Console.WriteLine("X = " + child.X + " Y = " + child.Y + "\n");
-                    roomInGrid = roomGrid[child.X, child.Y];
+                    roomInGrid = grid[child.X, child.Y];
                     if (roomInGrid == null)
                     {
                         child.Rotation = (this.Rotation + 90) % 360;
@@ -389,7 +391,7 @@ namespace LevelGenerator
                     //If it is in the grid, tries to make a shortcut between the actual room and the existing one
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = " + child.X + " Y = " + child.Y + "\n");
-                    roomInGrid = roomGrid[child.X, child.Y];
+                    roomInGrid = grid[child.X, child.Y];
                     if (roomInGrid == null)
                     {
                         child.Rotation = (this.Rotation + 90) % 360;
@@ -418,7 +420,7 @@ namespace LevelGenerator
                     //If it is in the grid, tries to make a shortcut between the actual room and the existing one
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = "+ child.X+" Y = "+child.Y+"\n");
-                    roomInGrid = roomGrid[child.X, child.Y];
+                    roomInGrid = grid[child.X, child.Y];
                     if (roomInGrid == null)
                     {
                         child.Rotation = (this.Rotation + 90) % 360;
@@ -441,33 +443,34 @@ namespace LevelGenerator
                 this.depth = ++parent.depth;
             }
         }
+
         /*
          * Adds all the existing children of a room in a list, and recursively, the children of each child
          */
-        public void FindChildren(ref List<Room> roomList)
+        public void FindChildren(ref List<Room> rooms)
         {
             if(rightChild!=null)
             {
                 if (rightChild.parent!= null && rightChild.parent.Equals(this))
                 {
-                    roomList.Add(rightChild);
-                    rightChild.FindChildren(ref roomList);
+                    rooms.Add(rightChild);
+                    rightChild.FindChildren(ref rooms);
                 }
             }
             if (bottomChild != null)
             {
                 if (bottomChild.parent != null && bottomChild.parent.Equals(this))
                 {
-                    roomList.Add(bottomChild);
-                    bottomChild.FindChildren(ref roomList);
+                    rooms.Add(bottomChild);
+                    bottomChild.FindChildren(ref rooms);
                 }
             }
             if (leftChild != null)
             {
                 if (leftChild.parent != null && leftChild.parent.Equals(this))
                 {
-                    roomList.Add(leftChild);
-                    leftChild.FindChildren(ref roomList);
+                    rooms.Add(leftChild);
+                    leftChild.FindChildren(ref rooms);
                 }
             }
         }

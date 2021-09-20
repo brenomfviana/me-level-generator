@@ -8,8 +8,6 @@ namespace LevelGenerator
     {
         /// Unknown reference.
         public static readonly int UNKNOWN = -1;
-        /// The level grid offset.
-        public static readonly int LEVEL_GRID_OFFSET = 150;
         /// The error message of not enough competitors.
         public static readonly string NOT_ENOUGH_COMPETITORS =
             "There are not enough individuals in the input population to " +
@@ -29,7 +27,7 @@ namespace LevelGenerator
             Left = 2
         };
 
-        // Define the room codes for printing purposes.
+        /// Define the room codes for printing purposes.
         public enum RoomCode
         {
             N = 0,   // Room

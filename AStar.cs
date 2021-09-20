@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-//Thanks to https://bitbucket.org/dandago/experimental/src/7adeb5f8cdfb054b540887d53cabf27e22a10059/AStarPathfinding/?at=master
+/// Thanks to https://bitbucket.org/dandago/experimental/src/7adeb5f8cdfb054b540887d53cabf27e22a10059/AStarPathfinding/?at=master
 namespace LevelGenerator
 {
     //Class with location, heuristic and real distances of the room and the room that was used to go to the actual one (parent)
@@ -22,6 +21,7 @@ namespace LevelGenerator
         //Size of the grid
         static int sizeX;
         static int sizeY;
+
         //The A* algorithm
         public static int FindRoute(Dungeon dun)
         {
@@ -42,7 +42,7 @@ namespace LevelGenerator
             int neededLocks = 0;
             Room actualRoom, parent;
             //The grid with the rooms
-            RoomGrid grid = dun.roomGrid;
+            RoomGrid grid = dun.grid;
             //Type of the room
             RoomType type;
             //X and Y coordinates
@@ -54,10 +54,10 @@ namespace LevelGenerator
             //int nLockedRooms = 0;
             //Min and max boundaries of the grid based on the original grid
             int minX, minY, maxX, maxY;
-            minX = Constants.MATRIXOFFSET;
-            minY = Constants.MATRIXOFFSET;
-            maxX = -Constants.MATRIXOFFSET;
-            maxY = -Constants.MATRIXOFFSET;
+            minX = RoomGrid.LEVEL_GRID_OFFSET;
+            minY = RoomGrid.LEVEL_GRID_OFFSET;
+            maxX = -RoomGrid.LEVEL_GRID_OFFSET;
+            maxY = -RoomGrid.LEVEL_GRID_OFFSET;
             //Check all the rooms and add them to the keys and locks lists if they are one of them
             foreach (Room room in dun.RoomList)
             {
@@ -162,7 +162,7 @@ namespace LevelGenerator
             {
                 allLocksLocation.Add(locked);
             }
-           
+
 
             //start by adding the original position to the open list
             openList.Add(start);
@@ -289,6 +289,7 @@ namespace LevelGenerator
             //Console.WriteLine("OpenList: "+openList.Count + "  Closed List:"+ closedList.Count);
             return neededLocks;
         }
+
         //Check what adjacent rooms exits and can be visited and return the valid ones
         static List<Location> GetWalkableAdjacentSquares(int x, int y, int[,] map)
         {
@@ -304,6 +305,7 @@ namespace LevelGenerator
 
             return proposedLocations.Where(l => (map[l.X,l.Y] >= 0 && map[l.X,l.Y] != 101)).ToList();
         }
+
         //Compute the heuristic score, in this case, a Manhattan Distance
         static int ComputeHScore(int x, int y, int targetX, int targetY)
         {

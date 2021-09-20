@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LevelGenerator
 {
@@ -30,7 +29,7 @@ namespace LevelGenerator
 
         protected List<int> lockedRooms = new List<int>();
         protected List<int> keys = new List<int>();
-        
+
         protected List<Location> openList = new List<Location>();
         private List<Location> closedList = new List<Location>();
 
@@ -51,11 +50,11 @@ namespace LevelGenerator
             this.dun = dun;
             neededLocks= 0;
 
-            grid = dun.roomGrid;
-            minX = Constants.MATRIXOFFSET;
-            minY = Constants.MATRIXOFFSET;
-            maxX = -Constants.MATRIXOFFSET;
-            maxY = -Constants.MATRIXOFFSET;
+            grid = dun.grid;
+            minX = RoomGrid.LEVEL_GRID_OFFSET;
+            minY = RoomGrid.LEVEL_GRID_OFFSET;
+            maxX = -RoomGrid.LEVEL_GRID_OFFSET;
+            maxY = -RoomGrid.LEVEL_GRID_OFFSET;
 
             initiatePathFinding();
         }

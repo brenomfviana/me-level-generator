@@ -1,17 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace LevelGenerator
 {
     class DFS : PathFinding
     {
-        
-        public DFS(Dungeon dun)
-            : base(dun)
-        {
-        }
+        public DFS(Dungeon _dungeon)
+            : base(_dungeon) {}
 
         //The DFS Algorithm
         public int FindRoute(
@@ -64,7 +59,7 @@ namespace LevelGenerator
 
                 int value = rand.Next();
                 adjacentSquares = adjacentSquares.OrderBy(X => value).ToList();
- 
+
                 foreach (var adjacentSquare in adjacentSquares)
                 {
                     if (current.Parent == adjacentSquare)

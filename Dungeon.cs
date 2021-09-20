@@ -4,34 +4,42 @@ using System.Collections.Generic;
 
 namespace LevelGenerator
 {
+    /// This class represents a dungeon level.
     public class Dungeon
     {
-        public int nKeys;
-        public int nLocks;
-        public int neededLocks;
-        public float neededRooms;
-        private int desiredKeys;
-        private float avgChildren;
-        //Queue with the notes that need to be visited
-        public Queue toVisit;
-        //List of Nodes (easier to add neighbors)
-        private List<Room> roomList;
-        //Room Grid, where a reference to all the existing room will be maintained for quick access when creating nodes
-        public RoomGrid roomGrid;
+        /// Number of keys.
+        public int keys;
+        /// The number of locked doors.
+        public int locks;
+        /// List of Nodes (easier to add neighbors).
+        private List<Room> rooms;
+        /// Room Grid, where a reference to all the existing room will be maintained for quick access when creating nodes.
+        public RoomGrid grid;
 
-        public List<Room> RoomList { get => roomList; set => roomList = value; }
-        public int DesiredKeys { get => desiredKeys; set => desiredKeys = value; }
+        // Collected data. Remove from this class.
+        public int neededLocks;
+        // Collected data. Remove from this class.
+        public float neededRooms;
+        // What is the function of this?
+        private int desiredKeys;
+        // What is the function of this?
+        private float avgChildren;
+        // Queue with the notes that need to be visited
+        // - Why they need to be visited?
+        public Queue toVisit;
+
+        public List<Room> RoomList { get => rooms; }
         public float AvgChildren { get => avgChildren; set => avgChildren = value; }
 
         public Dungeon()
         {
             toVisit = new Queue();
-            RoomList = new List<Room>();
+            rooms = new List<Room>();
             Room root = RoomFactory.CreateRoot();
             RoomList.Add(root);
             toVisit.Enqueue(root);
-            roomGrid = new RoomGrid();
-            roomGrid[root.X, root.Y] = root;
+            grid = new RoomGrid();
+            grid[root.X, root.Y] = root;
             neededRooms = 0;
             neededLocks = 0;
         }
@@ -44,38 +52,38 @@ namespace LevelGenerator
         {
             Dungeon copyDungeon = new Dungeon();
             copyDungeon.toVisit = new Queue();
-            copyDungeon.roomList = new List<Room>();
-            copyDungeon.roomGrid = new RoomGrid();
-            copyDungeon.nKeys = nKeys;
-            copyDungeon.nLocks = nLocks;
+            copyDungeon.rooms = new List<Room>();
+            copyDungeon.grid = new RoomGrid();
+            copyDungeon.keys = keys;
+            copyDungeon.locks = locks;
             copyDungeon.desiredKeys = desiredKeys;
             copyDungeon.avgChildren = avgChildren;
             Room aux;
-            foreach (Room oldRoom in roomList)
+            foreach (Room oldRoom in rooms)
             {
                 aux = oldRoom.Copy();
-                copyDungeon.roomList.Add(aux);
-                copyDungeon.roomGrid[oldRoom.X, oldRoom.Y] = aux;
+                copyDungeon.rooms.Add(aux);
+                copyDungeon.grid[oldRoom.X, oldRoom.Y] = aux;
             }
             //Need to use the grid to copy the neighboors, children and parent
             //Checks the position of the node in the grid and then substitutes the old room with the copied one
-            foreach (Room newRoom in copyDungeon.roomList)
+            foreach (Room newRoom in copyDungeon.rooms)
             {
                 if (newRoom.Parent != null)
                 {
-                    newRoom.Parent = copyDungeon.roomGrid[newRoom.Parent.X, newRoom.Parent.Y];
+                    newRoom.Parent = copyDungeon.grid[newRoom.Parent.X, newRoom.Parent.Y];
                 }
                 if (newRoom.RightChild != null)
                 {
-                    newRoom.RightChild = copyDungeon.roomGrid[newRoom.RightChild.X, newRoom.RightChild.Y];
+                    newRoom.RightChild = copyDungeon.grid[newRoom.RightChild.X, newRoom.RightChild.Y];
                 }
                 if (newRoom.BottomChild != null)
                 {
-                    newRoom.BottomChild = copyDungeon.roomGrid[newRoom.BottomChild.X, newRoom.BottomChild.Y];
+                    newRoom.BottomChild = copyDungeon.grid[newRoom.BottomChild.X, newRoom.BottomChild.Y];
                 }
                 if (newRoom.LeftChild != null)
                 {
-                    newRoom.LeftChild = copyDungeon.roomGrid[newRoom.LeftChild.X, newRoom.LeftChild.Y];
+                    newRoom.LeftChild = copyDungeon.grid[newRoom.LeftChild.X, newRoom.LeftChild.Y];
                 }
             }
             return copyDungeon;
@@ -113,16 +121,16 @@ namespace LevelGenerator
             Util.Direction dir,
             ref Random rand
         ) {
-            if (actualRoom.ValidateChild(dir, roomGrid))
+            if (actualRoom.ValidateChild(dir, grid))
             {
                 child = RoomFactory.CreateRoom(ref rand);
                 //System.Console.WriteLine("Created! ID = " + child.RoomId);
-                actualRoom.InsertChild(dir, ref child, ref roomGrid);
+                actualRoom.InsertChild(dir, ref child, ref grid);
                 //System.Console.WriteLine("Inserted! ID = " + child.RoomId);
                 child.ParentDirection = dir;
                 toVisit.Enqueue(child);
                 RoomList.Add(child);
-                roomGrid[child.X, child.Y] = child;
+                grid[child.X, child.Y] = child;
             }
         }
 
@@ -133,8 +141,8 @@ namespace LevelGenerator
         {
             if (cut != null)
             {
-                roomGrid[cut.X, cut.Y] = null;
-                roomList.Remove(cut);
+                grid[cut.X, cut.Y] = null;
+                rooms.Remove(cut);
                 if (cut.LeftChild != null && cut.LeftChild.Parent != null && cut.LeftChild.Parent.Equals(cut))
                 {
                     RemoveFromGrid(cut.LeftChild);
@@ -150,6 +158,7 @@ namespace LevelGenerator
                 }
             }
         }
+
         /*
          * Updates the grid from the dungeon with the position of all the new rooms based on the new rotation of the traded room
          * If a room already exists in the grid, "ignores" all the children node of this room
@@ -159,15 +168,15 @@ namespace LevelGenerator
             bool hasInserted;
             if (newRoom != null)
             {
-                roomGrid[newRoom.X, newRoom.Y] = newRoom;
-                roomList.Add(newRoom);
+                grid[newRoom.X, newRoom.Y] = newRoom;
+                rooms.Add(newRoom);
                 Room aux = newRoom.LeftChild;
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
-                    hasInserted = newRoom.ValidateChild(Util.Direction.Left, roomGrid);
+                    hasInserted = newRoom.ValidateChild(Util.Direction.Left, grid);
                     if (hasInserted)
                     {
-                        newRoom.InsertChild(Util.Direction.Left, ref aux, ref roomGrid);
+                        newRoom.InsertChild(Util.Direction.Left, ref aux, ref grid);
                         RefreshGrid(ref aux);
                     }
                     else
@@ -178,10 +187,10 @@ namespace LevelGenerator
                 aux = newRoom.BottomChild;
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
-                    hasInserted = newRoom.ValidateChild(Util.Direction.Down, roomGrid);
+                    hasInserted = newRoom.ValidateChild(Util.Direction.Down, grid);
                     if (hasInserted)
                     {
-                        newRoom.InsertChild(Util.Direction.Down, ref aux, ref roomGrid);
+                        newRoom.InsertChild(Util.Direction.Down, ref aux, ref grid);
                         RefreshGrid(ref aux);
                     }
                     else
@@ -192,10 +201,10 @@ namespace LevelGenerator
                 aux = newRoom.RightChild;
                 if (aux != null && aux.Parent != null && aux.Parent.Equals(newRoom))
                 {
-                    hasInserted = newRoom.ValidateChild(Util.Direction.Right, roomGrid);
+                    hasInserted = newRoom.ValidateChild(Util.Direction.Right, grid);
                     if (hasInserted)
                     {
-                        newRoom.InsertChild(Util.Direction.Right, ref aux, ref roomGrid);
+                        newRoom.InsertChild(Util.Direction.Right, ref aux, ref grid);
                         RefreshGrid(ref aux);
                     }
                     else
@@ -255,27 +264,28 @@ namespace LevelGenerator
                     }
                 }
             }
-            nKeys = RoomFactory.AvailableLockId.Count + RoomFactory.UsedLockId.Count;
-            nLocks = RoomFactory.UsedLockId.Count;
+            keys = RoomFactory.AvailableLockId.Count + RoomFactory.UsedLockId.Count;
+            locks = RoomFactory.UsedLockId.Count;
         }
+
         /*
          * Recreates the room list by visiting all the rooms in the tree and adding them to the list while also counting the number of locks and keys
          **/
         public void FixRoomList()
         {
             Queue<Room> toVisit = new Queue<Room>();
-            toVisit.Enqueue(roomList[0]);
-            nKeys = 0;
-            nLocks = 0;
-            roomList.Clear();
+            toVisit.Enqueue(rooms[0]);
+            keys = 0;
+            locks = 0;
+            rooms.Clear();
             while (toVisit.Count > 0)
             {
                 Room actualRoom = toVisit.Dequeue() as Room;
-                roomList.Add(actualRoom);
+                rooms.Add(actualRoom);
                 if (actualRoom.RoomType == RoomType.key)
-                    nKeys++;
+                    keys++;
                 else if (actualRoom.RoomType == RoomType.locked)
-                    nLocks++;
+                    locks++;
                 if (actualRoom.LeftChild != null)
                     toVisit.Enqueue(actualRoom.LeftChild);
                 if (actualRoom.BottomChild != null)
@@ -284,6 +294,7 @@ namespace LevelGenerator
                     toVisit.Enqueue(actualRoom.RightChild);
             }
         }
+
         /*
          * Fixes a dungeons after crossover and mutation
          * Just edit the room types using a breadth-first search algorithm with a similar algorithm as the one used
@@ -294,7 +305,7 @@ namespace LevelGenerator
         ) {
             Room actualRoom;
             Room child;
-            actualRoom = roomList[0];
+            actualRoom = rooms[0];
             toVisit.Clear();
             toVisit.Enqueue(actualRoom);
             RoomFactory.AvailableLockId.Clear();
@@ -327,8 +338,8 @@ namespace LevelGenerator
                     }
 
             }
-            nKeys = RoomFactory.AvailableLockId.Count + RoomFactory.UsedLockId.Count;
-            nLocks = RoomFactory.UsedLockId.Count;
+            keys = RoomFactory.AvailableLockId.Count + RoomFactory.UsedLockId.Count;
+            locks = RoomFactory.UsedLockId.Count;
         }
 
         /*
@@ -338,7 +349,7 @@ namespace LevelGenerator
         {
             Room actualRoom;
             Room child;
-            actualRoom = roomList[0];
+            actualRoom = rooms[0];
             toVisit.Clear();
             toVisit.Enqueue(actualRoom);
             bool hasKey = false;
@@ -348,7 +359,7 @@ namespace LevelGenerator
             while (toVisit.Count > 0 && !hasLock)
             {
                 actualRoom = toVisit.Dequeue() as Room;
-                if (actualRoom.RoomType == RoomType.normal && !actualRoom.Equals(roomList[0]))
+                if (actualRoom.RoomType == RoomType.normal && !actualRoom.Equals(rooms[0]))
                 {
                     //if (rand.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM + Convert.ToInt32(hasKey)*Constants.PROB_KEY_ROOM)
                     if (rand.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM)
@@ -360,14 +371,14 @@ namespace LevelGenerator
                             actualRoom.KeyToOpen = actualRoom.RoomId;
                             lockId = actualRoom.RoomId;
                             hasKey = true;
-                            roomGrid[actualRoom.X, actualRoom.Y] = actualRoom;
+                            grid[actualRoom.X, actualRoom.Y] = actualRoom;
                         }
                         else
                         {
                             actualRoom.RoomType = RoomType.locked;
                             actualRoom.KeyToOpen = lockId;
                             hasLock = true;
-                            roomGrid[actualRoom.X, actualRoom.Y] = actualRoom;
+                            grid[actualRoom.X, actualRoom.Y] = actualRoom;
                         }
                     }
                 }
@@ -389,7 +400,6 @@ namespace LevelGenerator
                     {
                         toVisit.Enqueue(child);
                     }
-
             }
         }
 
@@ -399,11 +409,11 @@ namespace LevelGenerator
         public void RemoveLockAndKey(
             ref Random rand
         ) {
-            int removeKey = rand.Next(nKeys);
+            int removeKey = rand.Next(keys);
             int removeLock = removeKey;
             Room actualRoom;
             Room child;
-            actualRoom = roomList[0];
+            actualRoom = rooms[0];
             toVisit.Clear();
             toVisit.Enqueue(actualRoom);
             bool hasKey = false;
@@ -411,7 +421,7 @@ namespace LevelGenerator
             int lockId = -1;
             int keyCount = 0;
 
-            foreach (Room r in roomList)
+            foreach (Room r in rooms)
             {
                 if (r.RoomType == RoomType.key)
                 {
@@ -432,7 +442,7 @@ namespace LevelGenerator
                         actualRoom.RoomType = RoomType.normal;
                         actualRoom.KeyToOpen = -1;
                         lockId = actualRoom.RoomId;
-                        roomGrid[actualRoom.X, actualRoom.Y] = actualRoom;
+                        grid[actualRoom.X, actualRoom.Y] = actualRoom;
                         hasKey = true;
                     }
                 }
@@ -457,7 +467,7 @@ namespace LevelGenerator
 
             }
 
-            actualRoom = roomList[0];
+            actualRoom = rooms[0];
             toVisit.Clear();
             toVisit.Enqueue(actualRoom);
 
@@ -494,8 +504,8 @@ namespace LevelGenerator
 
             }
 
-            nKeys -= Convert.ToInt32(hasKey);
-            nLocks -= Convert.ToInt32(hasLock);
+            keys -= Convert.ToInt32(hasKey);
+            locks -= Convert.ToInt32(hasLock);
         }
     }
 }

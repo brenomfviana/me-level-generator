@@ -1,10 +1,11 @@
-﻿using System;
-
-namespace LevelGenerator
+﻿namespace LevelGenerator
 {
     /// This class represents the grid of rooms of levels.
     public class RoomGrid
     {
+        /// The level grid offset.
+        public static readonly int LEVEL_GRID_OFFSET = 150;
+
         /// This matrix holds the grids of rooms corresponding to a Dungeon.
         private Room[,] grid;
 
@@ -12,16 +13,10 @@ namespace LevelGenerator
         ///
         /// `get`: Return the room of the given position (coordinate x and y).
         /// `set`: Assign a room to the given position (coordinate x and y).
-        public Room this[int X, int Y]
+        public Room this[int x, int y]
         {
-            get => grid[
-                    X + Constants.MATRIXOFFSET,
-                    Y + Constants.MATRIXOFFSET
-                ];
-            set => grid[
-                    X + Constants.MATRIXOFFSET,
-                    Y + Constants.MATRIXOFFSET
-                ] = value;
+            get => grid[x + LEVEL_GRID_OFFSET, y + LEVEL_GRID_OFFSET];
+            set => grid[x + LEVEL_GRID_OFFSET, y + LEVEL_GRID_OFFSET] = value;
         }
 
         /// Room Grid constructor.
@@ -29,10 +24,7 @@ namespace LevelGenerator
         /// Initialize the room grid with the maximum matrix offset.
         public RoomGrid()
         {
-            grid = new Room[
-                Constants.MATRIXOFFSET * 2,
-                Constants.MATRIXOFFSET * 2
-            ];
+            grid = new Room[LEVEL_GRID_OFFSET * 2, LEVEL_GRID_OFFSET * 2];
         }
     }
 }

@@ -8,10 +8,10 @@ namespace LevelGenerator
         //List of currently available keys
         private static List<int> availableLockId = new List<int>();
         private static List<int> usedLockId = new List<int>();
-        
+
         public static List<int> AvailableLockId { get => availableLockId; set => availableLockId = value; }
         public static List<int> UsedLockId { get => usedLockId; set => usedLockId = value; }
-        
+
         /*
          * Creates the root room of the dungeon
          */
@@ -24,8 +24,9 @@ namespace LevelGenerator
 
             return root;
         }
+
         /*
-         *  Creates a Room for the dungeon, defining if it is a normal room, a room with a key, or a locked room 
+         *  Creates a Room for the dungeon, defining if it is a normal room, a room with a key, or a locked room
          */
         public static Room CreateRoom(
             ref Random rand
@@ -34,7 +35,7 @@ namespace LevelGenerator
             int keyToOpen;
             //int lockId;
             Room room;
-            
+
             int prob = rand.Next(101);
             //If there are too many keys without locks, raises the chance to create a lock
             if (AvailableLockId.Count > 0)
@@ -83,6 +84,7 @@ namespace LevelGenerator
             }
             return room;
         }
+
         /*
          * Recreates a room, used after a crossover to fix the level
          * Only redefines the types of the room in order to make the new level a feasible one even with the changes
