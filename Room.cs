@@ -155,7 +155,7 @@ namespace LevelGenerator
                 //If there is a special room left, check the random number and see if it will be placed in the actual room or not
                 if (newSpecialRooms.Count > 0)
                 {
-                    if (prob < (Constants.PROB_NORMAL_ROOM))
+                    if (prob < (RoomFactory.PROB_NORMAL_ROOM))
                     {
                         actualRoom.RoomType = RoomType.normal;
                         actualRoom.KeyToOpen = -1;

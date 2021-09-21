@@ -1,5 +1,3 @@
-using System;
-
 namespace LevelGenerator
 {
     static class Constants
@@ -9,9 +7,6 @@ namespace LevelGenerator
         public const float PROB_2_CHILD = 100f / 3;
         public const float PROB_3_CHILD = 100f / 3;
         public const float PROB_CHILD = 100f / 3;
-        public const float PROB_NORMAL_ROOM = 70f;
-        public const float PROB_KEY_ROOM = 15f;
-        public const float PROB_LOCKER_ROOM = 15f;
         public const int MAX_DEPTH = 20;
     }
 }

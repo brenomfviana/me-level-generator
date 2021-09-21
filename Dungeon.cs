@@ -264,8 +264,8 @@ namespace LevelGenerator
                     }
                 }
             }
-            keys = RoomFactory.AvailableLockId.Count + RoomFactory.UsedLockId.Count;
-            locks = RoomFactory.UsedLockId.Count;
+            keys = RoomFactory.AvailableKeys.Count + RoomFactory.UsedKeys.Count;
+            locks = RoomFactory.UsedKeys.Count;
         }
 
         /*
@@ -296,53 +296,6 @@ namespace LevelGenerator
         }
 
         /*
-         * Fixes a dungeons after crossover and mutation
-         * Just edit the room types using a breadth-first search algorithm with a similar algorithm as the one used
-         * to create the rooms
-         */
-        public void FixIndividual(
-            ref Random rand
-        ) {
-            Room actualRoom;
-            Room child;
-            actualRoom = rooms[0];
-            toVisit.Clear();
-            toVisit.Enqueue(actualRoom);
-            RoomFactory.AvailableLockId.Clear();
-            RoomFactory.UsedLockId.Clear();
-
-            while (toVisit.Count > 0)
-            {
-                actualRoom = toVisit.Dequeue() as Room;
-
-                child = actualRoom.LeftChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys, ref rand);
-                        toVisit.Enqueue(child);
-                    }
-                child = actualRoom.BottomChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys, ref rand);
-                        toVisit.Enqueue(child);
-                    }
-                child = actualRoom.RightChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        RoomFactory.RecreateRoom(ref child, desiredKeys, ref rand);
-                        toVisit.Enqueue(child);
-                    }
-
-            }
-            keys = RoomFactory.AvailableLockId.Count + RoomFactory.UsedLockId.Count;
-            locks = RoomFactory.UsedLockId.Count;
-        }
-
-        /*
          * Add lock and key
          */
         public void AddLockAndKey(ref Random rand)
@@ -362,7 +315,7 @@ namespace LevelGenerator
                 if (actualRoom.RoomType == RoomType.normal && !actualRoom.Equals(rooms[0]))
                 {
                     //if (rand.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM + Convert.ToInt32(hasKey)*Constants.PROB_KEY_ROOM)
-                    if (rand.Next(101) <= Constants.PROB_KEY_ROOM + Constants.PROB_LOCKER_ROOM)
+                    if (rand.Next(101) <= RoomFactory.PROB_KEY_ROOM + RoomFactory.PROB_LOCKER_ROOM)
                     {
                         if (!hasKey)
                         {
