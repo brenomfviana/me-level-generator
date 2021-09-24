@@ -18,6 +18,14 @@ namespace LevelGenerator
         public float fitness;
         [JsonInclude]
         public int generation;
+        // Collected data. Remove from this class.
+        public int neededLocks = 0;
+        // Collected data. Remove from this class.
+        public float neededRooms = 0;
+
+        // Collected data (linearity). Remove from this class.
+        private float avgChildren;
+        public float AvgChildren { get => avgChildren; set => avgChildren = value; }
 
         /// Individual contructor.
         public Individual(
@@ -42,8 +50,8 @@ namespace LevelGenerator
             Console.WriteLine(LevelDebug.INDENT + "F=" + fitness);
             Console.WriteLine(LevelDebug.INDENT + "MAP=");
             LevelDebug.PrintMap(dungeon, LevelDebug.INDENT);
-            Console.WriteLine(LevelDebug.INDENT + "TREE=");
-            LevelDebug.PrintTree(dungeon, LevelDebug.INDENT);
+            // Console.WriteLine(LevelDebug.INDENT + "TREE=");
+            // LevelDebug.PrintTree(dungeon, LevelDebug.INDENT);
         }
 
         /// Return a random individual.

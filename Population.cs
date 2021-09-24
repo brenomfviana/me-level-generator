@@ -82,12 +82,12 @@ namespace LevelGenerator
             {
                 return;
             }
-            // If the new individual deserves to survive
-            if (Fitness.IsBest(_individual, map[k, l]))
-            {
+            // // If the new individual deserves to survive
+            // if (Fitness.IsBest(_individual, map[k, l]))
+            // {
                 // Then, place the individual in the MAP-Elites population
                 map[k, l] = _individual;
-            }
+            // }
         }
 
         /// Return a list with the population individuals.

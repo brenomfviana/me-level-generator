@@ -14,19 +14,17 @@ namespace LevelGenerator
             Dungeon _dungeon,
             string _indent
         ) {
-            // Get tree root
-            Room root = _dungeon.RoomList[0];
             // This list holds lists of nodes children
-            List<List<Room>> stacks = new List<List<Room>>();
+            List<List<int>> stacks = new List<List<int>>();
             // Add the root in the list of stacks
-            stacks.Add(new List<Room>() { root });
+            stacks.Add(new List<int>() { 0 });
             // Print the tree
             while (stacks.Count > 0)
             {
                 // Calculate the last added stack index
                 int last = stacks.Count - 1;
                 // Get the last added stack
-                List<Room> current = stacks[last];
+                List<int> current = stacks[last];
                 // Remove empty stacks
                 if (current.Count == 0)
                 {
@@ -34,7 +32,7 @@ namespace LevelGenerator
                     continue;
                 }
                 // Get the first node and remove if from the list of nodes
-                Room node = current[0];
+                int node = current[0];
                 current.RemoveAt(0);
                 string indent = _indent;
                 // Print the nodes in the current stack
@@ -44,20 +42,20 @@ namespace LevelGenerator
                 }
                 // Tag the nodes with the respective room type
                 string tag = "";
-                tag += node.RoomType == RoomType.normal ? "N" : "";
-                tag += node.RoomType == RoomType.key ? "K" : "";
-                tag += node.RoomType == RoomType.locked ? "L" : "";
-                Console.WriteLine(indent + "+- " + node.RoomId + "-" + tag);
+                tag += _dungeon.Rooms[node].RoomType == RoomType.normal ? "N" : "";
+                tag += _dungeon.Rooms[node].RoomType == RoomType.key ? "K" : "";
+                tag += _dungeon.Rooms[node].RoomType == RoomType.locked ? "L" : "";
+                Console.WriteLine(indent + "+- " + _dungeon.Rooms[node].RoomId + "-" + tag);
                 // Get non-null children nodes
-                List<Room> next = new List<Room>();
-                Room[] children = new Room[] {
-                    node.LeftChild,
-                    node.BottomChild,
-                    node.RightChild
+                List<int> next = new List<int>();
+                int[] children = new int[] {
+                    _dungeon.GetChildIndexByDirection(node, Util.Direction.Left),
+                    _dungeon.GetChildIndexByDirection(node, Util.Direction.Down),
+                    _dungeon.GetChildIndexByDirection(node, Util.Direction.Right)
                 };
-                foreach (Room child in children)
+                foreach (int child in children)
                 {
-                    if (child != null)
+                    if (child != -1 && _dungeon.Rooms[child] != null)
                     {
                         next.Add(child);
                     }
@@ -84,8 +82,9 @@ namespace LevelGenerator
             List<int> locks = new List<int>();
 
             // Calculate the grid bounds and get the level keys and locked doors
-            foreach (Room room in _dungeon.RoomList)
+            foreach (Room room in _dungeon.Rooms)
             {
+                if (room == null) { continue; }
                 // Update grid bounds
                 minX = minX > room.X ? room.X : minX;
                 minY = minY > room.Y ? room.Y : minY;
@@ -115,9 +114,9 @@ namespace LevelGenerator
 
             // Set the corridors, keys and locked rooms
             RoomGrid grid = _dungeon.grid;
-            for (int i = minX; i < maxX + 1; ++i)
+            for (int i = minX; i < maxX + 1; i++)
             {
-                for (int j = minY; j < maxY + 1; ++j)
+                for (int j = minY; j < maxY + 1; j++)
                 {
                     // Get the even positions
                     int iep = (i - minX) * 2;
@@ -143,7 +142,7 @@ namespace LevelGenerator
                                 (int) Util.RoomCode.N;
                         }
                         // Get current room parent
-                        Room parent = current.Parent;
+                        Room parent = _dungeon.GetParent(current.index);
                         if (parent != null)
                         {
                             // Get the corridor between both rooms

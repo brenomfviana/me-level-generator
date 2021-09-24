@@ -69,8 +69,8 @@ namespace LevelGenerator
             {
                 // Create a new random individual
                 Individual individual = Individual.GetRandom(ref rand);
-                // Calculate the individual fitness
-                Fitness.Calculate(ref individual, ref rand);
+                // // Calculate the individual fitness
+                // Fitness.Calculate(ref individual, ref rand);
                 // Place the individual in the MAP-Elites
                 pop.PlaceIndividual(individual);
             }
@@ -95,8 +95,8 @@ namespace LevelGenerator
                     // Add the new individuals in the offspring list
                     for (int i = 0; i < children.Length; i++)
                     {
-                        // Calculate the new individual fitness
-                        Fitness.Calculate(ref children[i], ref rand);
+                        // // Calculate the new individual fitness
+                        // Fitness.Calculate(ref children[i], ref rand);
                         // Add the new individual in the offspring
                         offspring.Add(children[i]);
                     }
@@ -108,15 +108,15 @@ namespace LevelGenerator
                         MUTATION_PARENT, prs.competitors, pop, ref rand
                     )[0];
                     Individual individual = Mutation.Apply(parent, ref rand);
-                    // Calculate the new individual fitness
-                    Fitness.Calculate(ref individual, ref rand);
+                    // // Calculate the new individual fitness
+                    // Fitness.Calculate(ref individual, ref rand);
                     // Add the new individual in the offspring
                     offspring.Add(individual);
                 }
 
                 foreach (Individual individual in offspring)
                 {
-                    individual.dungeon.FixRoomList();
+                    // individual.dungeon.FixRooms();
                     individual.generation = g;
                     pop.PlaceIndividual(individual);
                 }

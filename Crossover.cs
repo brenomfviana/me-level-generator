@@ -19,173 +19,340 @@ namespace LevelGenerator
             // Initialize the two new individuals
             Individual[] individuals = new Individual[2];
 
-            Dungeon ind1, ind2;
-            //The root of the branch that will be traded
-            Room roomCut1, roomCut2;
-            //List of rooms that were the root of the branch and led to an impossible crossover (Tabu List)
-            List<Room> failedRooms;
-            //List of special rooms in the branche to be traded of each parent
-            List<int> specialRooms1 = new List<int>(), specialRooms2 = new List<int>();
-            //List of special rooms in the traded brach after the crossover
-            List<int> newSpecial1 = new List<int>(), newSpecial2 = new List<int>();
-            //Total number of rooms in each branch that will be traded
-            int nRooms1 = 0, nRooms2 = 0;
-            //Answers if the trade is possible or not
+            // Initialize the offspring
+            Dungeon dungeon1;
+            Dungeon dungeon2;
+            Console.WriteLine("=========================================");
+            LevelDebug.PrintMap(_parent1.dungeon, LevelDebug.INDENT);
+            Console.WriteLine(" >>>>");
+            LevelDebug.PrintMap(_parent2.dungeon, LevelDebug.INDENT);
+            Console.WriteLine("-----------------------------------------");
+
+            // Cut points
+            Room rCut1 = null;
+            Room rCut2 = null;
+            // Tabu List: list of rooms that were the root of the branch and
+            // led to an impossible crossover
+            List<Room> failedRooms = new List<Room>();
+            // List of mission rooms (rooms with keys and locked doors) in the
+            // branch to be traded of each parent
+            List<int> pMissionRooms1 = new List<int>();
+            List<int> pMissionRooms2 = new List<int>();
+            // List of mission rooms (rooms with keys and locked doors) in the
+            // traded branch after the crossover (i.e., in the new individuals)
+            List<int> oMissionRooms1 = new List<int>();
+            List<int> oMissionRooms2 = new List<int>();
+            // Total number of rooms in each branch that will be traded
+            int nRooms1 = 0;
+            int nRooms2 = 0;
+            // Check if the trade is possible or not
             bool isImpossible = false;
 
-            do
-            {
-                ind1 = _parent1.dungeon.Clone();
-                ind2 = _parent2.dungeon.Clone();
-                //Get a random node from the parent, find the number of keys, locks and rooms and add it to the list of future failed rooms
-                roomCut1 = ind1.RoomList[_rand.Next(1, ind1.RoomList.Count)];
-                FindNKLR(ref nRooms1, ref specialRooms1, roomCut1);
-                failedRooms = new List<Room>();
+            do {
+                // Clone the dungeons of both parents
+                dungeon1 = _parent1.dungeon.Clone();
+                dungeon2 = _parent2.dungeon.Clone();
+                // The number of non-null rooms of the dungeons
+                List<Room> nonNullRooms1 = dungeon1.GetNonNullRooms();
+                List<Room> nonNullRooms2 = dungeon2.GetNonNullRooms();
 
-                //While the number of Keys and Locks from a branch is greater than the number of rooms of the other branch,
-                //Redraw the cut point (root of the branch).
-                //System.Console.WriteLine("STARTFINDINGCUT");
-                do
-                {
-                    do
+                // Get a random node from the parent as the root of the branch
+                // that will be traded
+                do {
+                    int index = _rand.Next(1, nonNullRooms1.Count);
+                    rCut1 = nonNullRooms1[index];
+                } while (rCut1 == null);
+                // Calculate the number of keys, locks and rooms in the branch
+                // of the cut point in dungeon 1
+                CalculateBranchRooms(
+                    dungeon1,
+                    rCut1.index,
+                    ref nRooms1,
+                    ref pMissionRooms1
+                );
+
+                // While the number of keys and locks from a branch is greater
+                // than the number of rooms of the other branch, redraw the cut
+                // point (the root of the branch)
+                do {
+                    do {
+                        int index = _rand.Next(1, nonNullRooms2.Count);
+                        rCut2 = nonNullRooms2[index];
+                    } while (rCut2 == null && failedRooms.Contains(rCut2));
+                    // Calculate the number of keys, locks and rooms in the
+                    // branch of the cut point in dungeon 2
+                    CalculateBranchRooms(
+                        dungeon2,
+                        rCut2.index,
+                        ref nRooms2,
+                        ref pMissionRooms2
+                    );
+                    // Add the cut room in the list of failed rooms
+                    failedRooms.Add(rCut2);
+                    // If no room can be the cut point, then the crossover
+                    // operation is impossible
+                    if (failedRooms.Count == nonNullRooms2.Count - 1)
                     {
-                        roomCut2 = ind2.RoomList[_rand.Next(1, ind2.RoomList.Count)];
-                    } while (failedRooms.Contains(roomCut2));
-                    failedRooms.Add(roomCut2);
-                    if (failedRooms.Count == ind2.RoomList.Count - 1)
                         isImpossible = true;
-                    FindNKLR(ref nRooms2, ref specialRooms2, roomCut2);
-                } while ((specialRooms2.Count > nRooms1 || specialRooms1.Count > nRooms2) && !isImpossible);
+                    }
+                } while ((pMissionRooms2.Count > nRooms1 ||
+                          pMissionRooms1.Count > nRooms2) &&
+                          !isImpossible);
 
-                //Changes the children of the parent's and neighbor's nodes to the node of the other branch if it is not an impossible trade
+                // If the crossover is possible, then perform it
                 if (!isImpossible)
                 {
-                    ChangeChildren(ref roomCut1, ref roomCut2);
-                    ChangeChildren(ref roomCut2, ref roomCut1);
+                    // Swap the two branches
+                    bool swap1 = SwapBranches(
+                        ref dungeon1,
+                        _parent2.dungeon,
+                        rCut1.index,
+                        rCut2.index
+                    );
+                    bool swap2 = SwapBranches(
+                        ref dungeon2,
+                        _parent1.dungeon,
+                        rCut2.index,
+                        rCut1.index
+                    );
 
-                    //Change the parent of each node
-                    Room auxRoom;
-                    //Changes the parents of the chosen nodes
-                    auxRoom = roomCut1.Parent;
-                    roomCut1.Parent = roomCut2.Parent;
-                    roomCut2.Parent = auxRoom;
+                    // If one of the dungeons could not finalize the crossover,
+                    // then try another tuple of cut points
+                    if (!swap1 || !swap2)
+                    {
+                        isImpossible = false;
+                        continue;
+                    }
 
-                    //Remove the node and their children from the grid of the old dungeon
-                    ind1.RemoveFromGrid(roomCut1);
-                    ind2.RemoveFromGrid(roomCut2);
+                    // Update the position, parent's direction, and rotation of
+                    // both switched nodes
+                    int x = rCut1.X;
+                    int y = rCut1.Y;
+                    Util.Direction dir = rCut1.ParentDirection;
+                    int rotation = rCut1.Rotation;
+                    //
+                    rCut1.X = rCut2.X;
+                    rCut1.Y = rCut2.Y;
+                    rCut1.ParentDirection = rCut2.ParentDirection;
+                    rCut1.Rotation = rCut2.Rotation;
+                    //
+                    rCut2.X = x;
+                    rCut2.Y = y;
+                    rCut2.ParentDirection = dir;
+                    rCut2.Rotation = rotation;
 
-                    //Update the position, parent's direction and rotation of both nodes that are switched
-                    int x = roomCut1.X;
-                    int y = roomCut1.Y;
-                    Util.Direction dir = roomCut1.ParentDirection;
-                    int rotation = roomCut1.Rotation;
-                    roomCut1.X = roomCut2.X;
-                    roomCut1.Y = roomCut2.Y;
-                    roomCut1.ParentDirection = roomCut2.ParentDirection;
-                    roomCut1.Rotation = roomCut2.Rotation;
-                    roomCut2.X = x;
-                    roomCut2.Y = y;
-                    roomCut2.ParentDirection = dir;
-                    roomCut2.Rotation = rotation;
+                    // Update the grid of the two new dungeons
+                    // If any conflicts arise here, they will be handled in the
+                    // creation of child nodes; that is, any overlap will make
+                    // the node and its children cease to exist
+                    dungeon1.RefreshGrid(rCut1.index);
+                    dungeon2.RefreshGrid(rCut2.index);
 
-                    //Updates the grid with all the new nodes. If any conflicts arise, handle them as in the child creation.
-                    //That is, any overlap will make the node and its children cease to exist
-                    ind1.RefreshGrid(ref roomCut2);
-                    ind2.RefreshGrid(ref roomCut1);
-
-                    //Find the number of keys, locks and rooms in the newly switched branches
-                    newSpecial1 = new List<int>();
-                    newSpecial2 = new List<int>();
-                    FindNKLR(ref nRooms2, ref newSpecial2, roomCut2);
-                    FindNKLR(ref nRooms1, ref newSpecial1, roomCut1);
+                    // Calculate the number of keys, locks and rooms in the
+                    // newly switched branchs
+                    oMissionRooms1 = new List<int>();
+                    CalculateBranchRooms(
+                        dungeon1,
+                        rCut1.index,
+                        ref nRooms1,
+                        ref oMissionRooms1
+                    );
+                    oMissionRooms2 = new List<int>();
+                    CalculateBranchRooms(
+                        dungeon2,
+                        rCut2.index,
+                        ref nRooms2,
+                        ref oMissionRooms2
+                    );
                 }
-                //If in the new branches there are special rooms missing or the number of special rooms is greater then the number of total rooms, retry
-            } while ((newSpecial1.Count != specialRooms1.Count || newSpecial2.Count != specialRooms2.Count || specialRooms1.Count > nRooms2 || specialRooms2.Count > nRooms1) && !isImpossible);
+            // If mission rooms are missing in the new branches or the number
+            // of rooms in the branches is greater than the number of total
+            // rooms, retry apply the crossover
+            } while ((oMissionRooms1.Count != pMissionRooms1.Count ||
+                      oMissionRooms2.Count != pMissionRooms2.Count ||
+                      pMissionRooms1.Count > nRooms2               ||
+                      pMissionRooms2.Count > nRooms1) &&
+                      !isImpossible);
 
-            //If the crossover can be done, do it. If not, don't.
-            //System.Console.WriteLine("Fixing");
+            // If the crossover did not generate impossible dungeons, then
+            // fix the created dungeons
             if (!isImpossible)
             {
-                // Replace locks and keys in the new branches
-                roomCut2.FixBranch(specialRooms1, ref _rand);
-                roomCut1.FixBranch(specialRooms2, ref _rand);
-                // Fix the list of rooms
-                ind1.FixRoomList();
-                ind2.FixRoomList();
+                // Replace locks and keys in the new branchs
+                dungeon1.FixBranch(rCut1.index, pMissionRooms1, ref _rand);
+                dungeon2.FixBranch(rCut2.index, pMissionRooms2, ref _rand);
             }
 
-            individuals[0] = new Individual(ind1);
-            individuals[1] = new Individual(ind1);
+            LevelDebug.PrintMap(dungeon1, LevelDebug.INDENT);
+            Console.WriteLine(" >>>>");
+            LevelDebug.PrintMap(dungeon2, LevelDebug.INDENT);
+            Console.WriteLine("=========================================");
+            Console.WriteLine();
+
+            throw new Exception("crossover");
+
+            individuals[0] = new Individual(dungeon1);
+            individuals[1] = new Individual(dungeon1);
 
             return individuals;
         }
 
-        /// Search the tree of rooms to find the number of special rooms. The
-        /// key room is saved in the list with its positive ID, while the
-        /// locked room with its negative value of the ID.
-        private static void FindNKLR(
+        /// Find the number of rooms of a branch and the mission rooms (rooms
+        /// with keys and locked doors) in the branch. The key rooms are saved
+        /// in the list with its positive ID, while the locked rooms with its
+        /// negative value of the ID.
+        private static void CalculateBranchRooms(
+            Dungeon _dungeon,
+            int _root,
             ref int _nRooms,
-            ref List<int> _specialRooms,
-            Room _root
+            ref List<int> _missionRooms
         ) {
-            // Initialize the list of special rooms
-            _specialRooms = new List<int>();
+            // Initialize the referenced variables
             _nRooms = 0;
-            // Search for the special rooms in the dungeon
-            Queue<Room> toVisit = new Queue<Room>();
+            _missionRooms = new List<int>();
+            // Search for the mission rooms in the dungeon
+            Queue<int> toVisit = new Queue<int>();
             toVisit.Enqueue(_root);
             while (toVisit.Count > 0)
             {
                 _nRooms++;
-                Room actualRoom = toVisit.Dequeue() as Room;
-                RoomType type;
-                type = actualRoom.RoomType;
+                int current = toVisit.Dequeue();
+                // Check if the current room is a mission room, if so, add it in
+                // the list of mission rooms
+                RoomType type = _dungeon.Rooms[current].RoomType;
                 if (type == RoomType.key)
                 {
-                    _specialRooms.Add(actualRoom.KeyToOpen);
+                    _missionRooms.Add(_dungeon.Rooms[current].KeyToOpen);
                 }
                 else if (type == RoomType.locked)
                 {
-                    _specialRooms.Add(-actualRoom.KeyToOpen);
+                    _missionRooms.Add(-_dungeon.Rooms[current].KeyToOpen);
                 }
-                Room[] rooms = new Room[] {
-                    actualRoom.LeftChild,
-                    actualRoom.BottomChild,
-                    actualRoom.RightChild
+                // Add the next rooms in the queue
+                int[] nexts = new int[] {
+                    _dungeon.GetChildIndexByDirection(
+                        current, Util.Direction.Left
+                    ),
+                    _dungeon.GetChildIndexByDirection(
+                        current, Util.Direction.Down
+                    ),
+                    _dungeon.GetChildIndexByDirection(
+                        current, Util.Direction.Right
+                    ),
                 };
-                foreach (Room room in rooms)
+                foreach (int next in nexts)
                 {
-                    if (room != null)
-                    {
-                        toVisit.Enqueue(room);
+                    if (next >= 0 &&
+                        next < Dungeon.CAPACITY &&
+                        _dungeon.Rooms[next] != null
+                    ) {
+                        toVisit.Enqueue(next);
                     }
                 }
             }
         }
 
-        /// Change the selected rooms between the parent dungeons. To do so,
-        /// change the parent who is their child to the corresponding node.
-        private static void ChangeChildren(
-            ref Room _room1,
-            ref Room _room2
+        /// Replace a branch of the dungeon `_to` with a branch of the dungeon
+        /// `_from`.
+        ///
+        /// First, this method clears all the nodes in the branch with root
+        /// `_cut1` in dungeon `_to`. Then, assign the nodes of the branch with
+        /// root `_cut2` of dungeon `_from` in dungeon `_to`.
+        private static bool SwapBranches(
+            ref Dungeon _to,
+            Dungeon _from,
+            int _cut1,
+            int _cut2
         ) {
-            // No room involved in this operation can be null
-            Debug.Assert(
-                _room1 != null && _room2 != null && _room1.Parent != null,
-                "There is something wrong with the dungeon representation."
-            );
-            // Set `_room2` as a child of the parent of `_room1`
-            switch (_room1.ParentDirection)
+            // Clear the branch with root `_cut1` of the target dungeon (`_to`)
+            ClearBranch(ref _to, _cut1);
+            // Move branch of dungeon `_from` to dungeon `_to`
+            Queue<(int, int)> toVisit = new Queue<(int, int)>();
+            toVisit.Enqueue((_cut1, _cut2));
+            while (toVisit.Count > 0)
             {
-                case Util.Direction.Right:
-                    _room1.Parent.RightChild = _room2;
-                    break;
-                case Util.Direction.Down:
-                    _room1.Parent.BottomChild = _room2;
-                    break;
-                case Util.Direction.Left:
-                    _room1.Parent.LeftChild = _room2;
-                    break;
+                (int c1, int c2) = toVisit.Dequeue();
+                _to.Rooms[c1] = _from.Rooms[c2].Clone();
+                _to.Rooms[c1].index = c1;
+                // Add the children of the current node
+                (int, int)[] nexts = new (int, int)[] {
+                    (
+                        _to.GetChildIndexByDirection(
+                            c1, Util.Direction.Left
+                        ),
+                        _from.GetChildIndexByDirection(
+                            c2, Util.Direction.Left
+                        )
+                    ),
+                    (
+                        _to.GetChildIndexByDirection(
+                            c1, Util.Direction.Down
+                        ),
+                        _from.GetChildIndexByDirection(
+                            c2, Util.Direction.Down
+                        )
+                    ),
+                    (
+                        _to.GetChildIndexByDirection(
+                            c1, Util.Direction.Right
+                        ),
+                        _from.GetChildIndexByDirection(
+                            c2, Util.Direction.Right
+                        )
+                    ),
+                };
+                foreach ((int n1, int n2) next in nexts)
+                {
+                    if (next.n1 != -1 &&
+                        next.n2 != -1 &&
+                        _from.Rooms[next.n2] != null
+                    ) {
+                        toVisit.Enqueue(next);
+                    }
+                    else if (next.n1 == -1 && next.n2 != -1)
+                    {
+                        // It is impossible place a new room if there is no
+                        // space in the dungeon 1
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        /// Erase the rooms from dungeon ternary heap and grid.
+        private static void ClearBranch(
+            ref Dungeon _dungeon,
+            int _cut
+        ) {
+            Queue<int> toVisit = new Queue<int>();
+            toVisit.Enqueue(_cut);
+            while (toVisit.Count > 0)
+            {
+                // Get the current room and erase it
+                int current = toVisit.Dequeue();
+                Room room = _dungeon.Rooms[current];
+                _dungeon.grid[room.X, room.Y] = null;
+                _dungeon.Rooms[current] = null;
+                // Add the children of the current room
+                int[] nexts = new int[] {
+                    _dungeon.GetChildIndexByDirection(
+                        current, Util.Direction.Left
+                    ),
+                    _dungeon.GetChildIndexByDirection(
+                        current, Util.Direction.Down
+                    ),
+                    _dungeon.GetChildIndexByDirection(
+                        current, Util.Direction.Right
+                    ),
+                };
+                foreach (int next in nexts)
+                {
+                    if (next != -1 && _dungeon.Rooms[next] != null)
+                    {
+                        toVisit.Enqueue(next);
+                    }
+                }
             }
         }
     }
