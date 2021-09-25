@@ -10,7 +10,7 @@ namespace LevelGenerator
     public class Dungeon
     {
         /// The max capacity of the ternary heap.
-        public static readonly int CAPACITY = 1093;
+        public static readonly int CAPACITY = 100000;
 
         /// Number of keys.
         public int keys;
@@ -22,7 +22,7 @@ namespace LevelGenerator
         public RoomGrid grid;
 
         /// Return the ternary heap.
-        public List<Room> Rooms { get => rooms; }
+        public List<Room> Rooms { get => rooms; set => rooms = value; }
 
         public Dungeon()
         {
@@ -41,18 +41,17 @@ namespace LevelGenerator
         public Dungeon Clone()
         {
             Dungeon clone = new Dungeon();
-            clone.rooms = new List<Room>();
+            clone.rooms = new List<Room>(new Room[CAPACITY]);
             clone.grid = new RoomGrid();
             clone.keys = keys;
             clone.locks = locks;
             foreach (Room room in rooms)
             {
-                Room aux = null;
                 if (room != null) {
-                    aux = room.Clone();
+                    Room aux = room.Clone();
                     clone.grid[aux.X, aux.Y] = aux;
+                    clone.rooms[aux.index] = aux;
                 }
-                clone.rooms.Add(aux);
             }
             return clone;
         }
@@ -137,7 +136,8 @@ namespace LevelGenerator
         /// already exists in the grid, "ignores" all the children node of this
         /// room.
         public void RefreshGrid(
-            int _room
+            int _room,
+            Util.Direction dir
         ) {
             if (_room < 0 ||
                 _room >= CAPACITY ||
@@ -145,53 +145,61 @@ namespace LevelGenerator
             ) {
                 return;
             }
-            // Set the room in the grid
-            grid[rooms[_room].X, rooms[_room].Y] = rooms[_room];
-            // Get the room children
-            int[] children = new int[] {
-                GetChildIndexByDirection(
-                    _room, Util.Direction.Left
-                ),
-                GetChildIndexByDirection(
-                    _room, Util.Direction.Down
-                ),
-                GetChildIndexByDirection(
-                    _room, Util.Direction.Right
-                ),
-            };
-            Util.Direction[] dirs = new Util.Direction[] {
-                Util.Direction.Left,
-                Util.Direction.Down,
-                Util.Direction.Right
-            };
-            // Refresh the remaining rooms in the branch
-            for (int i = 0; i < children.Length; i++)
+            // Console.WriteLine("  :> " + _room);
+            Room parent = GetParent(_room);
+            if (ValidateChild(parent.index, dir))
             {
-                int child = children[i];
-                if (child == -1 || rooms[child] == null)
+                (int x, int y) = GetChildPositionInGrid(parent.index, dir);
+                if (grid[x, y] == null)
                 {
-                    continue;
+                    // Set the room in the grid
+                    rooms[_room].X = x;
+                    rooms[_room].Y = y;
+                    grid[x, y] = rooms[_room];
+                    rooms[_room].ParentDirection = dir;
+                    rooms[_room].Rotation = (rooms[parent.index].Rotation + 90) % 360;
                 }
-                Room parent = GetParent(child);
-                if (parent != null &&
-                    parent.Equals(rooms[_room]) &&
-                    !rooms[child].Equals(parent)
-                ) {
-                    if (ValidateChild(_room, dirs[i]))
+                // Get the room children
+                int[] children = new int[] {
+                    GetChildIndexByDirection(
+                        _room, Util.Direction.Left
+                    ),
+                    GetChildIndexByDirection(
+                        _room, Util.Direction.Down
+                    ),
+                    GetChildIndexByDirection(
+                        _room, Util.Direction.Right
+                    ),
+                };
+                Util.Direction[] dirs = new Util.Direction[] {
+                    Util.Direction.Left,
+                    Util.Direction.Down,
+                    Util.Direction.Right
+                };
+                // Refresh the remaining rooms in the branch
+                for (int i = 0; i < children.Length; i++)
+                {
+                    int child = children[i];
+                    if (child == -1 || rooms[child] == null)
                     {
-                        (int x, int y) = GetChildPositionInGrid(_room, dirs[i]);
-                        if (grid[x, y] == null)
-                        {
-                            rooms[child].X = x;
-                            rooms[child].Y = y;
-                        }
-                        RefreshGrid(child);
+                        continue;
+                    }
+                    parent = GetParent(child);
+                    if (parent != null &&
+                        parent.Equals(rooms[_room]) &&
+                        !rooms[child].Equals(parent)
+                    ) {
+                        RefreshGrid(child, dirs[i]);
                     }
                     else
                     {
                         rooms[child] = null;
                     }
                 }
+            }
+            else
+            {
+                rooms[_room] = null;
             }
         }
 
@@ -265,6 +273,27 @@ namespace LevelGenerator
             // Get the number of keys and locked doors of the created dungeon
             keys = RoomFactory.AvailableKeys.Count + RoomFactory.UsedKeys.Count;
             locks = RoomFactory.UsedKeys.Count;
+        }
+
+        /// Recreate the room list by visiting all the rooms in the tree and adding them to the list while also counting the number of locks and keys
+        public void FixNumberLockKey()
+        {
+            Queue<int> toVisit = new Queue<int>();
+            toVisit.Enqueue(0);
+            keys = 0;
+            locks = 0;
+            while (toVisit.Count > 0)
+            {
+                int current = toVisit.Dequeue();
+                if (rooms[current].RoomType == RoomType.key)
+                {
+                    keys++;
+                }
+                else if (rooms[current].RoomType == RoomType.locked)
+                {
+                    locks++;
+                }
+            }
         }
 
         /// Add lock and key.
@@ -507,6 +536,16 @@ namespace LevelGenerator
             return rooms[(int) (_child - 1) / 3];
         }
 
+        /// Return the parent of the entered child.
+        public int GetParentIndex(
+            int _child
+        ) {
+            // If the entered child is the root, then return null
+            if (_child == 0) { return -1; }
+            // Return the parent of the entered child
+            return (int) (_child - 1) / 3;
+        }
+
         /// Check if a room can have a new child in the entered direction.
         ///
         /// Return true if a room can be placed as a child of the entered room
@@ -527,7 +566,7 @@ namespace LevelGenerator
         /// direction of insertion. Then, it checks the position is empty in
         /// the dungeon grid, if so, then, it places the entered child room in
         /// the calculated position and rotation.
-        public void InsertChild(
+        public bool InsertChild(
             int _parent,
             Util.Direction _dir,
             ref Room _child
@@ -546,7 +585,9 @@ namespace LevelGenerator
                 _child.Rotation = (rooms[_parent].Rotation + 90) % 360;
                 rooms[index] = _child;
                 grid[_child.X, _child.Y] = _child;
+                return true;
             }
+            return false;
         }
 
         /// Return a tuple corresponding to the position in the dungeon grid of
@@ -555,8 +596,9 @@ namespace LevelGenerator
             int _parent,
             Util.Direction _dir
         ) {
-            int x = -1, y = -1;
-
+            int x = RoomGrid.LEVEL_GRID_OFFSET + 1;
+            int y = RoomGrid.LEVEL_GRID_OFFSET + 1;
+            if (rooms[_parent] == null) { return (x, y); }
             switch (_dir)
             {
                 case Util.Direction.Right:

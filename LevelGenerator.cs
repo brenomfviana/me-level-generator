@@ -116,8 +116,10 @@ namespace LevelGenerator
 
                 foreach (Individual individual in offspring)
                 {
-                    // individual.dungeon.FixRooms();
+                    LevelDebug.PrintMap(individual.dungeon, LevelDebug.INDENT);
+                    Console.WriteLine("-----------------------------------------");
                     individual.generation = g;
+                    individual.dungeon.FixNumberLockKey();
                     pop.PlaceIndividual(individual);
                 }
             }

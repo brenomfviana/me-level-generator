@@ -22,11 +22,13 @@ namespace LevelGenerator
             // Initialize the offspring
             Dungeon dungeon1;
             Dungeon dungeon2;
-            Console.WriteLine("=========================================");
-            LevelDebug.PrintMap(_parent1.dungeon, LevelDebug.INDENT);
-            Console.WriteLine(" >>>>");
-            LevelDebug.PrintMap(_parent2.dungeon, LevelDebug.INDENT);
-            Console.WriteLine("-----------------------------------------");
+            // Console.WriteLine("=========================================");
+            // LevelDebug.PrintMap(_parent1.dungeon, LevelDebug.INDENT);
+            // LevelDebug.PrintTree(_parent1.dungeon, LevelDebug.INDENT);
+            // Console.WriteLine(" >>>>");
+            // LevelDebug.PrintMap(_parent2.dungeon, LevelDebug.INDENT);
+            // LevelDebug.PrintTree(_parent2.dungeon, LevelDebug.INDENT);
+            // Console.WriteLine("-----------------------------------------");
 
             // Cut points
             Room rCut1 = null;
@@ -109,6 +111,7 @@ namespace LevelGenerator
                         rCut1.index,
                         rCut2.index
                     );
+                    // Console.WriteLine("   ");
                     bool swap2 = SwapBranches(
                         ref dungeon2,
                         _parent1.dungeon,
@@ -116,37 +119,26 @@ namespace LevelGenerator
                         rCut1.index
                     );
 
+                    // LevelDebug.PrintMap(dungeon1, LevelDebug.INDENT);
+                    // LevelDebug.PrintTree(dungeon1, LevelDebug.INDENT);
+                    // Console.WriteLine(" >>>>");
+                    // LevelDebug.PrintMap(dungeon2, LevelDebug.INDENT);
+                    // Console.WriteLine("-----------------------------------------");
+
                     // If one of the dungeons could not finalize the crossover,
                     // then try another tuple of cut points
                     if (!swap1 || !swap2)
                     {
-                        isImpossible = false;
+                        isImpossible = true;
                         continue;
                     }
-
-                    // Update the position, parent's direction, and rotation of
-                    // both switched nodes
-                    int x = rCut1.X;
-                    int y = rCut1.Y;
-                    Util.Direction dir = rCut1.ParentDirection;
-                    int rotation = rCut1.Rotation;
-                    //
-                    rCut1.X = rCut2.X;
-                    rCut1.Y = rCut2.Y;
-                    rCut1.ParentDirection = rCut2.ParentDirection;
-                    rCut1.Rotation = rCut2.Rotation;
-                    //
-                    rCut2.X = x;
-                    rCut2.Y = y;
-                    rCut2.ParentDirection = dir;
-                    rCut2.Rotation = rotation;
 
                     // Update the grid of the two new dungeons
                     // If any conflicts arise here, they will be handled in the
                     // creation of child nodes; that is, any overlap will make
                     // the node and its children cease to exist
-                    dungeon1.RefreshGrid(rCut1.index);
-                    dungeon2.RefreshGrid(rCut2.index);
+                    dungeon1.RefreshGrid(rCut1.index, rCut1.ParentDirection);
+                    dungeon2.RefreshGrid(rCut2.index, rCut2.ParentDirection);
 
                     // Calculate the number of keys, locks and rooms in the
                     // newly switched branchs
@@ -178,21 +170,29 @@ namespace LevelGenerator
             // fix the created dungeons
             if (!isImpossible)
             {
+                // Console.WriteLine("New");
                 // Replace locks and keys in the new branchs
                 dungeon1.FixBranch(rCut1.index, pMissionRooms1, ref _rand);
                 dungeon2.FixBranch(rCut2.index, pMissionRooms2, ref _rand);
             }
+            else
+            {
+                // Console.WriteLine("Keep");
+                // Clone the dungeons of both parents
+                dungeon1 = _parent1.dungeon.Clone();
+                dungeon2 = _parent2.dungeon.Clone();
+            }
 
-            LevelDebug.PrintMap(dungeon1, LevelDebug.INDENT);
-            Console.WriteLine(" >>>>");
-            LevelDebug.PrintMap(dungeon2, LevelDebug.INDENT);
-            Console.WriteLine("=========================================");
-            Console.WriteLine();
-
-            throw new Exception("crossover");
+            // LevelDebug.PrintMap(dungeon1, LevelDebug.INDENT);
+            // LevelDebug.PrintTree(dungeon1, LevelDebug.INDENT);
+            // Console.WriteLine(" >>>>");
+            // LevelDebug.PrintMap(dungeon2, LevelDebug.INDENT);
+            // LevelDebug.PrintTree(dungeon2, LevelDebug.INDENT);
+            // Console.WriteLine("=========================================");
+            // Console.WriteLine();
 
             individuals[0] = new Individual(dungeon1);
-            individuals[1] = new Individual(dungeon1);
+            individuals[1] = new Individual(dungeon2);
 
             return individuals;
         }
@@ -264,6 +264,7 @@ namespace LevelGenerator
             int _cut1,
             int _cut2
         ) {
+            // Console.WriteLine(" >>>> " + _cut1);
             // Clear the branch with root `_cut1` of the target dungeon (`_to`)
             ClearBranch(ref _to, _cut1);
             // Move branch of dungeon `_from` to dungeon `_to`
@@ -301,8 +302,14 @@ namespace LevelGenerator
                         )
                     ),
                 };
-                foreach ((int n1, int n2) next in nexts)
+                Util.Direction[] dirs = new Util.Direction[] {
+                    Util.Direction.Left,
+                    Util.Direction.Down,
+                    Util.Direction.Right
+                };
+                for (int i = 0; i < nexts.Length; i++)
                 {
+                    (int n1, int n2) next = nexts[i];
                     if (next.n1 != -1 &&
                         next.n2 != -1 &&
                         _from.Rooms[next.n2] != null

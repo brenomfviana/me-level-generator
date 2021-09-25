@@ -45,7 +45,7 @@ namespace LevelGenerator
                 tag += _dungeon.Rooms[node].RoomType == RoomType.normal ? "N" : "";
                 tag += _dungeon.Rooms[node].RoomType == RoomType.key ? "K" : "";
                 tag += _dungeon.Rooms[node].RoomType == RoomType.locked ? "L" : "";
-                Console.WriteLine(indent + "+- " + _dungeon.Rooms[node].RoomId + "-" + tag);
+                Console.WriteLine(indent + "+- " + node + "-" + tag);
                 // Get non-null children nodes
                 List<int> next = new List<int>();
                 int[] children = new int[] {
@@ -91,7 +91,8 @@ namespace LevelGenerator
                 maxX = room.X > maxX ? room.X : maxX;
                 maxY = room.Y > maxY ? room.Y : maxY;
                 // Add the keys and locked doors in the level
-                if (room.RoomType == RoomType.key) {
+                if (room.RoomType == RoomType.key)
+                {
                     keys.Add(room.KeyToOpen);
                 }
                 if (room.RoomType == RoomType.locked)

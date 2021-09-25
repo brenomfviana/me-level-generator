@@ -7,6 +7,6 @@ namespace LevelGenerator
         public const float PROB_2_CHILD = 100f / 3;
         public const float PROB_3_CHILD = 100f / 3;
         public const float PROB_CHILD = 100f / 3;
-        public const int MAX_DEPTH = 20;
+        public const int MAX_DEPTH = 10;
     }
 }
