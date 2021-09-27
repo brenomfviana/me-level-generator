@@ -22,13 +22,6 @@ namespace LevelGenerator
             // Initialize the offspring
             Dungeon dungeon1;
             Dungeon dungeon2;
-            // Console.WriteLine("=========================================");
-            // LevelDebug.PrintMap(_parent1.dungeon, LevelDebug.INDENT);
-            // LevelDebug.PrintTree(_parent1.dungeon, LevelDebug.INDENT);
-            // Console.WriteLine(" >>>>");
-            // LevelDebug.PrintMap(_parent2.dungeon, LevelDebug.INDENT);
-            // LevelDebug.PrintTree(_parent2.dungeon, LevelDebug.INDENT);
-            // Console.WriteLine("-----------------------------------------");
 
             // Cut points
             Room rCut1 = null;
@@ -119,12 +112,6 @@ namespace LevelGenerator
                         rCut1.index
                     );
 
-                    // LevelDebug.PrintMap(dungeon1, LevelDebug.INDENT);
-                    // LevelDebug.PrintTree(dungeon1, LevelDebug.INDENT);
-                    // Console.WriteLine(" >>>>");
-                    // LevelDebug.PrintMap(dungeon2, LevelDebug.INDENT);
-                    // Console.WriteLine("-----------------------------------------");
-
                     // If one of the dungeons could not finalize the crossover,
                     // then try another tuple of cut points
                     if (!swap1 || !swap2)
@@ -170,26 +157,18 @@ namespace LevelGenerator
             // fix the created dungeons
             if (!isImpossible)
             {
-                // Console.WriteLine("New");
+                Console.WriteLine("New");
                 // Replace locks and keys in the new branchs
                 dungeon1.FixBranch(rCut1.index, pMissionRooms1, ref _rand);
                 dungeon2.FixBranch(rCut2.index, pMissionRooms2, ref _rand);
             }
             else
             {
-                // Console.WriteLine("Keep");
+                Console.WriteLine("Keep");
                 // Clone the dungeons of both parents
                 dungeon1 = _parent1.dungeon.Clone();
                 dungeon2 = _parent2.dungeon.Clone();
             }
-
-            // LevelDebug.PrintMap(dungeon1, LevelDebug.INDENT);
-            // LevelDebug.PrintTree(dungeon1, LevelDebug.INDENT);
-            // Console.WriteLine(" >>>>");
-            // LevelDebug.PrintMap(dungeon2, LevelDebug.INDENT);
-            // LevelDebug.PrintTree(dungeon2, LevelDebug.INDENT);
-            // Console.WriteLine("=========================================");
-            // Console.WriteLine();
 
             individuals[0] = new Individual(dungeon1);
             individuals[1] = new Individual(dungeon2);
@@ -222,7 +201,18 @@ namespace LevelGenerator
                 RoomType type = _dungeon.Rooms[current].RoomType;
                 if (type == RoomType.key)
                 {
-                    _missionRooms.Add(_dungeon.Rooms[current].KeyToOpen);
+                    int key = -_dungeon.Rooms[current].KeyToOpen;
+                    int lockIndex = _missionRooms.IndexOf(key);
+                    if (_missionRooms.Count > 0 && lockIndex != -1)
+                    {
+                        _missionRooms.Insert(
+                            lockIndex, _dungeon.Rooms[current].KeyToOpen
+                        );
+                    }
+                    else
+                    {
+                        _missionRooms.Add(_dungeon.Rooms[current].KeyToOpen);
+                    }
                 }
                 else if (type == RoomType.locked)
                 {
@@ -242,8 +232,7 @@ namespace LevelGenerator
                 };
                 foreach (int next in nexts)
                 {
-                    if (next >= 0 &&
-                        next < Dungeon.CAPACITY &&
+                    if (next != -1 &&
                         _dungeon.Rooms[next] != null
                     ) {
                         toVisit.Enqueue(next);
