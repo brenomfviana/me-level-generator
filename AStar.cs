@@ -97,7 +97,7 @@ namespace LevelGenerator
             {
                 for (int j = 0; j < 2*sizeY; ++j)
                 {
-                    map[i, j] = 101;
+                    map[i, j] = (int) Util.RoomCode.E;
                 }
             }
             //Fill the new grid
@@ -116,7 +116,7 @@ namespace LevelGenerator
                         //0 is a NORMAL ROOM
                         if (type == RoomType.normal)
                         {
-                            map[iPositive * 2, jPositive * 2] = 0;
+                            map[iPositive * 2, jPositive * 2] = (int) Util.RoomCode.N;
                         }
                         //The sequential, positivie index of the key is its representation
                         else if (type == RoomType.key)
@@ -128,16 +128,11 @@ namespace LevelGenerator
                         {
                             if (lockedRooms.IndexOf(actualRoom.KeyToOpen) == lockedRooms.Count -1)
                             {
-                                map[iPositive * 2, jPositive * 2] = 102;
+                                map[iPositive * 2, jPositive * 2] = (int) Util.RoomCode.B;
                                 target = new Location { X = iPositive * 2, Y = jPositive * 2 };
                             }
                             else
-                                map[iPositive * 2, jPositive * 2] = 0;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Something went wrong printing the tree!\n");
-                            Console.WriteLine("This Room type does not exist!\n\n");
+                                map[iPositive * 2, jPositive * 2] = (int) Util.RoomCode.N;
                         }
                         parent = dun.GetParent(actualRoom.index);
                         //If the actual room is a locked room and has a parent, then the connection between then is locked and is represented by the negative value of the index of the key that opens the lock
@@ -153,11 +148,19 @@ namespace LevelGenerator
                             }
                             //If the connection is open, 100 represents a normal corridor
                             else
-                                map[x, y] = 100;
+                            {
+                                map[x, y] = (int) Util.RoomCode.C;
+                            }
                         }
                     }
                 }
             }
+
+            if (target == null)
+            {
+                return 0;
+            }
+
             //Add all the locks location to the list that will hold their values through the execution of the algorithm
             foreach(var locked in locksLocation)
             {
@@ -174,7 +177,7 @@ namespace LevelGenerator
                 var lowest = openList.Min(l => l.F);
                 current = openList.First(l => l.F == lowest);
                 //if the current is a key, change the locked door status in the map
-                if (map[current.X, current.Y] > 0 && map[current.X, current.Y] < 100)
+                if (map[current.X, current.Y] > 0 && map[current.X, current.Y] < (int) Util.RoomCode.C)
                 {
                     //If there is still a lock to be open (there may be more keys than locks in the level, so the verification is necessary) find its location and check if the key to open it is the one found
                     if (locksLocation.Count > 0)
@@ -184,7 +187,7 @@ namespace LevelGenerator
                             //If the key we found is the one that open the room we are checking now, change the lock to an open corridor and update the algorithm's knowledge
                             if (map[room.X, room.Y] == -map[current.X, current.Y])
                             {
-                                map[room.X, room.Y] = 100;
+                                map[room.X, room.Y] = (int) Util.RoomCode.C;
                                 //remove the lock from the unopenned locks location list
                                 locksLocation.Remove(room);
                                 //Check if the parent room of the locked room was already closed by the algorithm (if it was in the closed list)
@@ -236,8 +239,12 @@ namespace LevelGenerator
                 //Console.WriteLine("Check Path");
                 // if we added the destination to the closed list, we've found a path
                 if(closedList != null)
+                {
                     if (closedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null)
+                    {
                         break;
+                    }
+                }
 
                 var adjacentSquares = GetWalkableAdjacentSquares(current.X, current.Y, map);
                 g++;
@@ -304,7 +311,7 @@ namespace LevelGenerator
             if (x < (2 * sizeX)-1)
                 proposedLocations.Add(new Location { X = x + 1, Y = y });
 
-            return proposedLocations.Where(l => (map[l.X,l.Y] >= 0 && map[l.X,l.Y] != 101)).ToList();
+            return proposedLocations.Where(l => (map[l.X,l.Y] >= 0 && map[l.X,l.Y] != (int) Util.RoomCode.E)).ToList();
         }
 
         //Compute the heuristic score, in this case, a Manhattan Distance

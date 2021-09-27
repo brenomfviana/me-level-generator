@@ -20,7 +20,6 @@ namespace LevelGenerator
         protected List<Location> locksLocation = new List<Location>();
         protected List<Location> allLocksLocation = new List<Location>();
 
-        protected Room parent;
         protected RoomGrid grid;
 
         protected List<int> locks = new List<int>();

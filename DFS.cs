@@ -13,6 +13,11 @@ namespace LevelGenerator
             Dungeon _dungeon,
             ref Random _rand
         ) {
+            if (target == null)
+            {
+                return 0;
+            }
+
             //
             openList.Add(start);
             path.Add(start);
@@ -26,9 +31,9 @@ namespace LevelGenerator
                 // add the current square to the closed list
                 ClosedList.Add(current);
 
-                if (((map[current.X, current.Y] >= 0) &&
-                    (map[current.X, current.Y] < 100)) ||
-                    (map[current.X, current.Y] == 102)
+                if (((map[current.X, current.Y] >= (int) Util.RoomCode.N) &&
+                    (map[current.X, current.Y] < (int) Util.RoomCode.C)) ||
+                    (map[current.X, current.Y] == (int) Util.RoomCode.B)
                 ) {
                     NVisitedRooms++;
                 }
