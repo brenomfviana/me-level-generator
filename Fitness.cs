@@ -19,7 +19,7 @@ namespace LevelGenerator
             // If the level has no locked door nor key
             if (dungeon.keys == 0 || dungeon.locks == 0)
             {
-                _individual.fitness = -1f;
+                _individual.fitness = 100000000f;
                 return;
             }
             float avgUsedRoom = 0.0f;
@@ -46,8 +46,15 @@ namespace LevelGenerator
                 Console.WriteLine(dungeon.locks);
             }
 
-            float fit = (2*(System.Math.Abs(nV - dungeon.Rooms.Count) + System.Math.Abs(nK - dungeon.keys) + System.Math.Abs(nL - dungeon.locks) + System.Math.Abs(lCoef - _individual.AvgChildren)) + (dungeon.locks * 0.8f - _individual.neededLocks) + (dungeon.Rooms.Count - _individual.neededRooms));
-
+            int amount = dungeon.GetNonNullRooms().Count;
+            float fit = (
+                2 * (System.Math.Abs(nV - amount) +
+                System.Math.Abs(nK - dungeon.keys) +
+                System.Math.Abs(nL - dungeon.locks) +
+                System.Math.Abs(lCoef - _individual.AvgChildren)) +
+                System.Math.Abs(dungeon.locks * 0.8f - _individual.neededLocks) +
+                System.Math.Abs(amount - _individual.neededRooms)
+            );
             _individual.fitness = fit;
         }
 

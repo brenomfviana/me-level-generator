@@ -43,6 +43,46 @@ namespace LevelGenerator
             return individual;
         }
 
+        public void CalcAvgChildren()
+        {
+            avgChildren = 0.0f;
+            int childCount;
+            int childLess = 0;
+            foreach (Room room in dungeon.Rooms)
+            {
+                if (room == null) { continue; }
+                childCount = 0;
+                // Get the current room children
+                int[] children = new int[] {
+                    dungeon.GetChildIndexByDirection(
+                        room.index, Util.Direction.Left
+                    ),
+                    dungeon.GetChildIndexByDirection(
+                        room.index, Util.Direction.Down
+                    ),
+                    dungeon.GetChildIndexByDirection(
+                        room.index, Util.Direction.Right
+                    ),
+                };
+                //
+                foreach (int child in children)
+                {
+                    if (child != -1 &&
+                        dungeon.Rooms[child] != null &&
+                        dungeon.GetParent(child) != null)
+                    {
+                        childCount += 1;
+                    }
+                }
+                if (childCount == 0)
+                {
+                    childLess++;
+                }
+                avgChildren += childCount;
+            }
+            avgChildren = avgChildren / (dungeon.Rooms.Count - childLess);
+        }
+
         /// Print the individual attributes and the dungeon map.
         public void Debug()
         {

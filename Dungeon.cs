@@ -10,7 +10,7 @@ namespace LevelGenerator
     public class Dungeon
     {
         /// The max capacity of the ternary heap.
-        public static readonly int CAPACITY = 100000;
+        public static readonly int CAPACITY = (int) Math.Pow(15f, 3f) + 1;
 
         /// Number of keys.
         public int keys;
@@ -55,27 +55,6 @@ namespace LevelGenerator
             }
             return clone;
         }
-
-        // public void CalcAvgChildren()
-        // {
-        //     avgChildren = 0.0f;
-        //     int childCount;
-        //     int childLess = 0;
-        //     foreach (Room room in Rooms)
-        //     {
-        //         childCount = 0;
-        //         if (room.RightChild != null && room.RightChild.Parent != null)
-        //             childCount += 1;
-        //         if (room.LeftChild != null && room.LeftChild.Parent != null)
-        //             childCount += 1;
-        //         if (room.BottomChild != null && room.BottomChild.Parent != null)
-        //             childCount += 1;
-        //         if (childCount == 0)
-        //             childLess++;
-        //         avgChildren += childCount;
-        //     }
-        //     avgChildren = avgChildren / (Rooms.Count - childLess);
-        // }
 
         /// Instantiates a room and tries to add it as a child of the actual room, considering its direction and position
         /// If there is not a room in the grid at the given coordinates, create the room, add it to the room list
@@ -292,6 +271,31 @@ namespace LevelGenerator
                 else if (rooms[current].RoomType == RoomType.locked)
                 {
                     locks++;
+                }
+                // Get the current room children
+                int[] children = new int[] {
+                    GetChildIndexByDirection(
+                        current, Util.Direction.Left
+                    ),
+                    GetChildIndexByDirection(
+                        current, Util.Direction.Down
+                    ),
+                    GetChildIndexByDirection(
+                        current, Util.Direction.Right
+                    ),
+                };
+                //
+                foreach (int child in children)
+                {
+                    if (child >= 0 &&
+                        child < CAPACITY &&
+                        rooms[child] != null
+                    ) {
+                        if (rooms[current].Equals(GetParent(child)))
+                        {
+                            toVisit.Enqueue(child);
+                        }
+                    }
                 }
             }
         }

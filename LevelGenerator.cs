@@ -61,7 +61,6 @@ namespace LevelGenerator
             // Initialize the random generator
             Random rand = new Random(prs.seed);
 
-            // Initialize the MAP-Elites population
             Population pop = new Population(5, 5);
 
             // Generate the initial population
@@ -69,8 +68,9 @@ namespace LevelGenerator
             {
                 // Create a new random individual
                 Individual individual = Individual.GetRandom(ref rand);
-                // // Calculate the individual fitness
-                // Fitness.Calculate(ref individual, ref rand);
+                // Calculate the individual fitness
+                individual.CalcAvgChildren();
+                Fitness.Calculate(ref individual, ref rand);
                 // Place the individual in the MAP-Elites
                 pop.PlaceIndividual(individual);
             }
@@ -96,6 +96,8 @@ namespace LevelGenerator
                     for (int i = 0; i < children.Length; i++)
                     {
                         // Calculate the new individual fitness
+                        children[i].CalcAvgChildren();
+                        children[i].dungeon.FixNumberLockKey();
                         Fitness.Calculate(ref children[i], ref rand);
                         // Add the new individual in the offspring
                         offspring.Add(children[i]);
@@ -109,6 +111,8 @@ namespace LevelGenerator
                     )[0];
                     Individual individual = Mutation.Apply(parent, ref rand);
                     // Calculate the new individual fitness
+                    individual.CalcAvgChildren();
+                    individual.dungeon.FixNumberLockKey();
                     Fitness.Calculate(ref individual, ref rand);
                     // Add the new individual in the offspring
                     offspring.Add(individual);
@@ -116,10 +120,7 @@ namespace LevelGenerator
 
                 foreach (Individual individual in offspring)
                 {
-                    LevelDebug.PrintMap(individual.dungeon, LevelDebug.INDENT);
-                    Console.WriteLine("-----------------------------------------");
                     individual.generation = g;
-                    individual.dungeon.FixNumberLockKey();
                     pop.PlaceIndividual(individual);
                 }
             }
