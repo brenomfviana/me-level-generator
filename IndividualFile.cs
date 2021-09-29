@@ -98,7 +98,7 @@ namespace LevelGenerator
         public override bool Equals(
             object _obj
         ) {
-            if (_obj == null || !GetType().Equals(_obj.GetType()))
+            if (_obj is null || !GetType().Equals(_obj.GetType()))
             {
                 return false;
             }

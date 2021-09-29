@@ -42,7 +42,7 @@ namespace LevelGenerator
             ref Random _rand
         ) {
             // Choose a random probability for the type of room to be created
-            int prob = Util.RandomPercent(ref _rand);
+            int prob = Common.RandomPercent(ref _rand);
             // Initialize the new room
             Room room = null;
             // Probability penalty for levels with exceding number of locks

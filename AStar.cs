@@ -250,7 +250,7 @@ namespace LevelGenerator
 
                     // if it's not in the open list...
                     if (openList.FirstOrDefault(l => l.X == adjacentSquare.X
-                            && l.Y == adjacentSquare.Y) == null)
+                            && l.Y == adjacentSquare.Y) is null)
                     {
                         // compute its score, set the parent
                         adjacentSquare.G = g;

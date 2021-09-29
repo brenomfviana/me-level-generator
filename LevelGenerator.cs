@@ -23,7 +23,6 @@ namespace LevelGenerator
             Parameters _prs
         ) {
             prs = _prs;
-            // Initialize the data to be collected
             data = new Data();
             data.parameters = prs;
         }
@@ -43,15 +42,10 @@ namespace LevelGenerator
         /// Generate and return a set of levels.
         public Population Evolve()
         {
-            // Get starting time
             DateTime start = DateTime.Now;
-            // Run evolutionary process
             Evolution();
-            // Get ending time
             DateTime end = DateTime.Now;
-            // Get the duration time
             data.duration = (end - start).TotalSeconds;
-            // Return the found individuals
             return solution;
         }
 
@@ -67,11 +61,8 @@ namespace LevelGenerator
             // Generate the initial population
             while (pop.Count() < prs.population)
             {
-                // Create a new random individual
                 Individual individual = Individual.GetRandom(ref rand);
-                // Calculate the individual fitness
                 Fitness.Calculate(ref individual, ref rand);
-                // Place the individual in the MAP-Elites
                 pop.PlaceIndividual(individual);
             }
 
@@ -82,7 +73,7 @@ namespace LevelGenerator
                 List<Individual> offspring = new List<Individual>();
 
                 // Apply the evolutionary operators
-                if (prs.crossover > Util.RandomPercent(ref rand))
+                if (prs.crossover > Common.RandomPercent(ref rand))
                 {
                     // Select two different parents
                     Individual[] parents = Selection.Select(
@@ -95,25 +86,24 @@ namespace LevelGenerator
                     // Add the new individuals in the offspring list
                     for (int i = 0; i < children.Length; i++)
                     {
-                        // Calculate the new individual fitness
                         Fitness.Calculate(ref children[i], ref rand);
-                        // Add the new individual in the offspring
                         offspring.Add(children[i]);
                     }
                 }
-                if (prs.mutation > Util.RandomPercent(ref rand))
+                if (prs.mutation > Common.RandomPercent(ref rand))
                 {
-                    // Select and mutate a parent
+                    // Select a parent
                     Individual parent = Selection.Select(
                         MUTATION_PARENT, prs.competitors, pop, ref rand
                     )[0];
+                    // Apply mutation
                     Individual individual = Mutation.Apply(parent, ref rand);
-                    // Calculate the new individual fitness
+                    // Add the new individual in the offspring list
                     Fitness.Calculate(ref individual, ref rand);
-                    // Add the new individual in the offspring
                     offspring.Add(individual);
                 }
 
+                // Place the offspring in the MAP-Elites population
                 foreach (Individual individual in offspring)
                 {
                     individual.dungeon.FixRoomList();

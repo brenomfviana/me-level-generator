@@ -11,8 +11,8 @@
 
         /// Define the `[]` operator for the grid.
         ///
-        /// `get`: Return the room of the given position (coordinate x and y).
-        /// `set`: Assign a room to the given position (coordinate x and y).
+        /// `get`: Return the room of the entered position (coordinate x and y).
+        /// `set`: Assign a room to the entered position (coordinate x and y).
         public Room this[int x, int y]
         {
             get => grid[x + LEVEL_GRID_OFFSET, y + LEVEL_GRID_OFFSET];

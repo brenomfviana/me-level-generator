@@ -109,7 +109,7 @@ namespace LevelGenerator
             {
                 for (int j = 0; j < 2 * sizeY; j++)
                 {
-                    map[i, j] = (int) Util.RoomCode.E;
+                    map[i, j] = (int) Common.RoomCode.E;
                 }
             }
 
@@ -128,7 +128,7 @@ namespace LevelGenerator
                     {
                         if (current.RoomType == RoomType.normal)
                         {
-                            map[iep, jep] = (int) Util.RoomCode.N;
+                            map[iep, jep] = (int) Common.RoomCode.N;
                         }
                         else if (current.RoomType == RoomType.key)
                         {
@@ -139,8 +139,8 @@ namespace LevelGenerator
                         {
                             int _lock = locks.IndexOf(current.KeyToOpen);
                             map[iep, jep] = _lock == locks.Count - 1 ?
-                                (int) Util.RoomCode.B :
-                                (int) Util.RoomCode.N;
+                                (int) Common.RoomCode.B :
+                                (int) Common.RoomCode.N;
                         }
                         // Get current room parent
                         Room parent = current.Parent;
@@ -159,7 +159,7 @@ namespace LevelGenerator
                             else
                             {
                                 // Otherwise it is an usual corridor
-                                map[x, y] = (int) Util.RoomCode.C;
+                                map[x, y] = (int) Common.RoomCode.C;
                             }
                         }
                     }
@@ -175,7 +175,7 @@ namespace LevelGenerator
                     // Set the room color
                     SetRoomColor(map[i, j]);
                     // Check room cores and print the corresponding string code
-                    if (map[i, j] == (int) Util.RoomCode.E)
+                    if (map[i, j] == (int) Common.RoomCode.E)
                     {
                         Console.Write("  ");
                     }
@@ -185,11 +185,11 @@ namespace LevelGenerator
                         {
                             Console.Write(" s");
                         }
-                        else if (map[i, j] == (int) Util.RoomCode.C)
+                        else if (map[i, j] == (int) Common.RoomCode.C)
                         {
                             Console.Write(" c");
                         }
-                        else if (map[i, j] == (int) Util.RoomCode.B)
+                        else if (map[i, j] == (int) Common.RoomCode.B)
                         {
                             Console.Write(" B");
                         }
@@ -212,22 +212,22 @@ namespace LevelGenerator
             int _code
         ) {
             // If the room is a room
-            if (_code == (int) Util.RoomCode.N)
+            if (_code == (int) Common.RoomCode.N)
             {
                 Console.ForegroundColor = ConsoleColor.DarkCyan;
             }
             // If the room is a boss room
-            else if (_code == (int) Util.RoomCode.B)
+            else if (_code == (int) Common.RoomCode.B)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
             }
             // If the room is a corridor
-            else if (_code == (int) Util.RoomCode.C)
+            else if (_code == (int) Common.RoomCode.C)
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
             }
             // If there is no room
-            else if (_code == (int) Util.RoomCode.E)
+            else if (_code == (int) Common.RoomCode.E)
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }

@@ -12,10 +12,10 @@ namespace LevelGenerator
         private static readonly char SEPARATOR = Path.DirectorySeparatorChar;
         /// The filename separator char.
         private static readonly char FILENAME_SEPARATOR = '-';
-        /// This constant defines that all files will be searched.
+        /// The general target for the search for files.
         private static readonly string SEARCH_FOR = "*";
-        /// This constant must be used to initialize empty strings or convert
-        /// values of other types during concatenation.
+        /// String to initialize empty strings or convert values of other types
+        /// during concatenation.
         private static readonly string EMPTY_STR = "";
         /// Define the JSON options.
         private static readonly JsonSerializerOptions JSON_OPTIONS =
@@ -118,7 +118,7 @@ namespace LevelGenerator
             {
                 for (int j = 0; j < 2 * sizeY; j++)
                 {
-                    map[i, j] = (int) Util.RoomCode.E;
+                    map[i, j] = (int) Common.RoomCode.E;
                 }
             }
 
@@ -137,7 +137,7 @@ namespace LevelGenerator
                     {
                         if (current.RoomType == RoomType.normal)
                         {
-                            map[iep, jep] = (int) Util.RoomCode.N;
+                            map[iep, jep] = (int) Common.RoomCode.N;
                         }
                         else if (current.RoomType == RoomType.key)
                         {
@@ -148,8 +148,8 @@ namespace LevelGenerator
                         {
                             int _lock = locks.IndexOf(current.KeyToOpen);
                             map[iep, jep] = _lock == locks.Count - 1 ?
-                                (int) Util.RoomCode.B :
-                                (int) Util.RoomCode.N;
+                                (int) Common.RoomCode.B :
+                                (int) Common.RoomCode.N;
                         }
                         // Get current room parent
                         Room parent = current.Parent;
@@ -168,7 +168,7 @@ namespace LevelGenerator
                             else
                             {
                                 // Otherwise it is an usual corridor
-                                map[x, y] = (int) Util.RoomCode.C;
+                                map[x, y] = (int) Common.RoomCode.C;
                             }
                         }
                     }
@@ -190,7 +190,7 @@ namespace LevelGenerator
                 {
                     // Initialize non-existent room
                     IndividualFile.Room room = null;
-                    if (map[i, j] != (int) Util.RoomCode.E)
+                    if (map[i, j] != (int) Common.RoomCode.E)
                     {
                         // Create a new empty room
                         room = new IndividualFile.Room
@@ -205,7 +205,7 @@ namespace LevelGenerator
                             room.treasures = 0;
                             room.npcs = 0;
                         }
-                        else if (map[i, j] == (int) Util.RoomCode.B)
+                        else if (map[i, j] == (int) Common.RoomCode.B)
                         {
                             // Set up the boss/goal room
                             room.type = "B";
@@ -213,7 +213,7 @@ namespace LevelGenerator
                             room.treasures = 0;
                             room.npcs = 0;
                         }
-                        else if (map[i, j] == (int) Util.RoomCode.C)
+                        else if (map[i, j] == (int) Common.RoomCode.C)
                         {
                             // Set up corridor
                             room.type = "c";

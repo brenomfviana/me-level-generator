@@ -38,7 +38,9 @@ namespace LevelGenerator
                 ind1 = _parent1.dungeon.Clone();
                 ind2 = _parent2.dungeon.Clone();
                 //Get a random node from the parent, find the number of keys, locks and rooms and add it to the list of future failed rooms
-                roomCut1 = ind1.RoomList[_rand.Next(1, ind1.RoomList.Count)];
+                (int, int) range = (1, ind2.RoomList.Count - 1);
+                int index = Common.RandomInt(range, ref _rand);
+                roomCut1 = ind1.RoomList[index];
                 FindNKLR(ref nRooms1, ref specialRooms1, roomCut1);
                 failedRooms = new List<Room>();
 
@@ -49,7 +51,9 @@ namespace LevelGenerator
                 {
                     do
                     {
-                        roomCut2 = ind2.RoomList[_rand.Next(1, ind2.RoomList.Count)];
+                        range = (1, ind2.RoomList.Count - 1);
+                        index = Common.RandomInt(range, ref _rand);
+                        roomCut2 = ind2.RoomList[index];
                     } while (failedRooms.Contains(roomCut2));
                     failedRooms.Add(roomCut2);
                     if (failedRooms.Count == ind2.RoomList.Count - 1)
@@ -77,7 +81,7 @@ namespace LevelGenerator
                     //Update the position, parent's direction and rotation of both nodes that are switched
                     int x = roomCut1.X;
                     int y = roomCut1.Y;
-                    Util.Direction dir = roomCut1.ParentDirection;
+                    Common.Direction dir = roomCut1.ParentDirection;
                     int rotation = roomCut1.Rotation;
                     roomCut1.X = roomCut2.X;
                     roomCut1.Y = roomCut2.Y;
@@ -142,7 +146,22 @@ namespace LevelGenerator
                 type = actualRoom.RoomType;
                 if (type == RoomType.key)
                 {
-                    _specialRooms.Add(actualRoom.KeyToOpen);
+                    if(_specialRooms.Count > 0)
+                    {
+                        int lockIndex = _specialRooms.IndexOf(-actualRoom.KeyToOpen);
+                        if (lockIndex != -1)
+                        {
+                            _specialRooms.Insert(lockIndex, actualRoom.KeyToOpen);
+                        }
+                        else
+                        {
+                            _specialRooms.Add(actualRoom.KeyToOpen);
+                        }
+                    }
+                    else
+                    {
+                        _specialRooms.Add(actualRoom.KeyToOpen);
+                    }
                 }
                 else if (type == RoomType.locked)
                 {
@@ -177,13 +196,13 @@ namespace LevelGenerator
             // Set `_room2` as a child of the parent of `_room1`
             switch (_room1.ParentDirection)
             {
-                case Util.Direction.Right:
+                case Common.Direction.Right:
                     _room1.Parent.RightChild = _room2;
                     break;
-                case Util.Direction.Down:
+                case Common.Direction.Down:
                     _room1.Parent.BottomChild = _room2;
                     break;
-                case Util.Direction.Left:
+                case Common.Direction.Left:
                     _room1.Parent.LeftChild = _room2;
                     break;
             }

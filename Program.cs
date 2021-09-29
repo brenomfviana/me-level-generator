@@ -23,6 +23,7 @@
 /// with players." Expert Systems with Applications 180 (2021): 115009.
 
 using System;
+using System.Diagnostics;
 
 namespace LevelGenerator
 {
@@ -31,41 +32,55 @@ namespace LevelGenerator
         /// The minimum number of program parameters (arguments).
         private const int NUMBER_OF_PARAMETERS = 6;
 
-        /// Flag of saving all levels separately.
+        /// The flag of saving all levels separately.
         private const string SAVE_SEPARATELY = "-s";
 
-        /// Error code for bad arguments.
+        /// The error code for bad arguments.
         private const int ERROR_BAD_ARGUMENTS = 0xA0;
+        /// The error message of not enough population.
+        public static readonly string TOO_MUCH_COMPETITORS =
+            "The number of competitors is higher than the population size; " +
+            "in this way, tournament selection is impossible.";
+        /// The error message of not enough competitors.
+        public static readonly string TOO_FEW_COMPETITORS =
+            "The number of competitors is not enough for a tournament.";
 
         static void Main(
-            string[] args
+            string[] _args
         ) {
             // Check if the expected number of parameters were entered
-            if (args.Length < NUMBER_OF_PARAMETERS)
+            if (_args.Length < NUMBER_OF_PARAMETERS)
             {
                 Console.WriteLine("ERROR: Invalid number of parameters!");
                 System.Environment.Exit(ERROR_BAD_ARGUMENTS);
             }
             // Has the separately save flag been entered?
-            bool separately = args[0] == SAVE_SEPARATELY;
+            bool separately = _args[0] == SAVE_SEPARATELY;
             // If so, then the evolutionary parameters are the next
             int i = separately ? 1 : 0;
             // Define the evolutionary parameters
             Parameters prs = new Parameters(
-                int.Parse(args[i++]), // Random seed
-                int.Parse(args[i++]), // Number of generations
-                int.Parse(args[i++]), // Initial population size
-                int.Parse(args[i++]), // Mutation chance
-                int.Parse(args[i++]), // Crossover chance
-                int.Parse(args[i])    // Number of tournament competitors
+                int.Parse(_args[i++]), // Random seed
+                int.Parse(_args[i++]), // Number of generations
+                int.Parse(_args[i++]), // Initial population size
+                int.Parse(_args[i++]), // Mutation chance
+                int.Parse(_args[i++]), // Crossover chance
+                int.Parse(_args[i])    // Number of tournament competitors
             );
-            // Prepare the evolutionary process
+            // Ensure the population size is enough for the tournament
+            Debug.Assert(
+                prs.competitors >= prs.population,
+                TOO_MUCH_COMPETITORS
+            );
+            // Ensure the number of competitors is valid
+            Debug.Assert(
+                prs.competitors > 1,
+                TOO_FEW_COMPETITORS
+            );
+            // Run the generator and save the results and the collected data
             LevelGenerator generator = new LevelGenerator(prs);
-            // Start the generative process and generate a set of levels
             generator.Evolve();
-            // Print MAP-Elites
             generator.GetSolution().Debug();
-            // Write the resulting set of levels
             Output.WriteData(generator.GetSolution(), generator.GetData());
         }
     }

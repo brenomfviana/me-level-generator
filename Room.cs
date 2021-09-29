@@ -43,7 +43,7 @@ namespace LevelGenerator
         private Room parent = null;
         //Saves the direction of the parent (if it is right, bottom or left child)
         //Reduces operations at crossover
-        private Util.Direction parentDirection = Util.Direction.Down;
+        private Common.Direction parentDirection = Common.Direction.Down;
 
         /*
          * Room constructor. The default is a normal room, without a lock so, without a key to open
@@ -150,7 +150,7 @@ namespace LevelGenerator
             {
                 actualRoom = visited.Dequeue();
 
-                int prob = rand.Next(101);
+                int prob = Common.RandomPercent(ref rand);
 
                 //If there is a special room left, check the random number and see if it will be placed in the actual room or not
                 if (newSpecialRooms.Count > 0)
@@ -209,15 +209,15 @@ namespace LevelGenerator
         }
 
         /*
-        * Validates if a child node can be created in the given position or not
+        * Validates if a child node can be created in the entered position or not
         */
-        public bool ValidateChild(Util.Direction dir, RoomGrid grid)
+        public bool ValidateChild(Common.Direction dir, RoomGrid grid)
         {
             int X, Y;
             Room roomInGrid;
             switch (dir)
             {
-                case Util.Direction.Right:
+                case Common.Direction.Right:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -239,7 +239,7 @@ namespace LevelGenerator
                     //as the actual room's child, returning true
                     //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
                     roomInGrid = grid[X, Y];
-                    if (roomInGrid == null)
+                    if (roomInGrid is null)
                     {
                         return true;
                     }
@@ -249,7 +249,7 @@ namespace LevelGenerator
                     {
                         return false;
                     }
-                case Util.Direction.Down:
+                case Common.Direction.Down:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -271,7 +271,7 @@ namespace LevelGenerator
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
                     roomInGrid = grid[X, Y];
-                    if (roomInGrid == null)
+                    if (roomInGrid is null)
                     {
                         return true;
                     }
@@ -282,7 +282,7 @@ namespace LevelGenerator
                         return false;
                     }
 
-                case Util.Direction.Left:
+                case Common.Direction.Left:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -304,7 +304,7 @@ namespace LevelGenerator
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
                     roomInGrid = grid[X, Y];
-                    if (roomInGrid == null)
+                    if (roomInGrid is null)
                     {
                         return true;
                     }
@@ -335,13 +335,13 @@ namespace LevelGenerator
          * set the current room as its parent and returns true so that the new room is added
          * to the room list and visiting queue
          */
-        public void InsertChild(Util.Direction dir, ref Room child, ref RoomGrid grid)
+        public void InsertChild(Common.Direction dir, ref Room child, ref RoomGrid grid)
         {
             Room roomInGrid;
 
             switch (dir)
             {
-                case Util.Direction.Right:
+                case Common.Direction.Right:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2)!=0)
                     {
@@ -363,14 +363,14 @@ namespace LevelGenerator
                     //as the actual room's child, returning true
                     //System.Console.WriteLine("X = " + child.X + " Y = " + child.Y + "\n");
                     roomInGrid = grid[child.X, child.Y];
-                    if (roomInGrid == null)
+                    if (roomInGrid is null)
                     {
                         child.Rotation = (this.Rotation + 90) % 360;
                         RightChild = child;
                         RightChild.SetParent(this);
                     }
                     break;
-                case Util.Direction.Down:
+                case Common.Direction.Down:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -392,14 +392,14 @@ namespace LevelGenerator
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = " + child.X + " Y = " + child.Y + "\n");
                     roomInGrid = grid[child.X, child.Y];
-                    if (roomInGrid == null)
+                    if (roomInGrid is null)
                     {
                         child.Rotation = (this.Rotation + 90) % 360;
                         BottomChild = child;
                         BottomChild.SetParent(this);
                     }
                     break;
-                case Util.Direction.Left:
+                case Common.Direction.Left:
                     //Calculates the X and Y based on the parent's rotation
                     if (((this.Rotation / 90) % 2) != 0)
                     {
@@ -421,7 +421,7 @@ namespace LevelGenerator
                     //Does not change the child's parent and return false
                     //System.Console.WriteLine("X = "+ child.X+" Y = "+child.Y+"\n");
                     roomInGrid = grid[child.X, child.Y];
-                    if (roomInGrid == null)
+                    if (roomInGrid is null)
                     {
                         child.Rotation = (this.Rotation + 90) % 360;
                         LeftChild = child;
@@ -476,17 +476,17 @@ namespace LevelGenerator
         }
 
         /*
-         * Get the child of the room in the given direction
+         * Get the child of the room in the entered direction
          */
-        public Room GetChildByDirection(Util.Direction dir)
+        public Room GetChildByDirection(Common.Direction dir)
         {
             switch (dir)
             {
-                case Util.Direction.Down:
+                case Common.Direction.Down:
                     return BottomChild;
-                case Util.Direction.Left:
+                case Common.Direction.Left:
                     return LeftChild;
-                case Util.Direction.Right:
+                case Common.Direction.Right:
                     return RightChild;
             }
             return null;
@@ -500,7 +500,7 @@ namespace LevelGenerator
         public Room LeftChild { get => leftChild; set => leftChild = value; }
         public Room RightChild { get => rightChild; set => rightChild = value; }
         public Room BottomChild { get => bottomChild; set => bottomChild = value; }
-        public Util.Direction ParentDirection { get => parentDirection; set => parentDirection = value; }
+        public Common.Direction ParentDirection { get => parentDirection; set => parentDirection = value; }
         public int Rotation { get => rotation; set => rotation = value; }
         public RoomType RoomType { get => type; set => type = value; }
         public int KeyToOpen { get => keyToOpen; set => keyToOpen = value; }

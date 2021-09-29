@@ -46,18 +46,15 @@ namespace LevelGenerator
             LevelDebug.PrintTree(dungeon, LevelDebug.INDENT);
         }
 
-        /// Return a random individual.
+        /// Generate and return a random individual.
         public static Individual GetRandom(
             ref Random _rand
         ) {
-            // Generate a new random dungeon
             Dungeon dungeon = new Dungeon();
             dungeon.GenerateRooms(ref _rand);
-            // Initialize the new individual
             Individual individual = new Individual(dungeon);
-            individual.generation = Util.UNKNOWN;
-            individual.fitness = Util.UNKNOWN;
-            // Return the generated individual
+            individual.generation = Common.UNKNOWN;
+            individual.fitness = Common.UNKNOWN;
             return individual;
         }
     }

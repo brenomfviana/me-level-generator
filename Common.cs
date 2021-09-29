@@ -3,16 +3,12 @@ using System.Collections.Generic;
 
 namespace LevelGenerator
 {
-    /// This class holds only utility functions and constants.
-    public static class Util
+    /// This class holds the project common functions and constants.
+    public static class Common
     {
         /// Unknown reference.
         public static readonly int UNKNOWN = -1;
-        /// The error message of not enough competitors.
-        public static readonly string NOT_ENOUGH_COMPETITORS =
-            "There are not enough individuals in the input population to " +
-            "perform this operation.";
-        /// The error message of not enough competitors.
+        /// The error message of cannot compare individuals.
         public static readonly string CANNOT_COMPARE_INDIVIDUALS =
             "There is no way of comparing two null individuals.";
 
@@ -26,6 +22,12 @@ namespace LevelGenerator
             Down = 1,
             Left = 2
         };
+
+        /// Return the array of all weapon types.
+        public static Direction[] AllDirections()
+        {
+            return (Direction[]) Enum.GetValues(typeof(Direction));
+        }
 
         /// Define the room codes for printing purposes.
         public enum RoomCode
@@ -43,7 +45,23 @@ namespace LevelGenerator
             return _rand.Next(100);
         }
 
-        /// Return a random element from the input list.
+        /// Return a random integer number from the entered inclusive range.
+        public static int RandomInt(
+            (int min, int max) _range,
+            ref Random _rand
+        ) {
+            return _rand.Next(_range.min, _range.max + 1);
+        }
+
+        /// Return a random element from the entered array.
+        public static T RandomElementFromArray<T>(
+            T[] _range,
+            ref Random _rand
+        ) {
+            return _range[_rand.Next(0, _range.Length)];
+        }
+
+        /// Return a random element from the entered list.
         public static T RandomElementFromList<T>(
             List<T> _range,
             ref Random _rand

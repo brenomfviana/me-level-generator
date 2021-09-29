@@ -10,6 +10,11 @@ namespace LevelGenerator
     /// This class holds the selector operator.
     public class Selection
     {
+        /// The error message of not enough competitors.
+        public static readonly string NOT_ENOUGH_COMPETITORS =
+            "There are not enough individuals in the entered population to " +
+            "perform this operation.";
+
         /// Select individuals from the MAP-Elites population.
         ///
         /// This function ensures that the same individual will not be selected
@@ -29,7 +34,7 @@ namespace LevelGenerator
             // Ensure the population size is enough for the tournament
             Debug.Assert(
                 avco.Count - _amount > _competitors,
-                Util.NOT_ENOUGH_COMPETITORS
+                NOT_ENOUGH_COMPETITORS
             );
             // Select `_amount` individuals
             Individual[] individuals = new Individual[_amount];
@@ -42,12 +47,10 @@ namespace LevelGenerator
                     avco,         // List of available competitors
                     ref _rand     // Random number generator
                 );
-                // Select a new individual
+                // Select an individual and remove it from available competitors
                 individuals[i] = individual;
-                // Remove selected individual from available competitors
                 avco.Remove(coordinate);
             }
-            // Return all selected individuals
             return individuals;
         }
 
@@ -59,30 +62,26 @@ namespace LevelGenerator
         static (Coordinate, Individual) Tournament(
             int _competitors,
             Population _pop,
-            List<Coordinate> _cs,
+            List<Coordinate> _avco,
             ref Random _rand
         ) {
             // List of available competitors
-            List<Coordinate> avco = new List<Coordinate>(_cs);
-            // Initialize the list of competitors
+            List<Coordinate> avco = new List<Coordinate>(_avco);
+            // Initialize the auxiliary variables
             Individual[] competitors = new Individual[_competitors];
-            // Initialize competitors' coordinates
             Coordinate[] coordinates = new Coordinate[_competitors];
-            // Select competitors
+            // Select the competitors randomly from the available coordinate
+            // then remove the competitor from available competitors
             for (int i = 0; i < _competitors; i++)
             {
-                // Get a random available coordinate
-                (int x, int y) rc = Util.RandomElementFromList(avco, ref _rand);
-                // Get the competitor corresponding to the chosen coordinate and
-                // add the individual to the chosen competitors list
-                competitors[i] = _pop.map[rc.x, rc.y];
+                Coordinate rc = Common.RandomElementFromList(avco, ref _rand);
+                competitors[i] = _pop.map[rc.Item1, rc.Item2];
                 coordinates[i] = rc;
-                // Remove the competitor from available competitors
                 avco.Remove(rc);
             }
             // Find the tournament winner and its coordinate in the population
             Individual winner = null;
-            Coordinate coordinate = (Util.UNKNOWN, Util.UNKNOWN);
+            Coordinate coordinate = (Common.UNKNOWN, Common.UNKNOWN);
             for (int i = 0; i < _competitors; i++)
             {
                 if (winner is null || competitors[i].fitness > winner.fitness)
