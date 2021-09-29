@@ -97,7 +97,7 @@ namespace LevelGenerator
                     {
                         // Calculate the new individual fitness
                         children[i].CalcAvgChildren();
-                        children[i].dungeon.FixNumberLockKey();
+                        children[i].dungeon.FixDungeon();
                         Fitness.Calculate(ref children[i], ref rand);
                         // Add the new individual in the offspring
                         offspring.Add(children[i]);
@@ -112,7 +112,7 @@ namespace LevelGenerator
                     Individual individual = Mutation.Apply(parent, ref rand);
                     // Calculate the new individual fitness
                     individual.CalcAvgChildren();
-                    individual.dungeon.FixNumberLockKey();
+                    individual.dungeon.FixDungeon();
                     Fitness.Calculate(ref individual, ref rand);
                     // Add the new individual in the offspring
                     offspring.Add(individual);

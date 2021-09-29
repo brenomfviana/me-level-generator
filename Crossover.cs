@@ -42,8 +42,10 @@ namespace LevelGenerator
             int nRooms2 = 0;
             // Check if the trade is possible or not
             bool isImpossible = false;
+            bool swapError = false;
 
             do {
+                swapError = false;
                 // Clone the dungeons of both parents
                 dungeon1 = _parent1.dungeon.Clone();
                 dungeon2 = _parent2.dungeon.Clone();
@@ -73,7 +75,7 @@ namespace LevelGenerator
                     do {
                         int index = _rand.Next(1, nonNullRooms2.Count);
                         rCut2 = nonNullRooms2[index];
-                    } while (rCut2 == null && failedRooms.Contains(rCut2));
+                    } while (rCut2 == null || failedRooms.Contains(rCut2));
                     // Calculate the number of keys, locks and rooms in the
                     // branch of the cut point in dungeon 2
                     CalculateBranchRooms(
@@ -104,7 +106,6 @@ namespace LevelGenerator
                         rCut1.index,
                         rCut2.index
                     );
-                    // Console.WriteLine("   ");
                     bool swap2 = SwapBranches(
                         ref dungeon2,
                         _parent1.dungeon,
@@ -112,11 +113,9 @@ namespace LevelGenerator
                         rCut1.index
                     );
 
-                    // If one of the dungeons could not finalize the crossover,
-                    // then try another tuple of cut points
                     if (!swap1 || !swap2)
                     {
-                        isImpossible = true;
+                        swapError = true;
                         continue;
                     }
 
@@ -150,28 +149,26 @@ namespace LevelGenerator
             } while ((oMissionRooms1.Count != pMissionRooms1.Count ||
                       oMissionRooms2.Count != pMissionRooms2.Count ||
                       pMissionRooms1.Count > nRooms2               ||
-                      pMissionRooms2.Count > nRooms1) &&
+                      pMissionRooms2.Count > nRooms1               ||
+                      swapError) &&
                       !isImpossible);
 
             // If the crossover did not generate impossible dungeons, then
             // fix the created dungeons
             if (!isImpossible)
             {
-                Console.WriteLine("New");
                 // Replace locks and keys in the new branchs
                 dungeon1.FixBranch(rCut1.index, pMissionRooms1, ref _rand);
                 dungeon2.FixBranch(rCut2.index, pMissionRooms2, ref _rand);
+                individuals[0] = new Individual(dungeon1);
+                individuals[1] = new Individual(dungeon2);
             }
             else
             {
-                Console.WriteLine("Keep");
                 // Clone the dungeons of both parents
-                dungeon1 = _parent1.dungeon.Clone();
-                dungeon2 = _parent2.dungeon.Clone();
+                individuals[0] = _parent1.Clone();
+                individuals[1] = _parent2.Clone();
             }
-
-            individuals[0] = new Individual(dungeon1);
-            individuals[1] = new Individual(dungeon2);
 
             return individuals;
         }
@@ -253,7 +250,6 @@ namespace LevelGenerator
             int _cut1,
             int _cut2
         ) {
-            // Console.WriteLine(" >>>> " + _cut1);
             // Clear the branch with root `_cut1` of the target dungeon (`_to`)
             ClearBranch(ref _to, _cut1);
             // Move branch of dungeon `_from` to dungeon `_to`

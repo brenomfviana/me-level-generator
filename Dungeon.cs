@@ -95,7 +95,7 @@ namespace LevelGenerator
                 foreach (int child in children)
                 {
                     if (child < 0 &&
-                        child > CAPACITY &&
+                        child >= CAPACITY &&
                         rooms[child] == null
                     ) {
                         continue;
@@ -124,7 +124,6 @@ namespace LevelGenerator
             ) {
                 return;
             }
-            // Console.WriteLine("  :> " + _room);
             Room parent = GetParent(_room);
             if (ValidateChild(parent.index, dir))
             {
@@ -178,7 +177,36 @@ namespace LevelGenerator
             }
             else
             {
-                rooms[_room] = null;
+                // If the room cannot be placed in the calculated grid position
+                // Then all the branch starting from this room must be erased
+                RemoveTrash(_room);
+            }
+        }
+
+        /// Erase a branch starting from the root `_room`.
+        private void RemoveTrash(
+            int _room
+        ) {
+            rooms[_room] = null;
+            // Get the room children
+            int[] children = new int[] {
+                GetChildIndexByDirection(
+                    _room, Util.Direction.Left
+                ),
+                GetChildIndexByDirection(
+                    _room, Util.Direction.Down
+                ),
+                GetChildIndexByDirection(
+                    _room, Util.Direction.Right
+                ),
+            };
+            for (int i = 0; i < children.Length; i++)
+            {
+                int child = children[i];
+                if (child != -1 && rooms[child] != null)
+                {
+                    RemoveTrash(child);
+                }
             }
         }
 
@@ -193,7 +221,7 @@ namespace LevelGenerator
             {
                 // Get the current room
                 current = toVisit.Dequeue();
-                int currentDepth = rooms[current].Depth;
+                int currentDepth = GetDepth(current);
                 // If max depth has been reached, stop creating children
                 if (currentDepth > Constants.MAX_DEPTH)
                 {
@@ -232,21 +260,25 @@ namespace LevelGenerator
                         InstantiateRoom(current, Util.Direction.Left, ref _rand);
                     }
                 }
-                // Add the children of the current node
-                Room next = GetChildByDirection(current, Util.Direction.Left);
-                if (next != null)
+                // Get the current room children
+                int[] children = new int[] {
+                    GetChildIndexByDirection(
+                        current, Util.Direction.Left
+                    ),
+                    GetChildIndexByDirection(
+                        current, Util.Direction.Down
+                    ),
+                    GetChildIndexByDirection(
+                        current, Util.Direction.Right
+                    ),
+                };
+                //
+                foreach (int child in children)
                 {
-                    toVisit.Enqueue(next.index);
-                }
-                next = GetChildByDirection(current, Util.Direction.Down);
-                if (next != null)
-                {
-                    toVisit.Enqueue(next.index);
-                }
-                next = GetChildByDirection(current, Util.Direction.Right);
-                if (next != null)
-                {
-                    toVisit.Enqueue(next.index);
+                    if (child != -1 && rooms[child] != null)
+                    {
+                        toVisit.Enqueue(child);
+                    }
                 }
             }
             // Get the number of keys and locked doors of the created dungeon
@@ -255,7 +287,7 @@ namespace LevelGenerator
         }
 
         /// Recreate the room list by visiting all the rooms in the tree and adding them to the list while also counting the number of locks and keys
-        public void FixNumberLockKey()
+        public void FixDungeon()
         {
             Queue<int> toVisit = new Queue<int>();
             toVisit.Enqueue(0);
@@ -492,18 +524,29 @@ namespace LevelGenerator
             {
                 case Util.Direction.Left:
                     index = _parent * 3 + 1;
-                    if (index > CAPACITY) { break; }
+                    if (index >= CAPACITY) { break; }
                     return rooms[index];
                 case Util.Direction.Down:
                     index = _parent * 3 + 2;
-                    if (index > CAPACITY) { break; }
+                    if (index >= CAPACITY) { break; }
                     return rooms[index];
                 case Util.Direction.Right:
                     index = _parent * 3 + 3;
-                    if (index > CAPACITY) { break; }
+                    if (index >= CAPACITY) { break; }
                     return rooms[index];
             }
             return null;
+        }
+
+        /// Return the depth of the entered room.
+        public int GetDepth(
+            int _room
+        ) {
+            if (_room == 0)
+            {
+                return 0;
+            }
+            return GetDepth(GetParentIndex(_room)) + 1;
         }
 
         /// Get the child of the entered parent room in the entered direction.
@@ -516,15 +559,15 @@ namespace LevelGenerator
             {
                 case Util.Direction.Left:
                     index = _parent * 3 + 1;
-                    if (index > CAPACITY) { break; }
+                    if (index >= CAPACITY) { break; }
                     return index;
                 case Util.Direction.Down:
                     index = _parent * 3 + 2;
-                    if (index > CAPACITY) { break; }
+                    if (index >= CAPACITY) { break; }
                     return index;
                 case Util.Direction.Right:
                     index = _parent * 3 + 3;
-                    if (index > CAPACITY) { break; }
+                    if (index >= CAPACITY) { break; }
                     return index;
             }
             return -1;
