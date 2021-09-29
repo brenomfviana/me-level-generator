@@ -34,9 +34,9 @@ namespace LevelGenerator
             }
             dungeon.neededRooms = avgUsedRoom / 3.0f;
             // System.Console.WriteLine("Needed Rooms: " + dungeon.neededRooms);
-            if (dungeon.neededRooms > dungeon.RoomList.Count)
+            if (dungeon.neededRooms > dungeon.Rooms.Count)
             {
-                Console.WriteLine("SOMETHING IS REALLY WRONG! Nrooms: " + dungeon.RoomList.Count + "  Used: " + dungeon.neededRooms);
+                Console.WriteLine("SOMETHING IS REALLY WRONG! Nrooms: " + dungeon.Rooms.Count + "  Used: " + dungeon.neededRooms);
                 Console.ReadKey();
             }
             if (dungeon.neededLocks > dungeon.locks)
@@ -46,7 +46,7 @@ namespace LevelGenerator
                 Console.WriteLine(dungeon.locks);
             }
 
-            float fit = (2*(System.Math.Abs(nV - dungeon.RoomList.Count) + System.Math.Abs(nK - dungeon.keys) + System.Math.Abs(nL - dungeon.locks) + System.Math.Abs(lCoef - dungeon.AvgChildren)) + (dungeon.locks * 0.8f - dungeon.neededLocks) + (dungeon.RoomList.Count - dungeon.neededRooms));
+            float fit = (2*(System.Math.Abs(nV - dungeon.Rooms.Count) + System.Math.Abs(nK - dungeon.keys) + System.Math.Abs(nL - dungeon.locks) + System.Math.Abs(lCoef - dungeon.AvgChildren)) + (dungeon.locks * 0.8f - dungeon.neededLocks) + (dungeon.Rooms.Count - dungeon.neededRooms));
 
             _individual.fitness = fit;
         }

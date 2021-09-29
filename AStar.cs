@@ -59,7 +59,7 @@ namespace LevelGenerator
             maxX = -RoomGrid.LEVEL_GRID_OFFSET;
             maxY = -RoomGrid.LEVEL_GRID_OFFSET;
             //Check all the rooms and add them to the keys and locks lists if they are one of them
-            foreach (Room room in dun.RoomList)
+            foreach (Room room in dun.Rooms)
             {
                 if (room.RoomType == RoomType.key)
                 {
@@ -285,7 +285,7 @@ namespace LevelGenerator
                 System.Threading.Thread.Sleep(10);
             }*/
             // end
-            //Console.WriteLine("NRooms: " + dun.RoomList.Count);
+            //Console.WriteLine("NRooms: " + dun.Rooms.Count);
             //Console.WriteLine("OpenList: "+openList.Count + "  Closed List:"+ closedList.Count);
             return neededLocks;
         }

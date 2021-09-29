@@ -38,9 +38,9 @@ namespace LevelGenerator
                 ind1 = _parent1.dungeon.Clone();
                 ind2 = _parent2.dungeon.Clone();
                 //Get a random node from the parent, find the number of keys, locks and rooms and add it to the list of future failed rooms
-                (int, int) range = (1, ind2.RoomList.Count - 1);
+                (int, int) range = (1, ind1.Rooms.Count - 1);
                 int index = Common.RandomInt(range, ref _rand);
-                roomCut1 = ind1.RoomList[index];
+                roomCut1 = ind1.Rooms[index];
                 FindNKLR(ref nRooms1, ref specialRooms1, roomCut1);
                 failedRooms = new List<Room>();
 
@@ -51,12 +51,12 @@ namespace LevelGenerator
                 {
                     do
                     {
-                        range = (1, ind2.RoomList.Count - 1);
+                        range = (1, ind2.Rooms.Count - 1);
                         index = Common.RandomInt(range, ref _rand);
-                        roomCut2 = ind2.RoomList[index];
+                        roomCut2 = ind2.Rooms[index];
                     } while (failedRooms.Contains(roomCut2));
                     failedRooms.Add(roomCut2);
-                    if (failedRooms.Count == ind2.RoomList.Count - 1)
+                    if (failedRooms.Count == ind2.Rooms.Count - 1)
                         isImpossible = true;
                     FindNKLR(ref nRooms2, ref specialRooms2, roomCut2);
                 } while ((specialRooms2.Count > nRooms1 || specialRooms1.Count > nRooms2) && !isImpossible);
@@ -114,8 +114,8 @@ namespace LevelGenerator
                 roomCut2.FixBranch(specialRooms1, ref _rand);
                 roomCut1.FixBranch(specialRooms2, ref _rand);
                 // Fix the list of rooms
-                ind1.FixRoomList();
-                ind2.FixRoomList();
+                ind1.FixRooms();
+                ind2.FixRooms();
             }
 
             individuals[0] = new Individual(ind1);

@@ -9,7 +9,7 @@ namespace LevelGenerator
     {
         public static readonly float PROB_HAS_CHILD = 100f;
         public static readonly float PROB_CHILD = 100f / 3;
-        public static readonly int MAX_DEPTH = 10;
+        public static readonly int MAX_DEPTH = 5;
 
         /// The number of keys.
         public int keys;
@@ -32,7 +32,7 @@ namespace LevelGenerator
         // - Why they need to be visited?
         public Queue toVisit;
 
-        public List<Room> RoomList { get => rooms; }
+        public List<Room> Rooms { get => rooms; }
         public float AvgChildren { get => avgChildren; set => avgChildren = value; }
 
         public Dungeon()
@@ -40,7 +40,7 @@ namespace LevelGenerator
             toVisit = new Queue();
             rooms = new List<Room>();
             Room root = RoomFactory.CreateRoot();
-            RoomList.Add(root);
+            Rooms.Add(root);
             toVisit.Enqueue(root);
             grid = new RoomGrid();
             grid[root.X, root.Y] = root;
@@ -98,7 +98,7 @@ namespace LevelGenerator
             avgChildren = 0.0f;
             int childCount;
             int childLess = 0;
-            foreach (Room room in RoomList)
+            foreach (Room room in Rooms)
             {
                 childCount = 0;
                 if (room.RightChild != null && room.RightChild.Parent != null)
@@ -111,7 +111,7 @@ namespace LevelGenerator
                     childLess++;
                 avgChildren += childCount;
             }
-            avgChildren = avgChildren / (RoomList.Count - childLess);
+            avgChildren = avgChildren / (Rooms.Count - childLess);
         }
 
         /*
@@ -131,7 +131,7 @@ namespace LevelGenerator
                 actualRoom.InsertChild(dir, ref child, ref grid);
                 child.ParentDirection = dir;
                 toVisit.Enqueue(child);
-                RoomList.Add(child);
+                Rooms.Add(child);
                 grid[child.X, child.Y] = child;
             }
         }
@@ -273,7 +273,7 @@ namespace LevelGenerator
         /*
          * Recreates the room list by visiting all the rooms in the tree and adding them to the list while also counting the number of locks and keys
          **/
-        public void FixRoomList()
+        public void FixRooms()
         {
             Queue<Room> toVisit = new Queue<Room>();
             toVisit.Enqueue(rooms[0]);

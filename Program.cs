@@ -54,22 +54,18 @@ namespace LevelGenerator
                 Console.WriteLine("ERROR: Invalid number of parameters!");
                 System.Environment.Exit(ERROR_BAD_ARGUMENTS);
             }
-            // Has the separately save flag been entered?
-            bool separately = _args[0] == SAVE_SEPARATELY;
-            // If so, then the evolutionary parameters are the next
-            int i = separately ? 1 : 0;
             // Define the evolutionary parameters
             Parameters prs = new Parameters(
-                int.Parse(_args[i++]), // Random seed
-                int.Parse(_args[i++]), // Number of generations
-                int.Parse(_args[i++]), // Initial population size
-                int.Parse(_args[i++]), // Mutation chance
-                int.Parse(_args[i++]), // Crossover chance
-                int.Parse(_args[i])    // Number of tournament competitors
+                int.Parse(_args[0]), // Random seed
+                int.Parse(_args[1]), // Number of generations
+                int.Parse(_args[2]), // Initial population size
+                int.Parse(_args[3]), // Mutation chance
+                int.Parse(_args[4]), // Crossover chance
+                int.Parse(_args[5])  // Number of tournament competitors
             );
             // Ensure the population size is enough for the tournament
             Debug.Assert(
-                prs.competitors >= prs.population,
+                prs.population >= prs.competitors,
                 TOO_MUCH_COMPETITORS
             );
             // Ensure the number of competitors is valid

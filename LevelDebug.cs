@@ -15,7 +15,7 @@ namespace LevelGenerator
             string _indent
         ) {
             // Get tree root
-            Room root = _dungeon.RoomList[0];
+            Room root = _dungeon.Rooms[0];
             // This list holds lists of nodes children
             List<List<Room>> stacks = new List<List<Room>>();
             // Add the root in the list of stacks
@@ -84,7 +84,7 @@ namespace LevelGenerator
             List<int> locks = new List<int>();
 
             // Calculate the grid bounds and get the level keys and locked doors
-            foreach (Room room in _dungeon.RoomList)
+            foreach (Room room in _dungeon.Rooms)
             {
                 // Update grid bounds
                 minX = minX > room.X ? room.X : minX;

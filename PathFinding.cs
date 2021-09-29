@@ -157,7 +157,7 @@ namespace LevelGenerator
         // Initiate the path finding setting map, sizes, rooms and filling the grid
         private void initiatePathFinding()
         {
-            foreach (Room room in dun.RoomList)
+            foreach (Room room in dun.Rooms)
             {
                 if (room.RoomType == RoomType.key)
                     keys.Add(room.KeyToOpen);

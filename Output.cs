@@ -93,7 +93,7 @@ namespace LevelGenerator
             List<int> locks = new List<int>();
 
             // Calculate the grid bounds and get the level keys and locked doors
-            foreach (Room room in dungeon.RoomList)
+            foreach (Room room in dungeon.Rooms)
             {
                 // Update grid bounds
                 minX = minX > room.X ? room.X : minX;
