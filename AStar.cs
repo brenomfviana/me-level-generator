@@ -96,7 +96,7 @@ namespace LevelGenerator
             {
                 for (int j = 0; j < 2*sizeY; ++j)
                 {
-                    map[i, j] = 101;
+                    map[i, j] = (int) Common.RoomCode.E;
                 }
             }
             //Fill the new grid
@@ -115,7 +115,7 @@ namespace LevelGenerator
                         //0 is a NORMAL ROOM
                         if (type == RoomType.Normal)
                         {
-                            map[iPositive * 2, jPositive * 2] = 0;
+                            map[iPositive * 2, jPositive * 2] = (int) Common.RoomCode.N;
                         }
                         //The sequential, positivie index of the key is its representation
                         else if (type == RoomType.Key)
@@ -127,11 +127,11 @@ namespace LevelGenerator
                         {
                             if (lockedRooms.IndexOf(actualRoom.key) == lockedRooms.Count -1)
                             {
-                                map[iPositive * 2, jPositive * 2] = 102;
+                                map[iPositive * 2, jPositive * 2] = (int) Common.RoomCode.B;
                                 target = new Location { x = iPositive * 2, y = jPositive * 2 };
                             }
                             else
-                                map[iPositive * 2, jPositive * 2] = 0;
+                                map[iPositive * 2, jPositive * 2] = (int) Common.RoomCode.N;
                         }
                         else
                         {
@@ -152,7 +152,7 @@ namespace LevelGenerator
                             }
                             //If the connection is open, 100 represents a normal corridor
                             else
-                                map[x, y] = 100;
+                                map[x, y] = (int) Common.RoomCode.C;
                         }
                     }
                 }
@@ -173,7 +173,7 @@ namespace LevelGenerator
                 var lowest = openList.Min(l => l.F);
                 current = openList.First(l => l.F == lowest);
                 //if the current is a key, change the locked door status in the map
-                if (map[current.x, current.y] > 0 && map[current.x, current.y] < 100)
+                if (map[current.x, current.y] > 0 && map[current.x, current.y] < (int) Common.RoomCode.C)
                 {
                     //If there is still a lock to be open (there may be more keys than locks in the level, so the verification is necessary) find its location and check if the key to open it is the one found
                     if (locksLocation.Count > 0)
@@ -183,7 +183,7 @@ namespace LevelGenerator
                             //If the key we found is the one that open the room we are checking now, change the lock to an open corridor and update the algorithm's knowledge
                             if (map[room.x, room.y] == -map[current.x, current.y])
                             {
-                                map[room.x, room.y] = 100;
+                                map[room.x, room.y] = (int) Common.RoomCode.C;
                                 //remove the lock from the unopenned locks location list
                                 locksLocation.Remove(room);
                                 //Check if the parent room of the locked room was already closed by the algorithm (if it was in the closed list)
@@ -303,7 +303,7 @@ namespace LevelGenerator
             if (x < (2 * sizeX)-1)
                 proposedLocations.Add(new Location { x = x + 1, y = y });
 
-            return proposedLocations.Where(l => (map[l.x,l.y] >= 0 && map[l.x,l.y] != 101)).ToList();
+            return proposedLocations.Where(l => (map[l.x,l.y] >= (int) Common.RoomCode.C && map[l.x,l.y] != (int) Common.RoomCode.E)).ToList();
         }
 
         //Compute the heuristic score, in this case, a Manhattan Distance

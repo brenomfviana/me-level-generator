@@ -24,8 +24,11 @@ namespace LevelGenerator
 
                 // add the current square to the closed list
                 ClosedList.Add(current);
-                if (((map[current.x, current.y] >= 0) && (map[current.x, current.y] < 100)) || (map[current.x, current.y] == 102))
-                {
+                if (
+                    ((map[current.x, current.y] >= (int) Common.RoomCode.N) &&
+                    (map[current.x, current.y] < (int) Common.RoomCode.C)) ||
+                    (map[current.x, current.y] == (int) Common.RoomCode.B)
+                ) {
                     //Console.SetCursorPosition(0, 15+auxoffset);
                     //auxoffset += 1;
                     NVisitedRooms++;
