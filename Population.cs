@@ -116,12 +116,10 @@ namespace LevelGenerator
                     log += "" + k + "-";
                     log += "" + l;
                     Console.WriteLine(log);
-                    // Print "Empty" if the Elite is null
                     if (map[k, l] is null)
                     {
                         Console.WriteLine(LevelDebug.INDENT + "Empty");
                     }
-                    // Print the Elite's attributes
                     else
                     {
                         map[k, l].Debug();

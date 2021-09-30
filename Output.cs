@@ -96,17 +96,17 @@ namespace LevelGenerator
             foreach (Room room in dungeon.Rooms)
             {
                 // Update grid bounds
-                minX = minX > room.X ? room.X : minX;
-                minY = minY > room.Y ? room.Y : minY;
-                maxX = room.X > maxX ? room.X : maxX;
-                maxY = room.Y > maxY ? room.Y : maxY;
+                minX = minX > room.x ? room.x : minX;
+                minY = minY > room.y ? room.y : minY;
+                maxX = room.x > maxX ? room.x : maxX;
+                maxY = room.y > maxY ? room.y : maxY;
                 // Add the keys and locked doors in the level
-                if (room.RoomType == RoomType.key) {
-                    keys.Add(room.KeyToOpen);
+                if (room.type == RoomType.Key) {
+                    keys.Add(room.key);
                 }
-                if (room.RoomType == RoomType.locked)
+                if (room.type == RoomType.Locked)
                 {
-                    locks.Add(room.KeyToOpen);
+                    locks.Add(room.key);
                 }
             }
 
@@ -135,34 +135,34 @@ namespace LevelGenerator
                     Room current = grid[i, j];
                     if (current != null)
                     {
-                        if (current.RoomType == RoomType.normal)
+                        if (current.type == RoomType.Normal)
                         {
                             map[iep, jep] = (int) Common.RoomCode.N;
                         }
-                        else if (current.RoomType == RoomType.key)
+                        else if (current.type == RoomType.Key)
                         {
-                            int _key = keys.IndexOf(current.KeyToOpen);
+                            int _key = keys.IndexOf(current.key);
                             map[iep, jep] = _key + 1;
                         }
-                        else if (current.RoomType == RoomType.locked)
+                        else if (current.type == RoomType.Locked)
                         {
-                            int _lock = locks.IndexOf(current.KeyToOpen);
+                            int _lock = locks.IndexOf(current.key);
                             map[iep, jep] = _lock == locks.Count - 1 ?
                                 (int) Common.RoomCode.B :
                                 (int) Common.RoomCode.N;
                         }
                         // Get current room parent
-                        Room parent = current.Parent;
+                        Room parent = current.parent;
                         if (parent != null)
                         {
                             // Get the corridor between both rooms
-                            int x = parent.X - current.X + iep;
-                            int y = parent.Y - current.Y + jep;
+                            int x = parent.x - current.x + iep;
+                            int y = parent.y - current.y + jep;
                             // If the current room is locked
-                            if (current.RoomType == RoomType.locked)
+                            if (current.type == RoomType.Locked)
                             {
                                 // Then, the corridor is locked
-                                int _key = keys.IndexOf(current.KeyToOpen);
+                                int _key = keys.IndexOf(current.key);
                                 map[x, y] = -(_key + 1);
                             }
                             else

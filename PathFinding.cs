@@ -64,21 +64,21 @@ namespace LevelGenerator
         {
             var proposedLocations = new List<Location>();
             if (y > 0)
-                proposedLocations.Add(new Location { X = x, Y = y - 1 });
+                proposedLocations.Add(new Location { x = x, y = y - 1 });
             if (y < (2 * sizeY) - 1)
-                proposedLocations.Add(new Location { X = x, Y = y + 1 });
+                proposedLocations.Add(new Location { x = x, y = y + 1 });
             if (x > 0)
-                proposedLocations.Add(new Location { X = x - 1, Y = y });
+                proposedLocations.Add(new Location { x = x - 1, y = y });
             if (x < (2 * sizeX) - 1)
-                proposedLocations.Add(new Location { X = x + 1, Y = y });
+                proposedLocations.Add(new Location { x = x + 1, y = y });
 
-            return proposedLocations.Where(l => (map[l.X, l.Y] >= 0 && map[l.X, l.Y] != 101)).ToList();
+            return proposedLocations.Where(l => (map[l.x, l.y] >= 0 && map[l.x, l.y] != 101)).ToList();
         }
 
         // Check if current location is a key room and...
         public void validateKeyRoom(Location current)
         {
-            if (map[current.X, current.Y] > 0 && map[current.X, current.Y] < 100)
+            if (map[current.x, current.y] > 0 && map[current.x, current.y] < 100)
             {
                 //If there is still a lock to be open (there may be more keys than locks in the level, so the verification is necessary) find its location and check if the key to open it is the one found
                 if (locksLocation.Count > 0)
@@ -86,16 +86,16 @@ namespace LevelGenerator
                     foreach (var room in locksLocation)
                     {
                         //If the key we found is the one that open the room we are checking now, change the lock to an open corridor and update the algorithm's knowledge
-                        if (map[room.X, room.Y] == -map[current.X, current.Y])
+                        if (map[room.x, room.y] == -map[current.x, current.y])
                         {
-                            map[room.X, room.Y] = 100;
+                            map[room.x, room.y] = 100;
                             //remove the lock from the unopenned locks location list
                             locksLocation.Remove(room);
                             //Check if the parent room of the locked room was already closed by the algorithm (if it was in the closed list)
                             foreach (var closedRoom in ClosedList)
                             {
                                 //If it was already closed, reopen it. Remove from the closed list and add to the open list
-                                if (closedRoom.X == room.Parent.X && closedRoom.Y == room.Parent.Y)
+                                if (closedRoom.x == room.Parent.x && closedRoom.y == room.Parent.y)
                                 {
                                     ClosedList.Remove(closedRoom);
                                     nVisitedRooms--;
@@ -106,7 +106,7 @@ namespace LevelGenerator
                                     //If the closed room was a locked one, also remove one of the needed locks, as it is now reopen and will be revisited
                                     foreach (var locked in allLocksLocation)
                                     {
-                                        if (locked.X == closedRoom.X && locked.Y == closedRoom.Y)
+                                        if (locked.x == closedRoom.x && locked.y == closedRoom.y)
                                         {
                                             neededLocks--;
                                             break;
@@ -129,12 +129,12 @@ namespace LevelGenerator
             foreach (var p in path)
             {
                 Console.SetCursorPosition(58, i++);
-                Console.WriteLine(p.Y.ToString() + ", " + p.X.ToString());
+                Console.WriteLine(p.y.ToString() + ", " + p.x.ToString());
 
                 // show current square on the map
-                Console.SetCursorPosition(p.Y, p.X + 20);
+                Console.SetCursorPosition(p.y, p.x + 20);
                 Console.Write('.');
-                Console.SetCursorPosition(p.Y, p.X + 20);
+                Console.SetCursorPosition(p.y, p.x + 20);
                 System.Threading.Thread.Sleep(time);
             }
             Console.SetCursorPosition(0, 40);
@@ -145,9 +145,9 @@ namespace LevelGenerator
         {
             while (current != null)
             {
-                Console.SetCursorPosition(current.Y + 20, current.X + 20);
+                Console.SetCursorPosition(current.y + 20, current.x + 20);
                 Console.Write('_');
-                Console.SetCursorPosition(current.Y + 20, current.X + 20);
+                Console.SetCursorPosition(current.y + 20, current.x + 20);
                 current = current.Parent;
                 System.Threading.Thread.Sleep(time);
             }
@@ -159,23 +159,23 @@ namespace LevelGenerator
         {
             foreach (Room room in dun.Rooms)
             {
-                if (room.RoomType == RoomType.key)
-                    keys.Add(room.KeyToOpen);
-                if (room.RoomType == RoomType.locked)
-                    lockedRooms.Add(room.KeyToOpen);
+                if (room.type == RoomType.Key)
+                    keys.Add(room.key);
+                if (room.type == RoomType.Locked)
+                    lockedRooms.Add(room.key);
 
-                if (room.X < minX)
-                    minX = room.X;
-                if (room.Y < minY)
-                    minY = room.Y;
-                if (room.X > maxX)
-                    maxX = room.X;
-                if (room.Y > maxY)
-                    maxY = room.Y;
+                if (room.x < minX)
+                    minX = room.x;
+                if (room.y < minY)
+                    minY = room.y;
+                if (room.x > maxX)
+                    maxX = room.x;
+                if (room.y > maxY)
+                    maxY = room.y;
             }
 
             //The starting location is room (0,0)
-            start = new Location { X = -2 * minX, Y = -2 * minY };
+            start = new Location { x = -2 * minX, y = -2 * minY };
             //Size of the new grid
             sizeX = maxX - minX + 1;
             sizeY = maxY - minY + 1;
@@ -201,24 +201,24 @@ namespace LevelGenerator
                     //If the position has a room, check its type and fill the grid accordingly
                     if (actualRoom != null)
                     {
-                        type = actualRoom.RoomType;
+                        type = actualRoom.type;
                         //0 is a NORMAL ROOM
-                        if (type == RoomType.normal)
+                        if (type == RoomType.Normal)
                         {
                             map[iPositive * 2, jPositive * 2] = 0;
                         }
                         //The sequential, positivie index of the key is its representation
-                        else if (type == RoomType.key)
+                        else if (type == RoomType.Key)
                         {
-                            map[iPositive * 2, jPositive * 2] = keys.IndexOf(actualRoom.KeyToOpen) + 1;
+                            map[iPositive * 2, jPositive * 2] = keys.IndexOf(actualRoom.key) + 1;
                         }
                         //If the room is locked, the room is a normal room, only the corridor is locked. But is the lock is the last one in the sequential order, than the room is the objective
-                        else if (type == RoomType.locked)
+                        else if (type == RoomType.Locked)
                         {
-                            if (lockedRooms.IndexOf(actualRoom.KeyToOpen) == lockedRooms.Count - 1)
+                            if (lockedRooms.IndexOf(actualRoom.key) == lockedRooms.Count - 1)
                             {
                                 map[iPositive * 2, jPositive * 2] = 102;
-                                target = new Location { X = iPositive * 2, Y = jPositive * 2 };
+                                target = new Location { x = iPositive * 2, y = jPositive * 2 };
                             }
                             else
                                 map[iPositive * 2, jPositive * 2] = 0;
@@ -228,17 +228,17 @@ namespace LevelGenerator
                             Console.WriteLine("Something went wrong printing the tree!\n");
                             Console.WriteLine("This Room type does not exist!\n\n");
                         }
-                        parent = actualRoom.Parent;
+                        parent = actualRoom.parent;
                         //If the actual room is a locked room and has a parent, then the connection between then is locked and is represented by the negative value of the index of the key that opens the lock
                         if (parent != null)
                         {
 
-                            x = parent.X - actualRoom.X + 2 * iPositive;
-                            y = parent.Y - actualRoom.Y + 2 * jPositive;
-                            if (type == RoomType.locked)
+                            x = parent.x - actualRoom.x + 2 * iPositive;
+                            y = parent.y - actualRoom.y + 2 * jPositive;
+                            if (type == RoomType.Locked)
                             {
-                                locksLocation.Add(new Location { X = x, Y = y, Parent = new Location { X = 2 * (parent.X - actualRoom.X) + 2 * iPositive, Y = 2 * (parent.Y - actualRoom.Y) + 2 * jPositive } });
-                                int test = keys.IndexOf(actualRoom.KeyToOpen);
+                                locksLocation.Add(new Location { x = x, y = y, Parent = new Location { x = 2 * (parent.x - actualRoom.x) + 2 * iPositive, y = 2 * (parent.y - actualRoom.y) + 2 * jPositive } });
+                                int test = keys.IndexOf(actualRoom.key);
                                 if (test == -1)
                                 {
                                     System.Console.WriteLine("There's a missing key here! What????");
@@ -246,7 +246,7 @@ namespace LevelGenerator
                                     map[x, y] = 100;
                                 }
                                 else
-                                    map[x, y] = -(keys.IndexOf(actualRoom.KeyToOpen) + 1);
+                                    map[x, y] = -(keys.IndexOf(actualRoom.key) + 1);
                             }
                             //If the connection is open, 100 represents a normal corridor
                             else

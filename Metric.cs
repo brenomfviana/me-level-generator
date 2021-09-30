@@ -30,9 +30,9 @@ namespace LevelGenerator
             {
                 Room current = toVisit.Dequeue();
                 Room[] nexts = new Room[] {
-                    current.LeftChild,
-                    current.BottomChild,
-                    current.RightChild
+                    current.left,
+                    current.bottom,
+                    current.right
                 };
                 int c = 0;
                 foreach (Room next in nexts)
@@ -43,7 +43,7 @@ namespace LevelGenerator
                         toVisit.Enqueue(next);
                     }
                 }
-                if (current.Parent != null)
+                if (current.parent != null)
                 {
                     c++;
                 }

@@ -70,27 +70,27 @@ namespace LevelGenerator
                     //Change the parent of each node
                     Room auxRoom;
                     //Changes the parents of the chosen nodes
-                    auxRoom = roomCut1.Parent;
-                    roomCut1.Parent = roomCut2.Parent;
-                    roomCut2.Parent = auxRoom;
+                    auxRoom = roomCut1.parent;
+                    roomCut1.parent = roomCut2.parent;
+                    roomCut2.parent = auxRoom;
 
                     //Remove the node and their children from the grid of the old dungeon
                     ind1.RemoveFromGrid(roomCut1);
                     ind2.RemoveFromGrid(roomCut2);
 
                     //Update the position, parent's direction and rotation of both nodes that are switched
-                    int x = roomCut1.X;
-                    int y = roomCut1.Y;
-                    Common.Direction dir = roomCut1.ParentDirection;
-                    int rotation = roomCut1.Rotation;
-                    roomCut1.X = roomCut2.X;
-                    roomCut1.Y = roomCut2.Y;
-                    roomCut1.ParentDirection = roomCut2.ParentDirection;
-                    roomCut1.Rotation = roomCut2.Rotation;
-                    roomCut2.X = x;
-                    roomCut2.Y = y;
-                    roomCut2.ParentDirection = dir;
-                    roomCut2.Rotation = rotation;
+                    int x = roomCut1.x;
+                    int y = roomCut1.y;
+                    Common.Direction dir = roomCut1.parentDirection;
+                    int rotation = roomCut1.rotation;
+                    roomCut1.x = roomCut2.x;
+                    roomCut1.y = roomCut2.y;
+                    roomCut1.parentDirection = roomCut2.parentDirection;
+                    roomCut1.rotation = roomCut2.rotation;
+                    roomCut2.x = x;
+                    roomCut2.y = y;
+                    roomCut2.parentDirection = dir;
+                    roomCut2.rotation = rotation;
 
                     //Updates the grid with all the new nodes. If any conflicts arise, handle them as in the child creation.
                     //That is, any overlap will make the node and its children cease to exist
@@ -143,34 +143,34 @@ namespace LevelGenerator
                 _nRooms++;
                 Room actualRoom = toVisit.Dequeue() as Room;
                 RoomType type;
-                type = actualRoom.RoomType;
-                if (type == RoomType.key)
+                type = actualRoom.type;
+                if (type == RoomType.Key)
                 {
                     if(_specialRooms.Count > 0)
                     {
-                        int lockIndex = _specialRooms.IndexOf(-actualRoom.KeyToOpen);
+                        int lockIndex = _specialRooms.IndexOf(-actualRoom.key);
                         if (lockIndex != -1)
                         {
-                            _specialRooms.Insert(lockIndex, actualRoom.KeyToOpen);
+                            _specialRooms.Insert(lockIndex, actualRoom.key);
                         }
                         else
                         {
-                            _specialRooms.Add(actualRoom.KeyToOpen);
+                            _specialRooms.Add(actualRoom.key);
                         }
                     }
                     else
                     {
-                        _specialRooms.Add(actualRoom.KeyToOpen);
+                        _specialRooms.Add(actualRoom.key);
                     }
                 }
-                else if (type == RoomType.locked)
+                else if (type == RoomType.Locked)
                 {
-                    _specialRooms.Add(-actualRoom.KeyToOpen);
+                    _specialRooms.Add(-actualRoom.key);
                 }
                 Room[] rooms = new Room[] {
-                    actualRoom.LeftChild,
-                    actualRoom.BottomChild,
-                    actualRoom.RightChild
+                    actualRoom.left,
+                    actualRoom.bottom,
+                    actualRoom.right
                 };
                 foreach (Room room in rooms)
                 {
@@ -190,20 +190,20 @@ namespace LevelGenerator
         ) {
             // No room involved in this operation can be null
             Debug.Assert(
-                _room1 != null && _room2 != null && _room1.Parent != null,
+                _room1 != null && _room2 != null && _room1.parent != null,
                 "There is something wrong with the dungeon representation."
             );
             // Set `_room2` as a child of the parent of `_room1`
-            switch (_room1.ParentDirection)
+            switch (_room1.parentDirection)
             {
-                case Common.Direction.Right:
-                    _room1.Parent.RightChild = _room2;
+                case Common.Direction.Left:
+                    _room1.parent.left = _room2;
                     break;
                 case Common.Direction.Down:
-                    _room1.Parent.BottomChild = _room2;
+                    _room1.parent.bottom = _room2;
                     break;
-                case Common.Direction.Left:
-                    _room1.Parent.LeftChild = _room2;
+                case Common.Direction.Right:
+                    _room1.parent.right = _room2;
                     break;
             }
         }

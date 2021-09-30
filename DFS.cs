@@ -24,7 +24,7 @@ namespace LevelGenerator
 
                 // add the current square to the closed list
                 ClosedList.Add(current);
-                if (((map[current.X, current.Y] >= 0) && (map[current.X, current.Y] < 100)) || (map[current.X, current.Y] == 102))
+                if (((map[current.x, current.y] >= 0) && (map[current.x, current.y] < 100)) || (map[current.x, current.y] == 102))
                 {
                     //Console.SetCursorPosition(0, 15+auxoffset);
                     //auxoffset += 1;
@@ -34,7 +34,7 @@ namespace LevelGenerator
                 //Check if the actual room is a locked one. If it is, add 1 to the number of locks needed to reach the goal
                 foreach (var locked in allLocksLocation)
                 {
-                    if (locked.X == current.X && locked.Y == current.Y)
+                    if (locked.x == current.x && locked.y == current.y)
                     {
                         //Console.WriteLine("NEED A LOCK");
                         NeededLocks++;
@@ -42,9 +42,9 @@ namespace LevelGenerator
                     }
                 }
                 // show current square on the map
-                /*Console.SetCursorPosition(60+current.Y, current.X);
+                /*Console.SetCursorPosition(60+current.y, current.x);
                 Console.Write('.');
-                Console.SetCursorPosition(60+current.Y, current.X);
+                Console.SetCursorPosition(60+current.y, current.x);
                 System.Threading.Thread.Sleep(2);*/
 
                 // remove it from the open list
@@ -52,10 +52,10 @@ namespace LevelGenerator
 
                 // if we added the destination to the closed list, we've found a path
                 if (ClosedList.Count > 0)
-                    if(ClosedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null)
+                    if(ClosedList.FirstOrDefault(l => l.x == target.x && l.y == target.y) != null)
                         break;
 
-                var adjacentSquares = GetWalkableAdjacentSquares(current.X, current.Y, sizeX, sizeY, map);
+                var adjacentSquares = GetWalkableAdjacentSquares(current.x, current.y, sizeX, sizeY, map);
 
                 int value = _rand.Next();
                 adjacentSquares = adjacentSquares.OrderBy(X => value).ToList();
@@ -73,13 +73,13 @@ namespace LevelGenerator
                 foreach (var adjacentSquare in adjacentSquares)
                 {
                     // if this adjacent square is already in the closed list, ignore it
-                    if (ClosedList.FirstOrDefault(l => l.X == adjacentSquare.X
-                            && l.Y == adjacentSquare.Y) != null)
+                    if (ClosedList.FirstOrDefault(l => l.x == adjacentSquare.x
+                            && l.y == adjacentSquare.y) != null)
                         continue;
 
                     // if it's not in the open list...
-                    if (openList.FirstOrDefault(l => l.X == adjacentSquare.X
-                            && l.Y == adjacentSquare.Y) is null)
+                    if (openList.FirstOrDefault(l => l.x == adjacentSquare.x
+                            && l.y == adjacentSquare.y) is null)
                     {
                         adjacentSquare.Parent = current;
 
@@ -96,9 +96,9 @@ namespace LevelGenerator
 
             /*while (current != null)
             {
-                Console.SetCursorPosition(60+current.Y + 20, current.X);
+                Console.SetCursorPosition(60+current.y + 20, current.x);
                 Console.Write('_');
-                Console.SetCursorPosition(60+current.Y + 20, current.X);
+                Console.SetCursorPosition(60+current.y + 20, current.x);
                 current = current.Parent;
                 System.Threading.Thread.Sleep(2);
             }*/

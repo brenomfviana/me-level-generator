@@ -41,10 +41,6 @@ namespace LevelGenerator
         public static Room CreateRoom(
             ref Random _rand
         ) {
-            // Choose a random probability for the type of room to be created
-            int prob = Common.RandomPercent(ref _rand);
-            // Initialize the new room
-            Room room = null;
             // Probability penalty for levels with exceding number of locks
             float penalty = 0.0f;
             // The more keys without locks higher the chances to create a lock
@@ -52,7 +48,9 @@ namespace LevelGenerator
             {
                 penalty = availableKeys.Count * 0.1f;
             }
-            // Check the probability and create the respective type of room
+            // Create a random room
+            Room room = null;
+            int prob = Common.RandomPercent(ref _rand);
             if (PROB_NORMAL_ROOM - penalty > prob)
             {
                 // Create a normal room
@@ -63,20 +61,17 @@ namespace LevelGenerator
                 // created, else, the lock room is turned into a key room
                 availableKeys.Count == 0
             ) {
-                // Create a room with a key
-                room = new Room(RoomType.key);
-                // Add the room ID to the list of available keys
-                availableKeys.Add(room.RoomId);
+                // Create a room with a key with room ID
+                room = new Room(RoomType.Key);
+                availableKeys.Add(room.id);
             }
             else
             {
-                // Get the key ID that open the lock
+                // Create a locked room with the key ID that open the lock
                 int key = availableKeys[0];
                 availableKeys.RemoveAt(0);
-                // Create a locked room
-                room = new Room(RoomType.locked, key);
-                // Add the key ID that opens the created locked room
-                usedKeys.Add(room.RoomId);
+                room = new Room(RoomType.Locked, key);
+                usedKeys.Add(room.id);
             }
             return room;
         }

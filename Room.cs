@@ -3,506 +3,303 @@ using System.Collections.Generic;
 
 namespace LevelGenerator
 {
-    /*
-     * The three types a room can have
-     * Key is a room containing a key
-     * Locker is a room that has a lock
-     */
-    public enum RoomType{
-        normal = 1 << 0,
-        key = 1 << 1,
-        locked = 1 << 2
+    /// The types of rooms that a dungeon may have.
+    ///
+    /// A normal room is a free access room that does not contain items.
+    /// A key room is a free access room that contains a key.
+    /// A locked room is a room that requires a key to be accessed by a player.
+    public enum RoomType
+    {
+        Normal = 0, // Normal room
+        Key = 1,    // Room with a key
+        Locked = 2, // Locked room
     };
 
+    /// This class represents a room of a dungeon.
     public class Room
     {
+        /// Counter of IDs (a sequential identifier) of rooms.
         private static int ID = 0;
 
-        public static int getNextId()
+        /// Calculate and return the next room ID.
+        public static int GetNextId()
         {
             return ID++;
         }
 
-        //Room's children
-        private Room leftChild = null;
-        private Room rightChild = null;
-        private Room bottomChild = null;
+        /// 90 degree rotation.
+        private static readonly int DEGREE_90 = 90;
+        /// 360 degree rotation.
+        private static readonly int DEGREE_360 = 360;
 
-        private int roomId; //Id of the node based on the sequential identifier
-        private int keyToOpen = -1;
-        private RoomType type; //Type of the room
+        /// The room ID.
+        public int id = -1;
+        /// The type of the room.
+        public RoomType type = RoomType.Normal;
+        /// The ID of the key that opens this room. The ID is equal to -1 when
+        /// the room is not locked).
+        public int key = -1;
+        /// The depth of the room in the tree. This is used to control the
+        /// depth of the dungeon level.
+        public int depth = 0;
+        /// The x position of the room in the grid.
+        public int x = 0;
+        /// The y position of the room in the grid.
+        public int y = 0;
+        /// The rotation of the individual's parent position is related to the
+        /// normal cartesian orientation. 0 means that the parent is in the
+        /// North (above) of the child, 90 the parent is in the East (right),
+        /// and so on. This is used to build the dungeon grid.
+        public int rotation = 0;
 
-        private int x = 0;
-        private int y = 0;
-        private int depth = 0;
-        //Rotation of the individual's parent position related to the normal cartesian orientation
-        //(with 0 meaning the parent is in the North of the child (Above), 90 being in the East (Right) and so on)
-        //Will be later used to construct the grid of the room
-        private int rotation = 0;
+        /// The room's left child.
+        public Room left = null;
+        /// The room's bottom child.
+        public Room bottom = null;
+        /// The room's right child.
+        public Room right = null;
+        /// The room's parent.
+        public Room parent = null;
+        /// The direction from what the parent connects with this room.
+        /// This attribute reduces operations at crossover.
+        public Common.Direction parentDirection = Common.Direction.Down;
 
-        private Room parent = null;
-        //Saves the direction of the parent (if it is right, bottom or left child)
-        //Reduces operations at crossover
-        private Common.Direction parentDirection = Common.Direction.Down;
-
-        /*
-         * Room constructor. The default is a normal room, without a lock so, without a key to open
-         * and without a predefined id
-         * If a key room defines the key to open as its id, and if a locked one, uses the id of the room which has the key that opens it
-         *
-         */
-        public Room(RoomType roomType = RoomType.normal, int keyToOpen = -1, int id = -1)
+        public int Depth
         {
-            if (id == -1)
-                RoomId = Room.getNextId();
-            else
-                RoomId = id;
-            RoomType = roomType;
-            if (RoomType == RoomType.key)
-                this.KeyToOpen = roomId;
-            else if (RoomType == RoomType.locked)
-                this.KeyToOpen = keyToOpen;
+            get => depth;
         }
 
-        /*
-         * Makes a deep copy of a room.
-         * The parent, children and neighboors must be replaced for the right ones in the dungeon's copy method
-         */
-        public Room Copy()
-        {
-            Room newRoom = new Room(type, keyToOpen, roomId);
-            newRoom.bottomChild = bottomChild;
-            newRoom.leftChild = leftChild;
-            newRoom.rightChild = rightChild;
-            newRoom.depth = depth;
-            newRoom.parent = parent;
-            newRoom.parentDirection = parentDirection;
-            newRoom.rotation = rotation;
-            newRoom.x = x;
-            newRoom.y = y;
-
-            return newRoom;
-        }
-
-        //Fix the newly inserted branch by reinserting in it the special rooms that were in the old branch while maintaining their order of appearence to guarantee the feasibility
-        public void FixBranch(
-            List<int> specialRooms,
-            ref Random rand
+        /// Room constructor.
+        ///
+        /// The default is a normal room without a predefined room ID. The key
+        /// room defines its key to open as its room ID. The locked room
+        /// defines its key to open as the entered key to open.
+        public Room(
+            RoomType _type = RoomType.Normal,
+            int _key = -1,
+            int _id = -1
         ) {
-            Queue<Room> toVisit = new Queue<Room>();
-            Queue<Room> visited = new Queue<Room>();
-            Queue<int> newSpecialRooms = new Queue<int>();
-            int specialId;
-            Room actualRoom;
-            Room child;
-            //The actual room is the root of the branch
-            actualRoom = this;
-            toVisit.Enqueue(actualRoom);
-            //System.Console.WriteLine("Start Conversion");
-            //If both lock and keys are in the branch, give them new ids also, add all the special rooms in the new special rooms list
-            for(int i = 0; i < specialRooms.Count-1; ++i)
+            type = _type;
+            id = _id == -1 ? Room.GetNextId() : _id;
+            key = type == RoomType.Key ? id : key;
+            key = type == RoomType.Locked ? _key : key;
+        }
+
+        /// Return a clone this room.
+        public Room Clone()
+        {
+            Room room = new Room(type, key, id);
+            room.depth = depth;
+            room.x = x;
+            room.y = y;
+            room.rotation = rotation;
+            room.left = left;
+            room.bottom = bottom;
+            room.right = right;
+            room.parent = parent;
+            room.parentDirection = parentDirection;
+            return room;
+        }
+
+        /// Return a tuple corresponding to the position in the dungeon grid of
+        /// the child of a parent in the entered direction.
+        public (int, int) GetChildPositionInGrid(
+            Common.Direction _dir
+        ) {
+            int cx = 0;
+            int cy = 0;
+            int rot = (rotation / DEGREE_90) % 2;
+            switch (_dir)
             {
-                for(int j = i+1; j < specialRooms.Count; ++j)
-                {
-                    if(specialRooms[i] == -specialRooms[j])
+                case Common.Direction.Right:
+                    if (rot != 0)
                     {
-                        int aux = Room.getNextId();
-                        if (specialRooms[i] > 0)
-                            specialRooms[i] = aux;
-                        else
-                            specialRooms[i] = -aux;
-                        specialRooms[j] = -specialRooms[i];
+                        cx = x;
+                        cy = rotation == DEGREE_90 ? y + 1 : y - 1;
+                    }
+                    else
+                    {
+                        cx = rotation == 0 ? x + 1 : x - 1;
+                        cy = y;
+                    }
+                    break;
+
+                case Common.Direction.Down:
+                    if (rot != 0)
+                    {
+                        cx = rotation == DEGREE_90 ? x + 1 : x - 1;
+                        cy = y;
+                    }
+                    else
+                    {
+                        cx = x;
+                        cy = rotation == 0 ? y - 1 : y + 1;
+                    }
+                    break;
+
+                case Common.Direction.Left:
+                    if (rot != 0)
+                    {
+                        cx = x;
+                        cy = rotation == DEGREE_90 ? y - 1 : y + 1;
+                    }
+                    else
+                    {
+                        cx = rotation == 0 ? x - 1 : x + 1;
+                        cy = y;
+                    }
+                    break;
+            }
+            return (cx, cy);
+        }
+
+        /// Check if a room can have a new child in the entered direction.
+        ///
+        /// Return true if a room can be placed as a child of the entered room
+        /// parent and in the entered position (i.e., the position in the grid
+        /// is empty), and false, otherwise.
+        public bool ValidateChild(
+            Common.Direction _dir,
+            RoomGrid _grid
+        ) {
+            (int x, int y) = GetChildPositionInGrid(_dir);
+            return _grid[x, y] is null;
+        }
+
+        /// Assign the parent of this room.
+        public void SetParent(
+            Room _parent
+        ) {
+            parent = _parent;
+            if (_parent != null)
+            {
+                depth = ++_parent.depth;
+            }
+        }
+
+        /// Insert the entered room in the dungeon (ternary heap and grid).
+        ///
+        /// First, this method calculates both X and Y positions of the entered
+        /// child room based on the parent rotation and coordinates, and on the
+        /// direction of insertion. Then, it checks the position is empty in
+        /// the dungeon grid, if so, then, it places the entered child room in
+        /// the calculated position and rotation.
+        public void InsertChild(
+            ref RoomGrid _grid,
+            ref Room _child,
+            Common.Direction _dir
+        ) {
+            (int x, int y) = GetChildPositionInGrid(_dir);
+            _child.x = x;
+            _child.y = y;
+            _child.rotation = (rotation + DEGREE_90) % DEGREE_360;
+            Room room = _grid[x, y];
+            if (room != null) { return; }
+            switch (_dir)
+            {
+                case Common.Direction.Right:
+                    right = _child;
+                    right.SetParent(this);
+                    break;
+                case Common.Direction.Down:
+                    bottom = _child;
+                    bottom.SetParent(this);
+                    break;
+                case Common.Direction.Left:
+                    left = _child;
+                    left.SetParent(this);
+                    break;
+            }
+        }
+
+        /// Fix the branch that starts in this node.
+        ///
+        /// This method must be called after a successful crossover. This fix
+        /// reinserts the mission rooms in the old branch to maintain the
+        /// occurring order of missions to guarantee feasibility.
+        public void FixBranch(
+            List<int> _missions,
+            ref Random _rand
+        ) {
+            // If both lock and key are in the branch, assign to them new IDs,
+            // and add all the missions in the new missions list
+            Queue<int> newMissions = new Queue<int>();
+            for (int i = 0; i < _missions.Count - 1; i++)
+            {
+                for (int j = i + 1; j < _missions.Count; j++)
+                {
+                    if (_missions[i] == -_missions[j])
+                    {
+                        int nextId = Room.GetNextId();
+                        _missions[i] = _missions[i] > 0 ? nextId : -nextId;
+                        _missions[j] = -_missions[i];
                     }
                 }
-                newSpecialRooms.Enqueue(specialRooms[i]);
+                newMissions.Enqueue(_missions[i]);
             }
-            //Add the last special room, which normally wouldn't be added, but only if it exists
-            if(specialRooms.Count > 0)
-                newSpecialRooms.Enqueue(specialRooms[specialRooms.Count-1]);
+            // Also add the last mission, if it exists
+            if (_missions.Count > 0)
+            {
+                newMissions.Enqueue(_missions[_missions.Count - 1]);
+            }
 
-            //Enqueue all the rooms
+            // Gather all the rooms of the branch
+            Queue<Room> branch = new Queue<Room>();
+            Queue<Room> toVisit = new Queue<Room>();
+            toVisit.Enqueue(this);
             while (toVisit.Count > 0)
             {
-                actualRoom = toVisit.Dequeue();
-                visited.Enqueue(actualRoom);
-                child = actualRoom.LeftChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
+                Room current = toVisit.Dequeue();
+                branch.Enqueue(current);
+                Room[] children = new Room[] {
+                    current.left,
+                    current.bottom,
+                    current.right
+                };
+                foreach (Room child in children)
+                {
+                    if (child != null && current.Equals(child.parent))
                     {
                         toVisit.Enqueue(child);
                     }
-                child = actualRoom.BottomChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        toVisit.Enqueue(child);
-                    }
-                child = actualRoom.RightChild;
-                if (child != null)
-                    if (actualRoom.Equals(child.Parent))
-                    {
-                        toVisit.Enqueue(child);
-                    }
+                }
             }
 
-            //try to place all the special rooms in the branch randomly. If the number of remaining rooms is the same as the number of special rooms, every room must be a special one, so we finish this while loop.
-            while(visited.Count > newSpecialRooms.Count)
+            // Try to place all the missions in the branch randomly. If the
+            // number of remaining rooms is the same as the number of mission
+            // rooms, every room must be a mission.
+            while (branch.Count > 0 && newMissions.Count > 0)
             {
-                actualRoom = visited.Dequeue();
-
-                int prob = Common.RandomPercent(ref rand);
-
-                //If there is a special room left, check the random number and see if it will be placed in the actual room or not
-                if (newSpecialRooms.Count > 0)
-                {
-                    if (prob < (RoomFactory.PROB_NORMAL_ROOM))
-                    {
-                        actualRoom.RoomType = RoomType.normal;
-                        actualRoom.KeyToOpen = -1;
-                    }
-                    else
-                    {
-                        /*
-                         * If the room has a key, then the key must have an id and this id is added to the list of available keys
-                         */
-                        specialId = newSpecialRooms.Dequeue();
-                        if (specialId > 0)
-                        {
-                            actualRoom.RoomType = RoomType.key;
-                            actualRoom.RoomId = specialId;
-                            actualRoom.KeyToOpen = specialId;
-                        }
-                        else
-                        {
-                            //Creates a locked room with the id of the room that contains the key to open it
-                            actualRoom.RoomType = RoomType.locked;
-                            actualRoom.KeyToOpen = -specialId;
-                        }
-                    }
+                Room current = branch.Dequeue();
+                int prob = Common.RandomPercent(ref _rand);
+                // If there are no missions left, then assign the remaining
+                // rooms as normal rooms; otherwise, check if the current room
+                // will not receive a mission
+                if (newMissions.Count == 0 ||
+                    RoomFactory.PROB_NORMAL_ROOM > prob
+                ) {
+                    current.type = RoomType.Normal;
+                    current.key = -1;
+                    continue;
                 }
                 else
                 {
-                    actualRoom.RoomType = RoomType.normal;
-                    actualRoom.KeyToOpen = -1;
-                }
-            }
-            //If there are rooms not visited, then all the next rooms must be special ones
-            while(visited.Count > 0)
-            {
-                actualRoom = visited.Dequeue();
-                specialId = newSpecialRooms.Dequeue();
-                if (specialId > 0)
-                {
-                    actualRoom.RoomType = RoomType.key;
-                    actualRoom.RoomId = specialId;
-                    actualRoom.KeyToOpen = specialId;
-                }
-                else
-                {
-                    //Creates a locked room with the id of the room that contains the key to open it
-                    actualRoom.RoomType = RoomType.locked;
-                    actualRoom.KeyToOpen = -specialId;
-                }
-            }
-            if (newSpecialRooms.Count > 0)
-                System.Console.WriteLine("STOOOOOP");
-        }
-
-        /*
-        * Validates if a child node can be created in the entered position or not
-        */
-        public bool ValidateChild(Common.Direction dir, RoomGrid grid)
-        {
-            int X, Y;
-            Room roomInGrid;
-            switch (dir)
-            {
-                case Common.Direction.Right:
-                    //Calculates the X and Y based on the parent's rotation
-                    if (((this.Rotation / 90) % 2) != 0)
+                    // The current room will receive a mission
+                    int missionId = newMissions.Dequeue();
+                    // Assign the mission ID to the current room
+                    if (missionId > 0)
                     {
-                        X = this.X;
-                        if (this.Rotation == 90)
-                            Y = this.Y + 1;
-                        else
-                            Y = this.Y - 1;
+                        current.type = RoomType.Key;
+                        current.id = missionId;
+                        current.key = missionId;
                     }
                     else
                     {
-                        if (this.Rotation == 0)
-                            X = this.X + 1;
-                        else
-                            X = this.X - 1;
-                        Y = this.Y;
+                        current.type = RoomType.Locked;
+                        current.key = -missionId;
                     }
-                    //Checks the grid of room if the room is there, if not, create the room, add it in the grid and
-                    //as the actual room's child, returning true
-                    //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
-                    roomInGrid = grid[X, Y];
-                    if (roomInGrid is null)
-                    {
-                        return true;
-                    }
-                    //If it is in the grid, tries to make a shortcut between the actual room and the existing one
-                    //Does not change the child's parent and return false
-                    else
-                    {
-                        return false;
-                    }
-                case Common.Direction.Down:
-                    //Calculates the X and Y based on the parent's rotation
-                    if (((this.Rotation / 90) % 2) != 0)
-                    {
-                        Y = this.Y;
-                        if (this.Rotation == 90)
-                            X = this.X + 1;
-                        else
-                            X = this.X - 1;
-                    }
-                    else
-                    {
-                        if (this.Rotation == 0)
-                            Y = this.Y - 1;
-                        else
-                            Y = this.Y + 1;
-                        X = this.X;
-                    }
-                    //If it is in the grid, tries to make a shortcut between the actual room and the existing one
-                    //Does not change the child's parent and return false
-                    //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
-                    roomInGrid = grid[X, Y];
-                    if (roomInGrid is null)
-                    {
-                        return true;
-                    }
-                    //If it is in the grid, tries to make a shortcut between the actual room and the existing one
-                    //Does not change the child's parent and return false
-                    else
-                    {
-                        return false;
-                    }
-
-                case Common.Direction.Left:
-                    //Calculates the X and Y based on the parent's rotation
-                    if (((this.Rotation / 90) % 2) != 0)
-                    {
-                        X = this.X;
-                        if (this.Rotation == 90)
-                            Y = this.Y - 1;
-                        else
-                            Y = this.Y + 1;
-                    }
-                    else
-                    {
-                        if (this.Rotation == 0)
-                            X = this.X - 1;
-                        else
-                            X = this.X + 1;
-                        Y = this.Y;
-                    }
-                    //If it is in the grid, tries to make a shortcut between the actual room and the existing one
-                    //Does not change the child's parent and return false
-                    //System.Console.WriteLine("X = " + X + " Y = " + Y + "\n");
-                    roomInGrid = grid[X, Y];
-                    if (roomInGrid is null)
-                    {
-                        return true;
-                    }
-                    //If it is in the grid, tries to make a shortcut between the actual room and the existing one
-                    //Does not change the child's parent and return false
-                    else
-                    {
-                        return false;
-                    }
-                default:
-                    System.Console.WriteLine("Something went wrong Creating a Child!\n");
-                    System.Console.WriteLine("Direction not supported:\n\tOnly Right, Down and Left are allowed.\n\n");
-                    break;
-            }
-            return false;
-        }
-
-        /*
-         * For each direction, calculates the X,Y position of the child room based on its rotation and the parent's coordinates
-         * and checks if a room already exists in that position.
-         *
-         * If it does, stop creating a room and gives a small chance
-         * for the parent room to adopt the existing room as async shortcut child,
-         * but does not change the child room's original parent. In this case, returns false,
-         * so the existing room will not be added to the visiting rooms queue.
-         *
-         * If the grid position is empty, create the room in the desired position, with the right position and rotation,
-         * set the current room as its parent and returns true so that the new room is added
-         * to the room list and visiting queue
-         */
-        public void InsertChild(Common.Direction dir, ref Room child, ref RoomGrid grid)
-        {
-            Room roomInGrid;
-
-            switch (dir)
-            {
-                case Common.Direction.Right:
-                    //Calculates the X and Y based on the parent's rotation
-                    if (((this.Rotation / 90) % 2)!=0)
-                    {
-                        child.X = this.X;
-                        if (this.Rotation == 90)
-                            child.Y = this.Y + 1;
-                        else
-                            child.Y = this.Y - 1;
-                    }
-                    else
-                    {
-                        if (this.Rotation == 0)
-                            child.X = this.X + 1;
-                        else
-                            child.X = this.X - 1;
-                        child.Y = this.Y;
-                    }
-                    //Checks the grid of room if the room is there, if not, create the room, add it in the grid and
-                    //as the actual room's child, returning true
-                    //System.Console.WriteLine("X = " + child.X + " Y = " + child.Y + "\n");
-                    roomInGrid = grid[child.X, child.Y];
-                    if (roomInGrid is null)
-                    {
-                        child.Rotation = (this.Rotation + 90) % 360;
-                        RightChild = child;
-                        RightChild.SetParent(this);
-                    }
-                    break;
-                case Common.Direction.Down:
-                    //Calculates the X and Y based on the parent's rotation
-                    if (((this.Rotation / 90) % 2) != 0)
-                    {
-                        child.Y = this.Y;
-                        if (this.Rotation == 90)
-                            child.X = this.X + 1;
-                        else
-                            child.X = this.X - 1;
-                    }
-                    else
-                    {
-                        if (this.Rotation == 0)
-                            child.Y = this.Y - 1;
-                        else
-                            child.Y = this.Y + 1;
-                        child.X = this.X;
-                    }
-                    //If it is in the grid, tries to make a shortcut between the actual room and the existing one
-                    //Does not change the child's parent and return false
-                    //System.Console.WriteLine("X = " + child.X + " Y = " + child.Y + "\n");
-                    roomInGrid = grid[child.X, child.Y];
-                    if (roomInGrid is null)
-                    {
-                        child.Rotation = (this.Rotation + 90) % 360;
-                        BottomChild = child;
-                        BottomChild.SetParent(this);
-                    }
-                    break;
-                case Common.Direction.Left:
-                    //Calculates the X and Y based on the parent's rotation
-                    if (((this.Rotation / 90) % 2) != 0)
-                    {
-                        child.X = this.X;
-                        if (this.Rotation == 90)
-                            child.Y = this.Y - 1;
-                        else
-                            child.Y = this.Y + 1;
-                    }
-                    else
-                    {
-                        if (this.Rotation == 0)
-                            child.X = this.X - 1;
-                        else
-                            child.X = this.X + 1;
-                        child.Y = this.Y;
-                    }
-                    //If it is in the grid, tries to make a shortcut between the actual room and the existing one
-                    //Does not change the child's parent and return false
-                    //System.Console.WriteLine("X = "+ child.X+" Y = "+child.Y+"\n");
-                    roomInGrid = grid[child.X, child.Y];
-                    if (roomInGrid is null)
-                    {
-                        child.Rotation = (this.Rotation + 90) % 360;
-                        LeftChild = child;
-                        LeftChild.SetParent(this);
-                    }
-                    break;
-                default:
-                    System.Console.WriteLine("Something went wrong Creating a Child!\n");
-                    System.Console.WriteLine("Direction not supported:\n\tOnly Right, Down and Left are allowed.\n\n");
-                    break;
-            }
-        }
-
-        public void SetParent(Room parent)
-        {
-            this.Parent = parent;
-            if (parent != null)
-            {
-                this.depth = ++parent.depth;
-            }
-        }
-
-        /*
-         * Adds all the existing children of a room in a list, and recursively, the children of each child
-         */
-        public void FindChildren(ref List<Room> rooms)
-        {
-            if(rightChild!=null)
-            {
-                if (rightChild.parent!= null && rightChild.parent.Equals(this))
-                {
-                    rooms.Add(rightChild);
-                    rightChild.FindChildren(ref rooms);
-                }
-            }
-            if (bottomChild != null)
-            {
-                if (bottomChild.parent != null && bottomChild.parent.Equals(this))
-                {
-                    rooms.Add(bottomChild);
-                    bottomChild.FindChildren(ref rooms);
-                }
-            }
-            if (leftChild != null)
-            {
-                if (leftChild.parent != null && leftChild.parent.Equals(this))
-                {
-                    rooms.Add(leftChild);
-                    leftChild.FindChildren(ref rooms);
                 }
             }
         }
-
-        /*
-         * Get the child of the room in the entered direction
-         */
-        public Room GetChildByDirection(Common.Direction dir)
-        {
-            switch (dir)
-            {
-                case Common.Direction.Down:
-                    return BottomChild;
-                case Common.Direction.Left:
-                    return LeftChild;
-                case Common.Direction.Right:
-                    return RightChild;
-            }
-            return null;
-        }
-
-        public int Depth { get => depth; set => depth = value; }
-        public int X { get => x; set => x = value; }
-        public int Y { get => y; set => y = value; }
-        public int RoomId { get => roomId; set => roomId = value; }
-        public Room Parent { get => parent; set => parent = value; }
-        public Room LeftChild { get => leftChild; set => leftChild = value; }
-        public Room RightChild { get => rightChild; set => rightChild = value; }
-        public Room BottomChild { get => bottomChild; set => bottomChild = value; }
-        public Common.Direction ParentDirection { get => parentDirection; set => parentDirection = value; }
-        public int Rotation { get => rotation; set => rotation = value; }
-        public RoomType RoomType { get => type; set => type = value; }
-        public int KeyToOpen { get => keyToOpen; set => keyToOpen = value; }
     }
 }
