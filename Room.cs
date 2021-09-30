@@ -37,7 +37,7 @@ namespace LevelGenerator
         /// The type of the room.
         public RoomType type = RoomType.Normal;
         /// The ID of the key that opens this room. The ID is equal to -1 when
-        /// the room is not locked).
+        /// the room is not locked and does not have a key.
         public int key = -1;
         /// The depth of the room in the tree. This is used to control the
         /// depth of the dungeon level.
@@ -63,11 +63,6 @@ namespace LevelGenerator
         /// The direction from what the parent connects with this room.
         /// This attribute reduces operations at crossover.
         public Common.Direction parentDirection = Common.Direction.Down;
-
-        public int Depth
-        {
-            get => depth;
-        }
 
         /// Room constructor.
         ///
@@ -166,17 +161,6 @@ namespace LevelGenerator
             return _grid[x, y] is null;
         }
 
-        /// Assign the parent of this room.
-        public void SetParent(
-            Room _parent
-        ) {
-            parent = _parent;
-            if (_parent != null)
-            {
-                depth = ++_parent.depth;
-            }
-        }
-
         /// Insert the entered room in the dungeon (ternary heap and grid).
         ///
         /// First, this method calculates both X and Y positions of the entered
@@ -199,15 +183,18 @@ namespace LevelGenerator
             {
                 case Common.Direction.Right:
                     right = _child;
-                    right.SetParent(this);
+                    right.parent = this;
+                    right.depth = ++this.depth;
                     break;
                 case Common.Direction.Down:
                     bottom = _child;
-                    bottom.SetParent(this);
+                    bottom.parent = this;
+                    bottom.depth = ++this.depth;
                     break;
                 case Common.Direction.Left:
                     left = _child;
-                    left.SetParent(this);
+                    left.parent = this;
+                    left.depth = ++this.depth;
                     break;
             }
         }

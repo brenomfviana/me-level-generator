@@ -221,11 +221,13 @@ namespace LevelGenerator
         public void GenerateRooms(
             ref Random _rand
         ) {
+            Queue<Room> toVisit = new Queue<Room>();
+            toVisit.Enqueue(rooms[0]);
             int prob;
             while (toVisit.Count > 0)
             {
-                Room actualRoom = toVisit.Dequeue() as Room;
-                int actualDepth = actualRoom.Depth;
+                Room current = toVisit.Dequeue();
+                int actualDepth = current.depth;
                 //If max depth allowed has been reached, stop creating children
                 if (actualDepth > MAX_DEPTH)
                 {
@@ -246,23 +248,36 @@ namespace LevelGenerator
 
                     if (prob < PROB_CHILD)
                     {
-                        InstantiateRoom(ref child, ref actualRoom, dir, ref _rand);
+                        InstantiateRoom(ref child, ref current, dir, ref _rand);
                     }
                     else if (prob < PROB_CHILD * 2)
                     {
-                        InstantiateRoom(ref child, ref actualRoom, dir, ref _rand);
+                        InstantiateRoom(ref child, ref current, dir, ref _rand);
                         Common.Direction dir2;
                         do
                         {
                             dir2 = Common.RandomElementFromArray(Common.AllDirections(), ref _rand);
                         } while (dir == dir2);
-                        InstantiateRoom(ref child, ref actualRoom, dir2, ref _rand);
+                        InstantiateRoom(ref child, ref current, dir2, ref _rand);
                     }
                     else
                     {
-                        InstantiateRoom(ref child, ref actualRoom, Common.Direction.Right, ref _rand);
-                        InstantiateRoom(ref child, ref actualRoom, Common.Direction.Down, ref _rand);
-                        InstantiateRoom(ref child, ref actualRoom, Common.Direction.Left, ref _rand);
+                        InstantiateRoom(ref child, ref current, Common.Direction.Right, ref _rand);
+                        InstantiateRoom(ref child, ref current, Common.Direction.Down, ref _rand);
+                        InstantiateRoom(ref child, ref current, Common.Direction.Left, ref _rand);
+                    }
+                }
+                //
+                Room[] children = new Room[] {
+                    current.left,
+                    current.bottom,
+                    current.right
+                };
+                foreach (Room child in children)
+                {
+                    if (child != null && current.Equals(child.parent))
+                    {
+                        toVisit.Enqueue(child);
                     }
                 }
             }
