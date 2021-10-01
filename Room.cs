@@ -184,17 +184,17 @@ namespace LevelGenerator
                 case Common.Direction.Right:
                     right = _child;
                     right.parent = this;
-                    right.depth = ++this.depth;
+                    right.depth = this.depth + 1;
                     break;
                 case Common.Direction.Down:
                     bottom = _child;
                     bottom.parent = this;
-                    bottom.depth = ++this.depth;
+                    bottom.depth = this.depth + 1;
                     break;
                 case Common.Direction.Left:
                     left = _child;
                     left.parent = this;
-                    left.depth = ++this.depth;
+                    left.depth = this.depth + 1;
                     break;
             }
         }

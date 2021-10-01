@@ -111,7 +111,6 @@ namespace LevelGenerator
             {
                 for (int l = 0; l < dimension.locks; l++)
                 {
-                    // Print the Elite's coordinate
                     string log = "Elite ";
                     log += "" + k + "-";
                     log += "" + l;

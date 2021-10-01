@@ -62,11 +62,9 @@ namespace LevelGenerator
             while (pop.Count() < prs.population)
             {
                 Individual individual = Individual.GetRandom(ref rand);
-                individual.dungeon.CalcAvgChildren();
+                individual.CalculateLinearCoefficient();
                 Fitness.Calculate(ref individual, ref rand);
                 pop.PlaceIndividual(individual);
-                // LevelDebug.PrintMap(individual.dungeon, LevelDebug.INDENT);
-                // Console.WriteLine("Linearity=" + Measurements.Linearity(individual));
             }
 
             // Evolve the population
@@ -109,7 +107,7 @@ namespace LevelGenerator
                 // Place the offspring in the MAP-Elites population
                 foreach (Individual individual in offspring)
                 {
-                    individual.dungeon.CalcAvgChildren();
+                    individual.CalculateLinearCoefficient();
                     individual.dungeon.FixRooms();
                     individual.generation = g;
                     pop.PlaceIndividual(individual);

@@ -25,28 +25,28 @@ namespace LevelGenerator
             float avgUsedRoom = 0.0f;
             // Only use the A* if there is a lock in the dungeon
             // System.Console.WriteLine("Begin A*");
-            dungeon.neededLocks = AStar.FindRoute(dungeon);
+            _individual.neededLocks = AStar.FindRoute(dungeon);
             for (int i = 0; i < 3; ++i)
             {
                 DFS dfs = new DFS(dungeon);
                 dfs.FindRoute(dungeon, ref _rand);
                 avgUsedRoom += dfs.NVisitedRooms;
             }
-            dungeon.neededRooms = avgUsedRoom / 3.0f;
-            // System.Console.WriteLine("Needed Rooms: " + dungeon.neededRooms);
-            if (dungeon.neededRooms > dungeon.Rooms.Count)
+            _individual.neededRooms = avgUsedRoom / 3.0f;
+            // System.Console.WriteLine("Needed Rooms: " + _individual.neededRooms);
+            if (_individual.neededRooms > dungeon.Rooms.Count)
             {
-                Console.WriteLine("SOMETHING IS REALLY WRONG! Nrooms: " + dungeon.Rooms.Count + "  Used: " + dungeon.neededRooms);
+                Console.WriteLine("SOMETHING IS REALLY WRONG! Nrooms: " + dungeon.Rooms.Count + "  Used: " + _individual.neededRooms);
                 Console.ReadKey();
             }
-            if (dungeon.neededLocks > dungeon.locks)
+            if (_individual.neededLocks > dungeon.locks)
             {
                 Console.WriteLine("SOMETHING IS REALLY WRONG!");
-                Console.WriteLine(dungeon.neededLocks);
+                Console.WriteLine(_individual.neededLocks);
                 Console.WriteLine(dungeon.locks);
             }
 
-            float fit = (2*(System.Math.Abs(nV - dungeon.Rooms.Count) + System.Math.Abs(nK - dungeon.keys) + System.Math.Abs(nL - dungeon.locks) + System.Math.Abs(lCoef - dungeon.AvgChildren)) + (dungeon.locks * 0.8f - dungeon.neededLocks) + (dungeon.Rooms.Count - dungeon.neededRooms));
+            float fit = (2*(System.Math.Abs(nV - dungeon.Rooms.Count) + System.Math.Abs(nK - dungeon.keys) + System.Math.Abs(nL - dungeon.locks) + System.Math.Abs(lCoef - _individual.linearCoefficient)) + (dungeon.locks * 0.8f - _individual.neededLocks) + (dungeon.Rooms.Count - _individual.neededRooms));
 
             _individual.fitness = fit;
         }

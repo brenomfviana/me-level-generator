@@ -17,13 +17,14 @@ namespace LevelGenerator
         /// String to initialize empty strings or convert values of other types
         /// during concatenation.
         private static readonly string EMPTY_STR = "";
-        /// Define the JSON options.
+        /// The default JSON options.
         private static readonly JsonSerializerOptions JSON_OPTIONS =
             new JsonSerializerOptions(){ WriteIndented = true };
-        /// Results folder name.
-        /// This folder saves the collected data to evaluate the approach.
+        /// The results folder name.
+        /// This folder stores the collected data to evaluate the approach.
         private static readonly string RESULTS_FOLDER_NAME = @"results";
-        /// Filename of the evolutionary process data.
+        /// The filename of the evolutionary process data.
+        /// This file is created only when the enemies are saved separately.
         private static readonly string DATA_FILENAME = @"data";
 
         /// Write the collected data from the evolutionary process.
@@ -33,7 +34,7 @@ namespace LevelGenerator
         ) {
             // Create folder to store the results
             Directory.CreateDirectory(RESULTS_FOLDER_NAME);
-            // Create the folder for the entered parameters
+            // Create the base name according to the entered parameters
             string basename = RESULTS_FOLDER_NAME + SEPARATOR;
             basename += GetFolderName(_data);
             Directory.CreateDirectory(basename);
@@ -41,7 +42,7 @@ namespace LevelGenerator
             int count = Directory.GetDirectories(
                 basename, SEARCH_FOR, SearchOption.TopDirectoryOnly
             ).Length;
-            // Create a folder for the resulting set of solutions
+            // Create a folder for the resulting set of dungeon levels
             basename = basename + SEPARATOR + EMPTY_STR + count;
             Directory.CreateDirectory(basename);
             // Save the evolutionary process data
