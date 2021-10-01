@@ -113,9 +113,6 @@ namespace LevelGenerator
                 // Replace locks and keys in the new branches
                 roomCut2.FixBranch(specialRooms1, ref _rand);
                 roomCut1.FixBranch(specialRooms2, ref _rand);
-                // Fix the list of rooms
-                ind1.FixRooms();
-                ind2.FixRooms();
             }
 
             individuals[0] = new Individual(ind1);

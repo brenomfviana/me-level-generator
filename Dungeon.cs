@@ -6,8 +6,11 @@ namespace LevelGenerator
     /// This class represents a dungeon level.
     public class Dungeon
     {
+        /// The probability of generating a new room as a child.
         public static readonly float PROB_HAS_CHILD = 100f;
+        /// The probability of generating a single child.
         public static readonly float PROB_CHILD = 100f / 3;
+        /// The max depth of a dungeon tree.
         public static readonly int MAX_DEPTH = 5;
 
         /// The number of keys.
@@ -17,8 +20,20 @@ namespace LevelGenerator
         /// Room Grid, where a reference to all the existing room will be maintained for quick access when creating nodes.
         public RoomGrid grid;
         /// The list of rooms (easier to add neighbors).
-        private List<Room> rooms;
+        public List<Room> rooms;
         public List<Room> Rooms { get => rooms; }
+        /// The list of dungeon key IDs.
+        public List<int> keyIds;
+        /// The list of locked room IDs.
+        public List<int> lockIds;
+        /// The lower limit of the x-axis of the grid.
+        int minX;
+        /// The lower limit of the y-axis of the grid.
+        int minY;
+        /// The upper limit of the x-axis of the grid.
+        int maxX;
+        /// The upper limit of the y-axis of the grid.
+        int maxY;
 
         /// Dungeon constructor.
         ///
@@ -30,6 +45,12 @@ namespace LevelGenerator
             Rooms.Add(root);
             grid = new RoomGrid();
             grid[root.x, root.y] = root;
+            lockIds = new List<int>();
+            keyIds = new List<int>();
+            minX = RoomGrid.LEVEL_GRID_OFFSET;
+            minY = RoomGrid.LEVEL_GRID_OFFSET;
+            maxX = -RoomGrid.LEVEL_GRID_OFFSET;
+            maxY = -RoomGrid.LEVEL_GRID_OFFSET;
         }
 
         /// Return a clone this dungeon.
@@ -69,6 +90,54 @@ namespace LevelGenerator
                 }
             }
             return dungeon;
+        }
+
+        /// Update the lists of keys and locks, and the grid limits.
+        private void Update()
+        {
+            foreach (Room room in rooms)
+            {
+                // Update grid bounds
+                minX = minX > room.x ? room.x : minX;
+                minY = minY > room.y ? room.y : minY;
+                maxX = room.x > maxX ? room.x : maxX;
+                maxY = room.y > maxY ? room.y : maxY;
+                // Add the keys and locked doors in the level
+                if (room.type == RoomType.Key) {
+                    keyIds.Add(room.key);
+                }
+                if (room.type == RoomType.Locked)
+                {
+                    lockIds.Add(room.key);
+                }
+            }
+        }
+
+        /// Return the number of rooms of the whole dungeon.
+        public int GetNumberOfRooms()
+        {
+            return rooms.Count;
+        }
+
+        /// Return the dungeon start room.
+        public Room GetStart()
+        {
+            return rooms[0];
+        }
+
+        /// Return the dungeon goal room.
+        public Room GetGoal()
+        {
+            foreach (Room room in rooms)
+            {
+                if (room.type != RoomType.Locked) { continue; }
+                int _lock = lockIds.IndexOf(room.key);
+                if (_lock == lockIds.Count - 1)
+                {
+                    return room;
+                }
+            }
+            return null;
         }
 
         /// Instantiates a room and tries to add it as a child of the actual room, considering its direction and position. If there is not a room in the grid at the entered coordinates, create the room, add it to the room list and also enqueue it so it can be explored later.
@@ -148,6 +217,7 @@ namespace LevelGenerator
             }
             keys = RoomFactory.AvailableKeys.Count + RoomFactory.UsedKeys.Count;
             locks = RoomFactory.UsedKeys.Count;
+            Update();
         }
 
         /// Add a lock and a key.
@@ -347,7 +417,7 @@ namespace LevelGenerator
         }
 
         /// Recreate the room list by visiting all the rooms in the tree and adding them to the list while also counting the number of locks and keys.
-        public void FixRooms()
+        public void Fix()
         {
             Queue<Room> toVisit = new Queue<Room>();
             toVisit.Enqueue(rooms[0]);
@@ -371,6 +441,7 @@ namespace LevelGenerator
                     }
                 }
             }
+            Update();
         }
     }
 }
