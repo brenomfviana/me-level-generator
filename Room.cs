@@ -96,9 +96,30 @@ namespace LevelGenerator
             return room;
         }
 
+        /// Return an array with the left, bottom, and right children.
+        public Room[] GetChildren()
+        {
+            return new Room[] {
+                    this.left,
+                    this.bottom,
+                    this.right,
+                };
+        }
+
+        /// Return an array with all the neighbors (parent and children).
+        public Room[] GetNeighbors()
+        {
+            return new Room[] {
+                    this.parent,
+                    this.left,
+                    this.bottom,
+                    this.right,
+                };
+        }
+
         /// Return a tuple corresponding to the position in the dungeon grid of
         /// the child of a parent in the entered direction.
-        public (int, int) GetChildPositionInGrid(
+        private (int, int) GetChildPositionInGrid(
             Common.Direction _dir
         ) {
             int cx = 0;
@@ -238,12 +259,7 @@ namespace LevelGenerator
             {
                 Room current = toVisit.Dequeue();
                 branch.Enqueue(current);
-                Room[] children = new Room[] {
-                    current.left,
-                    current.bottom,
-                    current.right
-                };
-                foreach (Room child in children)
+                foreach (Room child in current.GetChildren())
                 {
                     if (child != null && current.Equals(child.parent))
                     {
