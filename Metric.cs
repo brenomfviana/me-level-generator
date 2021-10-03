@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace LevelGenerator
@@ -9,11 +10,47 @@ namespace LevelGenerator
         public static float CoefficientExploration(
             Individual _individual
         ) {
+            // Get the coefficient of exploration between start and goal rooms
             Dungeon dungeon = _individual.dungeon;
             Room start = dungeon.GetStart();
             Room target = dungeon.GetGoal();
             List<Room> reached = FloodFill(dungeon, start, target);
-            return (float) reached.Count / dungeon.GetNumberOfRooms();
+            float sum = (float) reached.Count / dungeon.GetNumberOfRooms();
+            // Get the all the rooms with keys and locks
+            Room[] keys = new Room[dungeon.keyIds.Count];
+            Room[] locks = new Room[dungeon.lockIds.Count];
+            foreach (Room room in dungeon.rooms)
+            {
+                if (room.type == RoomType.Key)
+                {
+                    int ki = dungeon.keyIds.IndexOf(room.key);
+                    if (ki != -1)
+                    {
+                        keys[ki] = room;
+                    }
+                }
+                if (room.type == RoomType.Locked)
+                {
+                    int li = dungeon.lockIds.IndexOf(room.key);
+                    if (li != -1)
+                    {
+                        locks[li] = room;
+                    }
+                }
+            }
+            // Get the coefficient of exploration between keys and locks and
+            // calculate the mean of all the coefficient of exploration
+            int count = 1;
+            for (int i = 0; i < keys.Length; i++)
+            {
+                if (i < locks.Length && keys[i] != null && locks[i] != null)
+                {
+                    List<Room> r = FloodFill(dungeon, keys[i], locks[i]);
+                    sum += (float) r.Count / dungeon.GetNumberOfRooms();
+                    count++;
+                }
+            }
+            return sum / count;
         }
 
         /// Return all the reached room in the search for the target room.
