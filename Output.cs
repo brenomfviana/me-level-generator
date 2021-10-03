@@ -72,7 +72,6 @@ namespace LevelGenerator
             foldername += EMPTY_STR + prs.generations + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.population + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.mutation + FILENAME_SEPARATOR;
-            foldername += EMPTY_STR + prs.crossover + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.competitors;
             return foldername;
         }
@@ -183,6 +182,8 @@ namespace LevelGenerator
                 2 * (maxX - minX + 1),
                 2 * (maxY - minY + 1)
             );
+            ifile.generation = _individual.generation;
+            ifile.fitness = _individual.fitness;
 
             // Set the list of rooms
             for (int i = 0; i < sizeX * 2; ++i)

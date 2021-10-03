@@ -17,7 +17,7 @@ namespace LevelGenerator
             ref Random _rand
         ) {
             // Initialize the two new individuals
-            Individual[] individuals = new Individual[2];
+            Individual[] individuals = new Individual[0];
 
             Dungeon ind1, ind2;
             //The root of the branch that will be traded
@@ -113,10 +113,10 @@ namespace LevelGenerator
                 // Replace locks and keys in the new branches
                 roomCut2.FixBranch(specialRooms1, ref _rand);
                 roomCut1.FixBranch(specialRooms2, ref _rand);
+                individuals = new Individual[2];
+                individuals[0] = new Individual(ind1);
+                individuals[1] = new Individual(ind1);
             }
-
-            individuals[0] = new Individual(ind1);
-            individuals[1] = new Individual(ind1);
 
             return individuals;
         }

@@ -30,7 +30,7 @@ namespace LevelGenerator
     class Program
     {
         /// The minimum number of program parameters (arguments).
-        private const int NUMBER_OF_PARAMETERS = 6;
+        private const int NUMBER_OF_PARAMETERS = 5;
 
         /// The error code for bad arguments.
         private const int ERROR_BAD_ARGUMENTS = 0xA0;
@@ -57,8 +57,7 @@ namespace LevelGenerator
                 int.Parse(_args[1]), // Number of generations
                 int.Parse(_args[2]), // Initial population size
                 int.Parse(_args[3]), // Mutation chance
-                int.Parse(_args[4]), // Crossover chance
-                int.Parse(_args[5])  // Number of tournament competitors
+                int.Parse(_args[4])  // Number of tournament competitors
             );
             // Ensure the population size is enough for the tournament
             Debug.Assert(

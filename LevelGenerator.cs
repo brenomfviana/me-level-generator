@@ -8,8 +8,6 @@ namespace LevelGenerator
     {
         /// The number of parents to be selected for crossover.
         private static readonly int CROSSOVER_PARENTS = 2;
-        /// The number of parents to be selected for mutation.
-        private static readonly int MUTATION_PARENT = 1;
 
         /// The evolutionary parameters.
         private Parameters prs;
@@ -70,49 +68,41 @@ namespace LevelGenerator
             // Evolve the population
             for (int g = 0; g < prs.generations; g++)
             {
-                // Initialize the offspring list
-                List<Individual> offspring = new List<Individual>();
-
-                // Apply the evolutionary operators
-                if (prs.crossover > Common.RandomPercent(ref rand))
-                {
-                    // Select two different parents
-                    Individual[] parents = Selection.Select(
-                        CROSSOVER_PARENTS, prs.competitors, pop, ref rand
-                    );
-                    // Apply crossover and get the resulting children
-                    Individual[] children = Crossover.Apply(
-                        parents[0], parents[1], ref rand
-                    );
-                    // Add the new individuals in the offspring list
-                    for (int i = 0; i < children.Length; i++)
+                // Apply the crossover operation
+                Individual[] parents = Selection.Select(
+                    CROSSOVER_PARENTS, prs.competitors, pop, ref rand
+                );
+                Individual[] offspring = Crossover.Apply(
+                    parents[0], parents[1], ref rand
+                );
+                // Apply the mutation operation with a random chance or always
+                // that the crossover was not successful
+                if (offspring.Length == 0 ||
+                    prs.mutation > Common.RandomPercent(ref rand)
+                ) {
+                    if (offspring.Length == CROSSOVER_PARENTS)
                     {
-                        children[i].dungeon.Fix();
-                        children[i].CalculateLinearCoefficient();
-                        Fitness.Calculate(ref children[i], ref rand);
-                        offspring.Add(children[i]);
+                        parents[0] = offspring[0];
+                        parents[1] = offspring[1];
                     }
-                }
-                if (prs.mutation > Common.RandomPercent(ref rand))
-                {
-                    // Select a parent
-                    Individual parent = Selection.Select(
-                        MUTATION_PARENT, prs.competitors, pop, ref rand
-                    )[0];
-                    // Apply mutation
-                    Individual individual = Mutation.Apply(parent, ref rand);
-                    // Add the new individual in the offspring list
-                    individual.dungeon.Fix();
-                    individual.CalculateLinearCoefficient();
-                    Fitness.Calculate(ref individual, ref rand);
-                    offspring.Add(individual);
+                    else
+                    {
+                        offspring = new Individual[2];
+                    }
+                    Individual child1 = Mutation.Apply(parents[0], ref rand);
+                    Individual child2 = Mutation.Apply(parents[1], ref rand);
+                    offspring[0] = child1;
+                    offspring[1] = child2;
                 }
 
                 // Place the offspring in the MAP-Elites population
-                foreach (Individual individual in offspring)
+                for (int i = 0; i < offspring.Length; i++)
                 {
-                    individual.generation = g;
-                    pop.PlaceIndividual(individual);
+                    offspring[i].generation = g;
+                    offspring[i].dungeon.Fix();
+                    offspring[i].CalculateLinearCoefficient();
+                    Fitness.Calculate(ref offspring[i], ref rand);
+                    pop.PlaceIndividual(offspring[i]);
                 }
             }
 
