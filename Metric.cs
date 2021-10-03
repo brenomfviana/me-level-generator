@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace LevelGenerator
@@ -13,7 +12,7 @@ namespace LevelGenerator
             Dungeon dungeon = _individual.dungeon;
             Room start = dungeon.GetStart();
             Room target = dungeon.GetGoal();
-            List<Room> reached = Metric.FloodFill(dungeon, start, target);
+            List<Room> reached = FloodFill(dungeon, start, target);
             return (float) reached.Count / dungeon.GetNumberOfRooms();
         }
 

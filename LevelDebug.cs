@@ -70,40 +70,14 @@ namespace LevelGenerator
             }
         }
 
+        /// Print the map of the entered level.
         public static void PrintMap(
             Dungeon _dungeon,
             string _indent
         ) {
-            // Initialize the grid bounds
-            int minX = RoomGrid.LEVEL_GRID_OFFSET;
-            int minY = RoomGrid.LEVEL_GRID_OFFSET;
-            int maxX = -RoomGrid.LEVEL_GRID_OFFSET;
-            int maxY = -RoomGrid.LEVEL_GRID_OFFSET;
-            // The list of keys and locks in the level
-            List<int> keys = new List<int>();
-            List<int> locks = new List<int>();
-
-            // Calculate the grid bounds and get the level keys and locked doors
-            foreach (Room room in _dungeon.Rooms)
-            {
-                // Update grid bounds
-                minX = minX > room.x ? room.x : minX;
-                minY = minY > room.y ? room.y : minY;
-                maxX = room.x > maxX ? room.x : maxX;
-                maxY = room.y > maxY ? room.y : maxY;
-                // Add the keys and locked doors in the level
-                if (room.type == RoomType.Key) {
-                    keys.Add(room.key);
-                }
-                if (room.type == RoomType.Locked)
-                {
-                    locks.Add(room.key);
-                }
-            }
-
             // Initialize the auxiliary map
-            int sizeX = maxX - minX + 1;
-            int sizeY = maxY - minY + 1;
+            int sizeX = _dungeon.maxX - _dungeon.minX + 1;
+            int sizeY = _dungeon.maxY - _dungeon.minY + 1;
             int[,] map = new int[2 * sizeX, 2 * sizeY];
             for (int i = 0; i < 2 * sizeX; i++)
             {
@@ -115,14 +89,12 @@ namespace LevelGenerator
 
             // Set the corridors, keys and locked rooms
             RoomGrid grid = _dungeon.grid;
-            for (int i = minX; i < maxX + 1; ++i)
+            for (int i = _dungeon.minX; i < _dungeon.maxX + 1; ++i)
             {
-                for (int j = minY; j < maxY + 1; ++j)
+                for (int j = _dungeon.minY; j < _dungeon.maxY + 1; ++j)
                 {
-                    // Get the even positions
-                    int iep = (i - minX) * 2;
-                    int jep = (j - minY) * 2;
-                    // Get the respective room
+                    int iep = (i - _dungeon.minX) * 2;
+                    int jep = (j - _dungeon.minY) * 2;
                     Room current = grid[i, j];
                     if (current != null)
                     {
@@ -130,19 +102,32 @@ namespace LevelGenerator
                         {
                             map[iep, jep] = (int) Common.RoomCode.N;
                         }
+                        // The key ID is the sequential positive index
                         else if (current.type == RoomType.Key)
                         {
-                            int _key = keys.IndexOf(current.key);
+                            int _key = _dungeon.keyIds.IndexOf(current.key);
                             map[iep, jep] = _key + 1;
                         }
+                        // If the room is locked, the room is a normal room,
+                        // and the corridor is locked; but if the lock is the
+                        // last one in the sequential order, then the room is
+                        // the goal room
                         else if (current.type == RoomType.Locked)
                         {
-                            int _lock = locks.IndexOf(current.key);
-                            map[iep, jep] = _lock == locks.Count - 1 ?
-                                (int) Common.RoomCode.B :
-                                (int) Common.RoomCode.N;
+                            int _lock = _dungeon.lockIds.IndexOf(current.key);
+                            if (_lock == _dungeon.lockIds.Count - 1)
+                            {
+                                map[iep, jep] = (int) Common.RoomCode.B;
+                            }
+                            else
+                            {
+                                map[iep, jep] = (int) Common.RoomCode.N;
+                            }
                         }
-                        // Get current room parent
+                        // If the current room is a locked room and has a
+                        // parent, then the connection between then is locked
+                        // and is represented by the negative value of the
+                        // index of the key that opens the lock
                         Room parent = current.parent;
                         if (parent != null)
                         {
@@ -153,7 +138,7 @@ namespace LevelGenerator
                             if (current.type == RoomType.Locked)
                             {
                                 // Then, the corridor is locked
-                                int _key = keys.IndexOf(current.key);
+                                int _key = _dungeon.keyIds.IndexOf(current.key);
                                 map[x, y] = -(_key + 1);
                             }
                             else
@@ -181,7 +166,7 @@ namespace LevelGenerator
                     }
                     else
                     {
-                        if (i + minX * 2 == 0 && j + minY * 2 == 0)
+                        if (i + _dungeon.minX * 2 == 0 && j + _dungeon.minY * 2 == 0)
                         {
                             Console.Write(" s");
                         }
@@ -207,7 +192,7 @@ namespace LevelGenerator
             }
         }
 
-        // Define the room color that will be printed on the console.
+        /// Define the room color that will be printed on the console.
         private static void SetRoomColor(
             int _code
         ) {

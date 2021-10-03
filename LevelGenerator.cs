@@ -87,6 +87,8 @@ namespace LevelGenerator
                     // Add the new individuals in the offspring list
                     for (int i = 0; i < children.Length; i++)
                     {
+                        children[i].dungeon.Fix();
+                        children[i].CalculateLinearCoefficient();
                         Fitness.Calculate(ref children[i], ref rand);
                         offspring.Add(children[i]);
                     }
@@ -100,6 +102,8 @@ namespace LevelGenerator
                     // Apply mutation
                     Individual individual = Mutation.Apply(parent, ref rand);
                     // Add the new individual in the offspring list
+                    individual.dungeon.Fix();
+                    individual.CalculateLinearCoefficient();
                     Fitness.Calculate(ref individual, ref rand);
                     offspring.Add(individual);
                 }
@@ -107,8 +111,6 @@ namespace LevelGenerator
                 // Place the offspring in the MAP-Elites population
                 foreach (Individual individual in offspring)
                 {
-                    individual.CalculateLinearCoefficient();
-                    individual.dungeon.FixRooms();
                     individual.generation = g;
                     pop.PlaceIndividual(individual);
                 }

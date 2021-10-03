@@ -13,10 +13,6 @@ namespace LevelGenerator
         /// The max depth of a dungeon tree.
         public static readonly int MAX_DEPTH = 5;
 
-        /// The number of keys.
-        public int keys;
-        /// The number of locked doors.
-        public int locks;
         /// Room Grid, where a reference to all the existing room will be maintained for quick access when creating nodes.
         public RoomGrid grid;
         /// The list of rooms (easier to add neighbors).
@@ -27,13 +23,13 @@ namespace LevelGenerator
         /// The list of locked room IDs.
         public List<int> lockIds;
         /// The lower limit of the x-axis of the grid.
-        int minX;
+        public int minX;
         /// The lower limit of the y-axis of the grid.
-        int minY;
+        public int minY;
         /// The upper limit of the x-axis of the grid.
-        int maxX;
+        public int maxX;
         /// The upper limit of the y-axis of the grid.
-        int maxY;
+        public int maxY;
 
         /// Dungeon constructor.
         ///
@@ -59,8 +55,6 @@ namespace LevelGenerator
             Dungeon dungeon = new Dungeon();
             dungeon.rooms = new List<Room>();
             dungeon.grid = new RoomGrid();
-            dungeon.keys = keys;
-            dungeon.locks = locks;
             Room aux;
             foreach (Room old in rooms)
             {
@@ -103,7 +97,8 @@ namespace LevelGenerator
                 maxX = room.x > maxX ? room.x : maxX;
                 maxY = room.y > maxY ? room.y : maxY;
                 // Add the keys and locked doors in the level
-                if (room.type == RoomType.Key) {
+                if (room.type == RoomType.Key)
+                {
                     keyIds.Add(room.key);
                 }
                 if (room.type == RoomType.Locked)
@@ -215,8 +210,6 @@ namespace LevelGenerator
                     }
                 }
             }
-            keys = RoomFactory.AvailableKeys.Count + RoomFactory.UsedKeys.Count;
-            locks = RoomFactory.UsedKeys.Count;
             Update();
         }
 
@@ -268,7 +261,7 @@ namespace LevelGenerator
         public void RemoveLockAndKey(
             ref Random rand
         ) {
-            int removeKey = Common.RandomInt((0, keys - 1), ref rand);
+            int removeKey = Common.RandomInt((0, keyIds.Count - 1), ref rand);
             int removeLock = removeKey;
             Room current;
             current = rooms[0];
@@ -338,8 +331,6 @@ namespace LevelGenerator
                     }
                 }
             }
-            keys -= Convert.ToInt32(hasKey);
-            locks -= Convert.ToInt32(hasLock);
         }
 
         /// Remove the nodes that will be taken out of the dungeon from the dungeon's grid.
@@ -421,17 +412,11 @@ namespace LevelGenerator
         {
             Queue<Room> toVisit = new Queue<Room>();
             toVisit.Enqueue(rooms[0]);
-            keys = 0;
-            locks = 0;
             rooms.Clear();
             while (toVisit.Count > 0)
             {
                 Room current = toVisit.Dequeue();
                 rooms.Add(current);
-                if (current.type == RoomType.Key)
-                    keys++;
-                else if (current.type == RoomType.Locked)
-                    locks++;
                 //
                 foreach (Room child in current.GetChildren())
                 {

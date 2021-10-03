@@ -278,8 +278,9 @@ namespace LevelGenerator
                 // If there are no missions left, then assign the remaining
                 // rooms as normal rooms; otherwise, check if the current room
                 // will not receive a mission
-                if (newMissions.Count == 0 ||
-                    RoomFactory.PROB_NORMAL_ROOM > prob
+                if (branch.Count > newMissions.Count &&
+                    (newMissions.Count == 0 ||
+                    RoomFactory.PROB_NORMAL_ROOM > prob)
                 ) {
                     current.type = RoomType.Normal;
                     current.key = -1;

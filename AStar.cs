@@ -18,18 +18,13 @@ namespace LevelGenerator
 
     class AStar
     {
-        //Size of the grid
         static int sizeX;
         static int sizeY;
 
-        //The A* algorithm
-        public static int FindRoute(Dungeon dun)
-        {
-
+        public static int FindRoute(
+            Dungeon _dungeon
+        ) {
             List<Location> path = new List<Location>();
-
-
-            Location current = null;
             Location start;
             Location target = null;
             //Location of the locks that were still not opened
@@ -40,56 +35,19 @@ namespace LevelGenerator
             //TODO: Make the A* (or another algorithm) use only the really needed ones, the A* in the search phase opens some unecessary locked doors, but this could be prevented
             //By making partial A* from the start to the key of the first locked door found, then from the key to the door, from the door to the key to the next locked one, and so on
             int neededLocks = 0;
-            Room actualRoom, parent;
             //The grid with the rooms
-            RoomGrid grid = dun.grid;
-            //Type of the room
-            RoomType type;
-            //X and Y coordinates
-            int x, y, iPositive, jPositive;
-            //List of all the locked rooms
-            List<int> lockedRooms = new List<int>();
-            //List of all the keys
-            List<int> keys = new List<int>();
-            //int nLockedRooms = 0;
-            //Min and max boundaries of the grid based on the original grid
-            int minX, minY, maxX, maxY;
-            minX = RoomGrid.LEVEL_GRID_OFFSET;
-            minY = RoomGrid.LEVEL_GRID_OFFSET;
-            maxX = -RoomGrid.LEVEL_GRID_OFFSET;
-            maxY = -RoomGrid.LEVEL_GRID_OFFSET;
-            //Check all the rooms and add them to the keys and locks lists if they are one of them
-            foreach (Room room in dun.Rooms)
-            {
-                if (room.type == RoomType.Key)
-                {
-                    keys.Add(room.key);
-                }
-                if (room.type == RoomType.Locked)
-                {
-                    lockedRooms.Add(room.key);
-                }
-                //Check the boundaries of the farthest rooms in the grid
-                if (room.x < minX)
-                    minX = room.x;
-                if (room.y < minY)
-                    minY = room.y;
-                if (room.x > maxX)
-                    maxX = room.x;
-                if (room.y > maxY)
-                    maxY = room.y;
-            }
+            RoomGrid grid = _dungeon.grid;
             //The starting location is room (0,0)
-            start = new Location { x = -2 * minX, y = -2 * minY };
+            start = new Location { x = -2 * _dungeon.minX, y = -2 * _dungeon.minY };
             //List of visited rooms that are not closed yet
             var openList = new List<Location>();
             //List of closed rooms. They were visited and all neighboors explored.
             var closedList = new List<Location>();
             int g = 0;
             //Size of the new grid
-            sizeX = maxX - minX + 1;
-            sizeY = maxY - minY + 1;
-            int[,] map = new int[2*sizeX, 2*sizeY];
+            sizeX = _dungeon.maxX - _dungeon.minX + 1;
+            sizeY = _dungeon.maxY - _dungeon.minY + 1;
+            int[,] map = new int[2 * sizeX, 2 * sizeY];
 
             //101 is EMPTY
             for (int i = 0; i < 2*sizeX; ++i)
@@ -99,70 +57,80 @@ namespace LevelGenerator
                     map[i, j] = (int) Common.RoomCode.E;
                 }
             }
-            //Fill the new grid
-            for (int i = minX; i < maxX + 1; ++i)
+            // Set the corridors, keys and locked rooms
+            for (int i = _dungeon.minX; i < _dungeon.maxX + 1; ++i)
             {
-                for (int j = minY; j < maxY + 1; ++j)
+                for (int j = _dungeon.minY; j < _dungeon.maxY + 1; ++j)
                 {
-                    //Converts the original coordinates (may be negative) to positive
-                    iPositive = i - minX;
-                    jPositive = j - minY;
-                    actualRoom = grid[i, j];
-                    //If the position has a room, check its type and fill the grid accordingly
-                    if (actualRoom != null)
+                    int iep = (i - _dungeon.minX) * 2;
+                    int jep = (j - _dungeon.minY) * 2;
+                    Room current = grid[i, j];
+                    if (current != null)
                     {
-                        type = actualRoom.type;
-                        //0 is a NORMAL ROOM
-                        if (type == RoomType.Normal)
+                        if (current.type == RoomType.Normal)
                         {
-                            map[iPositive * 2, jPositive * 2] = (int) Common.RoomCode.N;
+                            map[iep, jep] = (int) Common.RoomCode.N;
                         }
-                        //The sequential, positivie index of the key is its representation
-                        else if (type == RoomType.Key)
+                        // The key ID is the sequential positive index
+                        else if (current.type == RoomType.Key)
                         {
-                            map[iPositive * 2, jPositive * 2] = keys.IndexOf(actualRoom.key)+1;
+                            int _key = _dungeon.keyIds.IndexOf(current.key);
+                            map[iep, jep] = _key + 1;
                         }
-                        //If the room is locked, the room is a normal room, only the corridor is locked. But is the lock is the last one in the sequential order, than the room is the objective
-                        else if (type == RoomType.Locked)
+                        // If the room is locked, the room is a normal room,
+                        // and the corridor is locked; but if the lock is the
+                        // last one in the sequential order, then the room is
+                        // the goal room
+                        else if (current.type == RoomType.Locked)
                         {
-                            if (lockedRooms.IndexOf(actualRoom.key) == lockedRooms.Count -1)
+                            int _lock = _dungeon.lockIds.IndexOf(current.key);
+                            if (_lock == _dungeon.lockIds.Count - 1)
                             {
-                                map[iPositive * 2, jPositive * 2] = (int) Common.RoomCode.B;
-                                target = new Location { x = iPositive * 2, y = jPositive * 2 };
+                                map[iep, jep] = (int) Common.RoomCode.B;
+                                target = new Location { x = iep, y = jep };
                             }
                             else
-                                map[iPositive * 2, jPositive * 2] = (int) Common.RoomCode.N;
+                            {
+                                map[iep, jep] = (int) Common.RoomCode.N;
+                            }
                         }
-                        else
-                        {
-                            Console.WriteLine("Something went wrong printing the tree!\n");
-                            Console.WriteLine("This Room type does not exist!\n\n");
-                        }
-                        parent = actualRoom.parent;
-                        //If the actual room is a locked room and has a parent, then the connection between then is locked and is represented by the negative value of the index of the key that opens the lock
+                        // If the current room is a locked room and has a
+                        // parent, then the connection between then is locked
+                        // and is represented by the negative value of the
+                        // index of the key that opens the lock
+                        Room parent = current.parent;
                         if (parent != null)
                         {
-
-                            x = parent.x - actualRoom.x + 2 * iPositive;
-                            y = parent.y - actualRoom.y + 2 * jPositive;
-                            if (type == RoomType.Locked)
+                            // Get the corridor between both rooms
+                            int x = parent.x - current.x + iep;
+                            int y = parent.y - current.y + jep;
+                            // If the current room is locked
+                            if (current.type == RoomType.Locked)
                             {
-                                locksLocation.Add(new Location { x = x, y = y, Parent = new Location { x = 2*(parent.x-actualRoom.x) +2*iPositive, y = 2 * (parent.y - actualRoom.y) + 2 * jPositive } });
-                                map[x, y] = -(keys.IndexOf(actualRoom.key)+1);
+                                // Then, the corridor is locked
+                                locksLocation.Add(new Location { x = x, y = y, Parent = new Location { x = 2*(parent.x-current.x) + iep, y = 2 * (parent.y - current.y) + jep } });
+                                map[x, y] = -(_dungeon.keyIds.IndexOf(current.key)+1);
                             }
-                            //If the connection is open, 100 represents a normal corridor
                             else
+                            {
+                                // Otherwise it is an usual corridor
                                 map[x, y] = (int) Common.RoomCode.C;
+                            }
                         }
                     }
                 }
             }
+
+            if (target == null)
+            {
+                return 0;
+            }
+
             //Add all the locks location to the list that will hold their values through the execution of the algorithm
-            foreach(var locked in locksLocation)
+            foreach (var locked in locksLocation)
             {
                 allLocksLocation.Add(locked);
             }
-
 
             //start by adding the original position to the open list
             openList.Add(start);
@@ -171,7 +139,7 @@ namespace LevelGenerator
             {
                 // get the square with the lowest F score
                 var lowest = openList.Min(l => l.F);
-                current = openList.First(l => l.F == lowest);
+                Location current = openList.First(l => l.F == lowest);
                 //if the current is a key, change the locked door status in the map
                 if (map[current.x, current.y] > 0 && map[current.x, current.y] < (int) Common.RoomCode.C)
                 {
@@ -235,8 +203,12 @@ namespace LevelGenerator
                 //Console.WriteLine("Check Path");
                 // if we added the destination to the closed list, we've found a path
                 if(closedList != null)
+                {
                     if (closedList.FirstOrDefault(l => l.x == target.x && l.y == target.y) != null)
+                    {
                         break;
+                    }
+                }
 
                 var adjacentSquares = GetWalkableAdjacentSquares(current.x, current.y, map);
                 g++;

@@ -32,9 +32,6 @@ namespace LevelGenerator
         /// The minimum number of program parameters (arguments).
         private const int NUMBER_OF_PARAMETERS = 6;
 
-        /// The flag of saving all levels separately.
-        private const string SAVE_SEPARATELY = "-s";
-
         /// The error code for bad arguments.
         private const int ERROR_BAD_ARGUMENTS = 0xA0;
         /// The error message of not enough population.
