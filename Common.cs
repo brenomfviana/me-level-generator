@@ -11,6 +11,9 @@ namespace LevelGenerator
         /// The error message of cannot compare individuals.
         public static readonly string CANNOT_COMPARE_INDIVIDUALS =
             "There is no way of comparing two null individuals.";
+        /// The error message of problem in swap children.
+        public static readonly string PROBLEM_IN_THE_DUNGEON =
+            "There is something wrong with the dungeon representation.";
 
         /// The directions in which a room may connect to other rooms.
         ///
