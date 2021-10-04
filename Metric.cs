@@ -6,7 +6,32 @@ namespace LevelGenerator
     /// This class holds the dungeon levels measurement-related functions.
     class Metric
     {
-        /// Calculate and return the coefficient of level exploration.
+        /// Calculate and return the leniency.
+        public static float Leniency(
+            Individual _individual
+        ) {
+            Dungeon dungeon = _individual.dungeon;
+            Queue<Room> unvisited = new Queue<Room>();
+            unvisited.Enqueue(dungeon.rooms[0]);
+            // Calculate the number of safe rooms
+            int safe = 0;
+            while (unvisited.Count > 0)
+            {
+                Room current = unvisited.Dequeue();
+                if (current.enemies == 0) { safe++; }
+                foreach (Room neighbor in current.GetChildren())
+                {
+                    if (neighbor != null)
+                    {
+                        unvisited.Enqueue(neighbor);
+                    }
+                }
+            }
+            // Calculate and return the dungeon leniency
+            return (float) safe / dungeon.rooms.Count;
+        }
+
+        /// Calculate and return the coefficient of exploration.
         public static float CoefficientExploration(
             Individual _individual
         ) {
