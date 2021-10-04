@@ -88,10 +88,8 @@ namespace LevelGenerator
                     {
                         offspring = new Individual[2];
                     }
-                    Individual child1 = Mutation.Apply(parents[0], ref rand);
-                    Individual child2 = Mutation.Apply(parents[1], ref rand);
-                    offspring[0] = child1;
-                    offspring[1] = child2;
+                    offspring[0] = Mutation.Apply(parents[0], ref rand);
+                    offspring[1] = Mutation.Apply(parents[1], ref rand);
                 }
 
                 // Place the offspring in the MAP-Elites population

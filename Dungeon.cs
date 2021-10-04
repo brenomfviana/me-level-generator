@@ -417,7 +417,6 @@ namespace LevelGenerator
             {
                 Room current = toVisit.Dequeue();
                 rooms.Add(current);
-                //
                 foreach (Room child in current.GetChildren())
                 {
                     if (child != null && current.Equals(child.parent))

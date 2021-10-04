@@ -106,15 +106,15 @@ namespace LevelGenerator
                             {
                                 // Then, the corridor is locked
                                 locksLocation.Add(new Location { x = x, y = y, Parent = new Location { x = 2 * (parent.x - current.x) + iep, y = 2 * (parent.y - current.y) + jep } });
-                                int test = dun.keyIds.IndexOf(current.key);
-                                if (test == -1)
+                                int key = dun.keyIds.IndexOf(current.key);
+                                if (key == -1)
                                 {
-                                    System.Console.WriteLine("There's a missing key here! What????");
+                                    System.Console.WriteLine("There's a missing key here! What???? Its ID is " + current.key);
                                     map[x, y] = (int) Common.RoomCode.C;
                                 }
                                 else
                                 {
-                                    map[x, y] = -(dun.keyIds.IndexOf(current.key) + 1);
+                                    map[x, y] = -(key + 1);
                                 }
                             }
                             else

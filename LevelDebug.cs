@@ -139,7 +139,8 @@ namespace LevelGenerator
                             {
                                 // Then, the corridor is locked
                                 int _key = _dungeon.keyIds.IndexOf(current.key);
-                                map[x, y] = -(_key + 1);
+                                map[x, y] = _key != -1 ? -(_key + 1) :
+                                    (int) Common.RoomCode.E;
                             }
                             else
                             {

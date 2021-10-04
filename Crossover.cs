@@ -115,7 +115,7 @@ namespace LevelGenerator
                 roomCut1.FixBranch(specialRooms2, ref _rand);
                 individuals = new Individual[2];
                 individuals[0] = new Individual(ind1);
-                individuals[1] = new Individual(ind1);
+                individuals[1] = new Individual(ind2);
             }
 
             return individuals;

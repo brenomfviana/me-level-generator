@@ -16,10 +16,17 @@ namespace LevelGenerator
             int nK = 4;
             int nL = 4;
             float lCoef = 1.5f;
-            // If the level has no locked door nor key
-            if (dungeon.keyIds.Count == 0 || dungeon.lockIds.Count == 0)
+            float fit;
+            if (dungeon.lockIds.Count > 0 && dungeon.keyIds.Count == 0)
             {
                 _individual.fitness = -1f;
+                return;
+            }
+            // If the level has no locked door nor key
+            if (dungeon.lockIds.Count == 0)
+            {
+                fit = 2*(System.Math.Abs(nV - dungeon.Rooms.Count) + System.Math.Abs(nK - dungeon.keyIds.Count) + System.Math.Abs(nL - dungeon.lockIds.Count) + System.Math.Abs(lCoef - _individual.linearCoefficient));
+                _individual.fitness = fit;
                 return;
             }
             float avgUsedRoom = 0.0f;
@@ -46,7 +53,7 @@ namespace LevelGenerator
                 Console.WriteLine(dungeon.lockIds.Count);
             }
 
-            float fit = (2*(System.Math.Abs(nV - dungeon.Rooms.Count) + System.Math.Abs(nK - dungeon.keyIds.Count) + System.Math.Abs(nL - dungeon.lockIds.Count) + System.Math.Abs(lCoef - _individual.linearCoefficient)) + (dungeon.lockIds.Count * 0.8f - _individual.neededLocks) + (dungeon.Rooms.Count - _individual.neededRooms));
+            fit = (2*(System.Math.Abs(nV - dungeon.Rooms.Count) + System.Math.Abs(nK - dungeon.keyIds.Count) + System.Math.Abs(nL - dungeon.lockIds.Count) + System.Math.Abs(lCoef - _individual.linearCoefficient)) + (dungeon.lockIds.Count * 0.8f - _individual.neededLocks) + (dungeon.Rooms.Count - _individual.neededRooms));
 
             _individual.fitness = fit;
         }

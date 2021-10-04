@@ -284,7 +284,6 @@ namespace LevelGenerator
                 ) {
                     current.type = RoomType.Normal;
                     current.key = -1;
-                    continue;
                 }
                 else
                 {
