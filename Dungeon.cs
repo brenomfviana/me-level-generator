@@ -231,6 +231,18 @@ namespace LevelGenerator
             }
         }
 
+        /// Remove enemies from random rooms.
+        public void RemoveEnemies(
+            int _enemies,
+            ref Random _rand
+        ) {
+            while (_enemies-- > 0)
+            {
+                int index = Common.RandomInt((1, rooms.Count - 1), ref _rand);
+                rooms[index].enemies--;
+            }
+        }
+
         /// Add a lock and a key.
         public void AddLockAndKey(ref Random rand)
         {
@@ -426,8 +438,11 @@ namespace LevelGenerator
         }
 
         /// Recreate the room list by visiting all the rooms in the tree and adding them to the list while also counting the number of locks and keys.
-        public void Fix()
-        {
+        public void Fix(
+            int _enemies,
+            ref Random _rand
+        ) {
+            // Fix the list of rooms
             Queue<Room> toVisit = new Queue<Room>();
             toVisit.Enqueue(rooms[0]);
             rooms.Clear();
@@ -443,6 +458,21 @@ namespace LevelGenerator
                     }
                 }
             }
+            // Fix the numer of enemies
+            int sum = 0;
+            foreach (Room room in rooms)
+            {
+                sum += room.enemies;
+            }
+            if (_enemies > sum)
+            {
+                PlaceEnemies(_enemies - sum, ref _rand);
+            }
+            else if (sum > _enemies)
+            {
+                RemoveEnemies(sum - _enemies, ref _rand);
+            }
+            // Fix the grid limits and the list of keys and locks
             Update();
         }
     }

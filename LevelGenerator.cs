@@ -98,7 +98,7 @@ namespace LevelGenerator
                 for (int i = 0; i < offspring.Length; i++)
                 {
                     offspring[i].generation = g;
-                    offspring[i].dungeon.Fix();
+                    offspring[i].dungeon.Fix(prs.enemies, ref rand);
                     offspring[i].CalculateLinearCoefficient();
                     Fitness.Calculate(prs, ref offspring[i], ref rand);
                     pop.PlaceIndividual(offspring[i]);
