@@ -20,6 +20,14 @@ namespace LevelGenerator
         /// The number of competitors of tournament selection.
         [JsonInclude]
         public int competitors { get; }
+        /// The aimed number of rooms.
+        public int rooms { get; }
+        /// The aimed number of keys.
+        public int keys { get; }
+        /// The aimed number of locks.
+        public int locks { get; }
+        /// The aimed linear coefficient.
+        public float linearCoefficient { get; }
 
         /// Parameters constructor.
         public Parameters(
@@ -27,13 +35,21 @@ namespace LevelGenerator
             int _generations,
             int _population,
             int _mutation,
-            int _competitors
+            int _competitors,
+            int _rooms,
+            int _keys,
+            int _locks,
+            float _linearCoefficient
         ) {
             seed = _seed;
             generations = _generations;
             population = _population;
             mutation = _mutation;
             competitors = _competitors;
+            rooms = _rooms;
+            keys = _keys;
+            locks = _locks;
+            linearCoefficient = _linearCoefficient;
         }
     }
 }

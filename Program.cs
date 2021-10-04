@@ -30,7 +30,7 @@ namespace LevelGenerator
     class Program
     {
         /// The minimum number of program parameters (arguments).
-        private const int NUMBER_OF_PARAMETERS = 5;
+        private const int NUMBER_OF_PARAMETERS = 9;
 
         /// The error code for bad arguments.
         private const int ERROR_BAD_ARGUMENTS = 0xA0;
@@ -53,11 +53,15 @@ namespace LevelGenerator
             }
             // Define the evolutionary parameters
             Parameters prs = new Parameters(
-                int.Parse(_args[0]), // Random seed
-                int.Parse(_args[1]), // Number of generations
-                int.Parse(_args[2]), // Initial population size
-                int.Parse(_args[3]), // Mutation chance
-                int.Parse(_args[4])  // Number of tournament competitors
+                int.Parse(_args[0]),   // Random seed
+                int.Parse(_args[1]),   // Number of generations
+                int.Parse(_args[2]),   // Initial population size
+                int.Parse(_args[3]),   // Mutation chance
+                int.Parse(_args[4]),   // Number of tournament competitors
+                int.Parse(_args[5]),   // Number of rooms
+                int.Parse(_args[6]),   // Number of keys
+                int.Parse(_args[7]),   // Number of locks
+                float.Parse(_args[8])  // Linear coefficient
             );
             // Ensure the population size is enough for the tournament
             Debug.Assert(

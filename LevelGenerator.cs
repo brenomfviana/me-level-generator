@@ -60,7 +60,7 @@ namespace LevelGenerator
             {
                 Individual individual = Individual.GetRandom(ref rand);
                 individual.CalculateLinearCoefficient();
-                Fitness.Calculate(ref individual, ref rand);
+                Fitness.Calculate(prs, ref individual, ref rand);
                 pop.PlaceIndividual(individual);
             }
 
@@ -98,7 +98,7 @@ namespace LevelGenerator
                     offspring[i].generation = g;
                     offspring[i].dungeon.Fix();
                     offspring[i].CalculateLinearCoefficient();
-                    Fitness.Calculate(ref offspring[i], ref rand);
+                    Fitness.Calculate(prs, ref offspring[i], ref rand);
                     pop.PlaceIndividual(offspring[i]);
                 }
             }

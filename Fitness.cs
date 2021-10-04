@@ -8,14 +8,15 @@ namespace LevelGenerator
     {
         /// Fitness is based in the number of rooms, number of keys and locks, the linear coefficient and the number of locks used by the A*
         public static void Calculate(
+            Parameters _prs,
             ref Individual _individual,
             ref Random _rand
         ) {
             Dungeon dungeon = _individual.dungeon;
-            int nV = 20;
-            int nK = 4;
-            int nL = 4;
-            float lCoef = 1.5f;
+            int nV = _prs.rooms;
+            int nK = _prs.keys;
+            int nL = _prs.locks;
+            float lCoef = _prs.linearCoefficient;
             float fit;
             if (dungeon.lockIds.Count > 0 && dungeon.keyIds.Count == 0)
             {

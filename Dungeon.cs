@@ -17,7 +17,6 @@ namespace LevelGenerator
         public RoomGrid grid;
         /// The list of rooms (easier to add neighbors).
         public List<Room> rooms;
-        public List<Room> Rooms { get => rooms; }
         /// The list of dungeon key IDs.
         public List<int> keyIds;
         /// The list of locked room IDs.
@@ -30,6 +29,8 @@ namespace LevelGenerator
         public int maxX;
         /// The upper limit of the y-axis of the grid.
         public int maxY;
+
+        public List<Room> Rooms { get => rooms; }
 
         /// Dungeon constructor.
         ///
@@ -55,13 +56,18 @@ namespace LevelGenerator
             Dungeon dungeon = new Dungeon();
             dungeon.rooms = new List<Room>();
             dungeon.grid = new RoomGrid();
-            Room aux;
             foreach (Room old in rooms)
             {
-                aux = old.Clone();
+                Room aux = old.Clone();
                 dungeon.rooms.Add(aux);
                 dungeon.grid[old.x, old.y] = aux;
             }
+            dungeon.keyIds = new List<int>(keyIds);
+            dungeon.lockIds = new List<int>(lockIds);
+            dungeon.minX = minX;
+            dungeon.minY = minY;
+            dungeon.maxX = maxX;
+            dungeon.maxY = maxY;
             // Need to use the grid to copy the neighboors, children and parent
             // Check the position of the node in the grid and then substitute the old room with the copied one
             foreach (Room room in dungeon.rooms)
