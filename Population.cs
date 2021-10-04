@@ -11,35 +11,35 @@ namespace LevelGenerator
     /// The MAP-Elites population is an N-dimensional array of individuals,
     /// where each matrix's ax corresponds to a different feature.
     ///
-    /// This particular population is mapped into level's locked doors and
-    /// keys. Each Elite (or matrix cell) corresponds to a combination of
-    /// different number of keys and locked doors.
+    /// This particular population is mapped into the level's coefficient of
+    /// exploration and leniency. Thus, each Elite (or matrix cell) corresponds
+    /// to a combination of a different degree of exploration and leniency.
     public struct Population
     {
         /// The MAP-Elites dimension. The dimension is defined by the number of
-        /// keys multiplied by the number of locked doors.
-        public (int keys, int locks) dimension { get; }
+        /// ranges of coefficient of exploration and leniency.
+        public (int exp, int len) dimension { get; }
         /// The MAP-Elites map (a matrix of individuals).
         public Individual[,] map { get; }
 
         /// Population constructor.
         public Population(
-            int _keys,
-            int _locks
+            int _exp,
+            int _len
         ) {
-            dimension = (_keys, _locks);
-            map = new Individual[dimension.keys, dimension.locks];
+            dimension = (_exp, _len);
+            map = new Individual[dimension.exp, dimension.len];
         }
 
         /// Return the number of Elites of the population.
         public int Count()
         {
             int count = 0;
-            for (int k = 0; k < dimension.keys; k++)
+            for (int e = 0; e < dimension.exp; e++)
             {
-                for (int l = 0; l < dimension.locks; l++)
+                for (int l = 0; l < dimension.len; l++)
                 {
-                    if (!(map[k, l] is null))
+                    if (map[e, l] != null)
                     {
                         count++;
                     }
@@ -52,13 +52,13 @@ namespace LevelGenerator
         public List<Coordinate> GetElitesCoordinates()
         {
             List<Coordinate> coordinates = new List<Coordinate>();
-            for (int k = 0; k < dimension.keys; k++)
+            for (int e = 0; e < dimension.exp; e++)
             {
-                for (int l = 0; l < dimension.locks; l++)
+                for (int l = 0; l < dimension.len; l++)
                 {
-                    if (!(map[k, l] is null))
+                    if (map[e, l] != null)
                     {
-                        coordinates.Add((k, l));
+                        coordinates.Add((e, l));
                     }
                 }
             }
@@ -75,18 +75,23 @@ namespace LevelGenerator
             Individual _individual
         ) {
             // Calculate the individual slot (Elite)
-            int k = (int) _individual.dungeon.keyIds.Count;
-            int l = (int) _individual.dungeon.lockIds.Count;
+            float ce = Metric.CoefficientOfExploration(_individual);
+            float le = Metric.Leniency(_individual);
+            int e = SearchSpace.GetCoefficientOfExplorationIndex(ce);
+            int l = SearchSpace.GetLeniencyIndex(le);
             // Check if the level is within the search space
-            if (k >= dimension.keys || l >= dimension.locks)
-            {
+            if (e < 0 ||
+                e >= dimension.exp ||
+                l < 0 ||
+                l >= dimension.len
+            ) {
                 return;
             }
             // If the new individual deserves to survive
-            if (Fitness.IsBest(_individual, map[k, l]))
+            if (Fitness.IsBest(_individual, map[e, l]))
             {
                 // Then, place the individual in the MAP-Elites population
-                map[k, l] = _individual;
+                map[e, l] = _individual;
             }
         }
 
@@ -94,11 +99,11 @@ namespace LevelGenerator
         public List<Individual> ToList()
         {
             List<Individual> list = new List<Individual>();
-            for (int k = 0; k < dimension.keys; k++)
+            for (int e = 0; e < dimension.exp; e++)
             {
-                for (int l = 0; l < dimension.locks; l++)
+                for (int l = 0; l < dimension.len; l++)
                 {
-                    list.Add(map[k, l]);
+                    list.Add(map[e, l]);
                 }
             }
             return list;
@@ -107,21 +112,25 @@ namespace LevelGenerator
         /// Print all the individuals of the MAP-Elites population.
         public void Debug()
         {
-            for (int k = 0; k < dimension.keys; k++)
+            for (int e = 0; e < dimension.exp; e++)
             {
-                for (int l = 0; l < dimension.locks; l++)
+                for (int l = 0; l < dimension.len; l++)
                 {
+                    (float, float)[] listCE = SearchSpace.
+                        CoefficientOfExplorationRanges();
+                    (float, float)[] listLE = SearchSpace.
+                        LeniencyRanges();
                     string log = "Elite ";
-                    log += "" + k + "-";
-                    log += "" + l;
+                    log += "" + listCE[e] + "-";
+                    log += "" + listLE[l];
                     Console.WriteLine(log);
-                    if (map[k, l] is null)
+                    if (map[e, l] is null)
                     {
                         Console.WriteLine(LevelDebug.INDENT + "Empty");
                     }
                     else
                     {
-                        map[k, l].Debug();
+                        map[e, l].Debug();
                     }
                     Console.WriteLine();
                 }

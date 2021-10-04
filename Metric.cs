@@ -31,7 +31,7 @@ namespace LevelGenerator
         }
 
         /// Calculate and return the coefficient of exploration.
-        public static float CoefficientExploration(
+        public static float CoefficientOfExploration(
             Individual _individual
         ) {
             // Get the coefficient of exploration between start and goal rooms

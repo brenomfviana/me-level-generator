@@ -53,7 +53,10 @@ namespace LevelGenerator
             Random rand = new Random(prs.seed);
 
             // Initialize the MAP-Elites population
-            Population pop = new Population(5, 5);
+            Population pop = new Population(
+                SearchSpace.CoefficientOfExplorationRanges().Length,
+                SearchSpace.LeniencyRanges().Length
+            );
 
             // Generate the initial population
             while (pop.Count() < prs.population)

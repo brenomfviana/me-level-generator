@@ -50,14 +50,14 @@ namespace LevelGenerator
             string json = JsonSerializer.Serialize(_data, JSON_OPTIONS);
             File.WriteAllText(datafn, json);
             // Save each individual in the create folder
-            for (int k = 0; k < _solution.dimension.keys; k++)
+            for (int e = 0; e < _solution.dimension.exp; e++)
             {
-                for (int l = 0; l < _solution.dimension.locks; l++)
+                for (int l = 0; l < _solution.dimension.len; l++)
                 {
-                    Individual individual = _solution.map[k, l];
+                    Individual individual = _solution.map[e, l];
                     if (individual != null)
                     {
-                        SaveLevel(individual, basename, (k, l));
+                        SaveLevel(individual, basename, (e, l));
                     }
                 }
             }
