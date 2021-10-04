@@ -102,7 +102,7 @@ namespace LevelGenerator
                 minY = minY > room.y ? room.y : minY;
                 maxX = room.x > maxX ? room.x : maxX;
                 maxY = room.y > maxY ? room.y : maxY;
-                // Add the keys and locked doors in the level
+                // Find the keys and locked doors in the level
                 if (room.type == RoomType.Key)
                 {
                     keyIds.Add(room.key);
@@ -217,6 +217,18 @@ namespace LevelGenerator
                 }
             }
             Update();
+        }
+
+        /// Place enemies in random rooms.
+        public void PlaceEnemies(
+            int _enemies,
+            ref Random _rand
+        ) {
+            while (_enemies-- > 0)
+            {
+                int index = Common.RandomInt((1, rooms.Count - 1), ref _rand);
+                rooms[index].enemies++;
+            }
         }
 
         /// Add a lock and a key.

@@ -36,21 +36,9 @@ namespace LevelGenerator
             [JsonInclude]
             public List<int> locks;
             public int enemies = -1;
-            public int treasures = -1;
-            public int enemyType = -1;
-            private int items = -1;
-            public int npcs = -1;
 
             [DefaultValue(-1), JsonInclude]
             public int Enemies { get => enemies; set => enemies = value; }
-            [DefaultValue(-1), JsonInclude]
-            public int Treasures { get => treasures; set => treasures = value; }
-            [DefaultValue(-1), JsonInclude]
-            public int EnemiesType { get => enemyType; set => enemyType = value; }
-            [DefaultValue(-1), JsonInclude]
-            public int Items { get => items; set => items = value; }
-            [DefaultValue(-1), JsonInclude]
-            public int Npcs { get => npcs; set => npcs = value; }
         }
     }
 

@@ -58,7 +58,9 @@ namespace LevelGenerator
             // Generate the initial population
             while (pop.Count() < prs.population)
             {
-                Individual individual = Individual.GetRandom(ref rand);
+                Individual individual = Individual.GetRandom(
+                    prs.enemies, ref rand
+                );
                 individual.CalculateLinearCoefficient();
                 Fitness.Calculate(prs, ref individual, ref rand);
                 pop.PlaceIndividual(individual);

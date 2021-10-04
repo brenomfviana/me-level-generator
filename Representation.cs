@@ -97,10 +97,12 @@ namespace LevelGenerator
 
         /// Generate and return a random individual.
         public static Individual GetRandom(
+            int _enemies,
             ref Random _rand
         ) {
             Dungeon dungeon = new Dungeon();
             dungeon.GenerateRooms(ref _rand);
+            dungeon.PlaceEnemies(_enemies, ref _rand);
             return new Individual(dungeon);
         }
     }

@@ -39,6 +39,8 @@ namespace LevelGenerator
         /// The ID of the key that opens this room. The ID is equal to -1 when
         /// the room is not locked and does not have a key.
         public int key = -1;
+        /// The number of enemies in this room.
+        public int enemies = 0;
         /// The depth of the room in the tree. This is used to control the
         /// depth of the dungeon level.
         public int depth = 0;
@@ -84,6 +86,7 @@ namespace LevelGenerator
         public Room Clone()
         {
             Room room = new Room(type, key, id);
+            room.enemies = enemies;
             room.depth = depth;
             room.x = x;
             room.y = y;

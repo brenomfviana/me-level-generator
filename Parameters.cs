@@ -26,6 +26,8 @@ namespace LevelGenerator
         public int keys { get; }
         /// The aimed number of locks.
         public int locks { get; }
+        /// The aimed number of enemies.
+        public int enemies { get; }
         /// The aimed linear coefficient.
         public float linearCoefficient { get; }
 
@@ -39,6 +41,7 @@ namespace LevelGenerator
             int _rooms,
             int _keys,
             int _locks,
+            int _enemies,
             float _linearCoefficient
         ) {
             seed = _seed;
@@ -49,6 +52,7 @@ namespace LevelGenerator
             rooms = _rooms;
             keys = _keys;
             locks = _locks;
+            enemies = _enemies;
             linearCoefficient = _linearCoefficient;
         }
     }

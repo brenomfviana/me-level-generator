@@ -124,9 +124,9 @@ namespace LevelGenerator
 
             // Set the corridors, keys and locked rooms
             RoomGrid grid = dungeon.grid;
-            for (int i = minX; i < maxX + 1; ++i)
+            for (int i = minX; i < maxX + 1; i++)
             {
-                for (int j = minY; j < maxY + 1; ++j)
+                for (int j = minY; j < maxY + 1; j++)
                 {
                     // Get the even positions
                     int iep = (i - minX) * 2;
@@ -186,12 +186,13 @@ namespace LevelGenerator
             ifile.fitness = _individual.fitness;
 
             // Set the list of rooms
-            for (int i = 0; i < sizeX * 2; ++i)
+            for (int i = 0; i < sizeX * 2; i++)
             {
-                for (int j = 0; j < sizeY * 2; ++j)
+                for (int j = 0; j < sizeY * 2; j++)
                 {
-                    // Initialize non-existent room
                     IndividualFile.Room room = null;
+                    int x = i / 2 + minX;
+                    int y = j / 2 + minY;
                     if (map[i, j] != (int) Common.RoomCode.E)
                     {
                         // Create a new empty room
@@ -203,17 +204,13 @@ namespace LevelGenerator
                         {
                             // Set up the starting room
                             room.type = "s";
-                            room.enemies = 0;
-                            room.treasures = 0;
-                            room.npcs = 0;
+                            room.enemies = grid[x, y].enemies;
                         }
                         else if (map[i, j] == (int) Common.RoomCode.B)
                         {
                             // Set up the boss/goal room
                             room.type = "B";
-                            room.enemies = 0;
-                            room.treasures = 0;
-                            room.npcs = 0;
+                            room.enemies = grid[x, y].enemies;
                         }
                         else if (map[i, j] == (int) Common.RoomCode.C)
                         {
@@ -223,22 +220,22 @@ namespace LevelGenerator
                         else if (map[i, j] < 0)
                         {
                             // Set up the a locked corridor
+                            room.type = "c";
                             room.locks = new List<int> { map[i, j] };
                         }
                         else if (map[i, j] > 0)
                         {
                             // Set up a room with a key
                             room.keys = new List<int> { map[i, j] };
-                            room.enemies = 0;
-                            room.treasures = 0;
-                            room.npcs = 0;
+                            room.enemies = grid[x, y].enemies;
                         }
                         else
                         {
                             // Set up a normal room
-                            room.enemies = 0;
-                            room.treasures = 0;
-                            room.npcs = 0;
+                            if (grid[x, y] != null)
+                            {
+                                room.enemies = grid[x, y].enemies;
+                            }
                         }
                     }
                     // If the room exists, then add it to the list of rooms
