@@ -65,6 +65,7 @@ namespace LevelGenerator
                     prs.enemies, ref rand
                 );
                 individual.CalculateLinearCoefficient();
+                individual.dungeon.Fix(prs.enemies, ref rand);
                 Fitness.Calculate(prs, ref individual, ref rand);
                 pop.PlaceIndividual(individual);
             }
