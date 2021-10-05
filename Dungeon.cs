@@ -95,6 +95,8 @@ namespace LevelGenerator
         /// Update the lists of keys and locks, and the grid limits.
         private void Update()
         {
+            keyIds.Clear();
+            lockIds.Clear();
             foreach (Room room in rooms)
             {
                 // Update grid bounds
@@ -248,8 +250,9 @@ namespace LevelGenerator
         }
 
         /// Add a lock and a key.
-        public void AddLockAndKey(ref Random rand)
-        {
+        public void AddLockAndKey(
+            ref Random _rand
+        ) {
             Queue<Room> toVisit = new Queue<Room>();
             toVisit.Enqueue(rooms[0]);
             bool hasKey = false;
@@ -258,29 +261,32 @@ namespace LevelGenerator
             while (toVisit.Count > 0 && !hasLock)
             {
                 Room current = toVisit.Dequeue();
-                if (current.type == RoomType.Normal && !current.Equals(rooms[0]))
-                {
-                    if (Common.RandomPercent(ref rand) <= RoomFactory.PROB_KEY_ROOM + RoomFactory.PROB_LOCKER_ROOM)
+                if (current.type == RoomType.Normal &&
+                    !current.Equals(rooms[0])
+                ) {
+                    float prob = Common.RandomPercent(ref _rand);
+                    float chance = RoomFactory.PROB_KEY_ROOM +
+                        RoomFactory.PROB_LOCKER_ROOM;
+                    if (chance >= prob)
                     {
                         if (!hasKey)
                         {
-                            current.type = RoomType.Key;
                             current.id = Room.GetNextId();
                             current.key = current.id;
+                            current.type = RoomType.Key;
                             lockId = current.id;
-                            hasKey = true;
                             grid[current.x, current.y] = current;
+                            hasKey = true;
                         }
                         else
                         {
                             current.type = RoomType.Locked;
                             current.key = lockId;
-                            hasLock = true;
                             grid[current.x, current.y] = current;
+                            hasLock = true;
                         }
                     }
                 }
-                //
                 foreach (Room child in current.GetChildren())
                 {
                     if (child != null && current.Equals(child.parent))
@@ -293,44 +299,40 @@ namespace LevelGenerator
 
         /// Remove a lock and a key.
         public void RemoveLockAndKey(
-            ref Random rand
+            ref Random _rand
         ) {
-            int removeKey = Common.RandomInt((0, keyIds.Count - 1), ref rand);
-            int removeLock = removeKey;
-            Room current;
-            current = rooms[0];
-            Queue<Room> toVisit = new Queue<Room>();
-            toVisit.Enqueue(current);
-            bool hasKey = false;
-            bool hasLock = false;
+            // Choose a random key to remove and find its lock
+            int keyId = Common.RandomInt((0, keyIds.Count - 1), ref _rand);
             int lockId = -1;
             int keyCount = 0;
-            foreach (Room r in rooms)
+            foreach (Room room in rooms)
             {
-                if (r.type == RoomType.Key)
+                if (room.type == RoomType.Key)
                 {
-                    if (removeKey == keyCount)
-                        lockId = r.id;
+                    if (keyId == keyCount)
+                    {
+                        lockId = room.id;
+                    }
                     keyCount++;
                 }
             }
-            //Console.WriteLine("Searching Id:" + lockId);
-            while (toVisit.Count > 0 && (!hasLock || !hasKey))
+            // Remove the key
+            bool hasKey = false;
+            Queue<Room> toVisit = new Queue<Room>();
+            toVisit.Enqueue(rooms[0]);
+            while (toVisit.Count > 0 && !hasKey)
             {
-                current = toVisit.Dequeue();
+                Room current = toVisit.Dequeue();
                 if (current.type == RoomType.Key)
                 {
-                    //Console.WriteLine("KeyId:" + current.id);
                     if (current.id == lockId)
                     {
                         current.type = RoomType.Normal;
                         current.key = -1;
-                        lockId = current.id;
                         grid[current.x, current.y] = current;
                         hasKey = true;
                     }
                 }
-                //
                 foreach (Room child in current.GetChildren())
                 {
                     if (child != null && current.Equals(child.parent))
@@ -339,24 +341,23 @@ namespace LevelGenerator
                     }
                 }
             }
-
-            current = rooms[0];
+            // Remove the lock
+            bool hasLock = false;
             toVisit.Clear();
-            toVisit.Enqueue(current);
-
+            toVisit.Enqueue(rooms[0]);
             while (toVisit.Count > 0 && !hasLock)
             {
-                current = toVisit.Dequeue();
+                Room current = toVisit.Dequeue();
                 if (current.type == RoomType.Locked)
                 {
                     if (current.key == lockId)
                     {
                         current.type = RoomType.Normal;
                         current.key = -1;
+                        grid[current.x, current.y] = current;
                         hasLock = true;
                     }
                 }
-                //
                 foreach (Room child in current.GetChildren())
                 {
                     if (child != null && current.Equals(child.parent))
@@ -478,6 +479,18 @@ namespace LevelGenerator
             }
             // Fix the grid limits and the list of keys and locks
             Update();
+            // If this dungeon does not have a lock, then add one
+            if (lockIds.Count == 0 && keyIds.Count != 0)
+            {
+                RemoveLockAndKey(ref _rand);
+                AddLockAndKey(ref _rand);
+                Update();
+            }
+            else if (lockIds.Count == 0 && keyIds.Count == 0)
+            {
+                AddLockAndKey(ref _rand);
+                Update();
+            }
         }
     }
 }
