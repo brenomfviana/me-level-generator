@@ -236,10 +236,14 @@ namespace LevelGenerator
             int _enemies,
             ref Random _rand
         ) {
-            while (_enemies-- > 0)
+            while (_enemies > 0)
             {
                 int index = Common.RandomInt((1, rooms.Count - 1), ref _rand);
-                rooms[index].enemies--;
+                if (rooms[index].enemies > 0)
+                {
+                    rooms[index].enemies--;
+                    _enemies--;
+                }
             }
         }
 
