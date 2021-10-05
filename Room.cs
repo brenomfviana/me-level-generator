@@ -241,8 +241,8 @@ namespace LevelGenerator
                 {
                     if (_missions[i] == -_missions[j])
                     {
-                        int nextId = Room.GetNextId();
-                        _missions[i] = _missions[i] > 0 ? nextId : -nextId;
+                        int newId = Room.GetNextId();
+                        _missions[i] = _missions[i] > 0 ? newId : -newId;
                         _missions[j] = -_missions[i];
                     }
                 }
@@ -271,19 +271,16 @@ namespace LevelGenerator
                 }
             }
 
-            // Try to place all the missions in the branch randomly. If the
-            // number of remaining rooms is the same as the number of mission
-            // rooms, every room must be a mission.
-            while (branch.Count > 0 && newMissions.Count > 0)
+            // Place missions in the branch randomly while there are more rooms than missions; otherwise, this while stops
+            while (branch.Count > newMissions.Count)
             {
                 Room current = branch.Dequeue();
                 int prob = Common.RandomPercent(ref _rand);
                 // If there are no missions left, then assign the remaining
                 // rooms as normal rooms; otherwise, check if the current room
                 // will not receive a mission
-                if (branch.Count > newMissions.Count &&
-                    (newMissions.Count == 0 ||
-                    RoomFactory.PROB_NORMAL_ROOM > prob)
+                if (newMissions.Count == 0 ||
+                    RoomFactory.PROB_NORMAL_ROOM > prob
                 ) {
                     current.type = RoomType.Normal;
                     current.key = -1;
@@ -293,18 +290,39 @@ namespace LevelGenerator
                     // The current room will receive a mission
                     int missionId = newMissions.Dequeue();
                     // Assign the mission ID to the current room
-                    if (missionId > 0)
-                    {
-                        current.type = RoomType.Key;
-                        current.id = missionId;
-                        current.key = missionId;
-                    }
-                    else
-                    {
-                        current.type = RoomType.Locked;
-                        current.key = -missionId;
-                    }
+                    FixMission(ref current, missionId);
                 }
+            }
+
+            // If new missions are remaining, it means that the number of
+            // remaining rooms is the same as the number of mission rooms;
+            // thus, place the missions in those rooms
+            while (branch.Count > 0 && newMissions.Count > 0)
+            {
+                // The current room will receive a mission
+                Room current = branch.Dequeue();
+                int missionId = newMissions.Dequeue();
+                // Assign the mission ID to the current room
+                FixMission(ref current, missionId);
+            }
+        }
+
+        /// Auxiliary method for fixing the branch; it assigns the entered
+        /// mission to the entered room.
+        private void FixMission(
+            ref Room _room,
+            int _mission
+        ) {
+            if (_mission > 0)
+            {
+                _room.type = RoomType.Key;
+                _room.id = _mission;
+                _room.key = _mission;
+            }
+            else
+            {
+                _room.type = RoomType.Locked;
+                _room.key = -_mission;
             }
         }
     }
