@@ -6,7 +6,19 @@ namespace LevelGenerator
     /// This class holds all the fitness-related functions.
     public class Fitness
     {
-        /// Fitness is based in the number of rooms, number of keys and locks, the linear coefficient and the number of locks used by the A*.
+        /// Calculate the fitness value of the entered individual.
+        ///
+        /// An individual's fitness is defined by two factors: the user aimed
+        /// settings and the gameplay factor. The user aimed settings are
+        /// measured by the distance of the aimed number of rooms, number of
+        /// keys, number of locks and the linear coefficient. The gameplay
+        /// factor sums: (1) the distance between the total number of locks
+        /// weighted by 0.8 and the number of needed locks to open to finish
+        /// the level; (2) the distance between the total number of rooms and
+        /// the number of needed rooms to visit to finish the level, and; (3)
+        /// the negative value of the sparsity of enemies. The last item is
+        /// negative because this fitness aims to minimize its value while
+        /// maximizing the sparsity of enemies.
         public static void Calculate(
             Parameters _prs,
             ref Individual _individual,
@@ -57,11 +69,42 @@ namespace LevelGenerator
                         "\n  Total rooms=" + dungeon.Rooms.Count +
                         "\n  Needed rooms=" + _individual.neededRooms);
                 }
-                // Update the fitness by summing the needed rooms and locks
+                // Update the fitness by summing the number of needed rooms and
+                // the number of needed locks, and subtracting the enemy
+                // sparsity (the higher the better)
                 fit += dungeon.lockIds.Count * 0.8f - _individual.neededLocks +
-                    dungeon.Rooms.Count - _individual.neededRooms;
+                    dungeon.Rooms.Count - _individual.neededRooms +
+                    -EnemySparsity(dungeon, _prs.enemies);
             }
             _individual.fitness = fit;
+        }
+
+        /// Calculate and return the enemy sparsity in the entered dungeon.
+        private static float EnemySparsity(
+            Dungeon _dungeon,
+            int _enemies
+        ) {
+            // Calculate the average position of enemies
+            float avg_x = 0f;
+            float avg_y = 0f;
+            foreach (Room room in _dungeon.rooms)
+            {
+                avg_x += room.x * room.enemies;
+                avg_y += room.y * room.enemies;
+            }
+            avg_x = avg_x / _enemies;
+            avg_y = avg_y / _enemies;
+            // Calculate the sparsity
+            float sparsity = 0f;
+            foreach (Room room in _dungeon.rooms)
+            {
+                for (int i = 0; i < room.enemies; i++)
+                {
+                    sparsity += Math.Abs(room.x - avg_x);
+                    sparsity += Math.Abs(room.y - avg_y);
+                }
+            }
+            return sparsity / (_enemies + _enemies);
         }
 
         /// Return true if the first individual (`_i1`) is best than the second
