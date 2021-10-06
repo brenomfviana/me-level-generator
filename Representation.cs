@@ -19,12 +19,12 @@ namespace LevelGenerator
         public int generation;
         /// The individual fitness.
         public float fitness;
+        /// The linear coefficient of the dungeon level.
+        public float linearCoefficient;
         /// The number of locked doors that must be unlocked to reach the goal.
         public int neededLocks;
         /// The number of rooms that must be visited to reach the goal.
         public float neededRooms;
-        /// The linear coefficient of the dungeon level.
-        public float linearCoefficient;
         /// The coefficient of exploration.
         public float exploration;
         /// The leniency degree.

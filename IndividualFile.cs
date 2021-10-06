@@ -18,11 +18,17 @@ namespace LevelGenerator
         [JsonInclude]
         public float fitness;
         [JsonInclude]
+        public int numberOfRooms;
+        [JsonInclude]
+        public int numberOfKeys;
+        [JsonInclude]
+        public int numberOfLocks;
+        [JsonInclude]
+        public float linearCoefficient;
+        [JsonInclude]
         public int neededLocks;
         [JsonInclude]
         public float neededRooms;
-        [JsonInclude]
-        public float linearCoefficient;
         [JsonInclude]
         public float exploration;
         [JsonInclude]

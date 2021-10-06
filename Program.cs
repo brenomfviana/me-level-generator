@@ -77,7 +77,7 @@ namespace LevelGenerator
             // Run the generator and save the results and the collected data
             LevelGenerator generator = new LevelGenerator(prs);
             generator.Evolve();
-            generator.GetSolution().Debug();
+            // generator.GetSolution().Debug();
             Output.WriteData(generator.GetSolution(), generator.GetData());
         }
     }

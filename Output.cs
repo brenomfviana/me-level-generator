@@ -184,9 +184,12 @@ namespace LevelGenerator
             );
             ifile.generation = _individual.generation;
             ifile.fitness = _individual.fitness;
+            ifile.numberOfRooms = _individual.dungeon.rooms.Count;
+            ifile.numberOfKeys = _individual.dungeon.keyIds.Count;
+            ifile.numberOfLocks = _individual.dungeon.lockIds.Count;
+            ifile.linearCoefficient = _individual.linearCoefficient;
             ifile.neededLocks = _individual.neededLocks;
             ifile.neededRooms = _individual.neededRooms;
-            ifile.linearCoefficient = _individual.linearCoefficient;
             ifile.exploration = _individual.exploration;
             ifile.leniency = _individual.leniency;
 
