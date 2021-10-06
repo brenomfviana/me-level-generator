@@ -53,6 +53,14 @@ def run(ge, po, mu, co):
   # Run algoritm for the current set of parameters
   os.system(executable + parameters)
 
+def plot(ge, po, mu, co, ex):
+  # Plot the charts for the current set of parameters
+  parameters = ''
+  for i in [ge, po, mu, co, ex]:
+    parameters += str(i) + ' '
+  os.system('python plot.py ' + parameters)
+
+
 # Variables to control the experiment progress
 total = len(generations) * \
   len(populations) * \
@@ -71,3 +79,13 @@ for ge in generations:
           # Print progress
           print("%.2f" % ((i / total) * 100))
           i += 1
+
+# Plot all the results
+print('Plotting')
+for ge in generations:
+  for po in populations:
+    for mu in mutations:
+        for co in competitors:
+          # Print progress
+          print("%.2f" % ((i / total) * 100))
+          plot(ge, po, mu, co, len(executions))

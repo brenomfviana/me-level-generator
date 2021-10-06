@@ -30,6 +30,12 @@ def to_map(files, filenames, attribute):
     x = int(name[1])
     y = int(name[0])
     map[x, y] = json.loads(files[i])[attribute]
+    # Uncomment to check if the levels are being placed in the right position
+    # print(json.loads(files[i])['exploration'])
+    # print(exploration[y])
+    # print(json.loads(files[i])['leniency'])
+    # print(leniency[x])
+    # print()
   return map
 
 
