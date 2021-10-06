@@ -75,8 +75,8 @@ namespace LevelGenerator
             Individual _individual
         ) {
             // Calculate the individual slot (Elite)
-            float ce = Metric.CoefficientOfExploration(_individual);
-            float le = Metric.Leniency(_individual);
+            float ce = _individual.exploration;
+            float le = _individual.leniency;
             int e = SearchSpace.GetCoefficientOfExplorationIndex(ce);
             int l = SearchSpace.GetLeniencyIndex(le);
             // Check if the level is within the search space

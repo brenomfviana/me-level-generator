@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json.Serialization;
 
 namespace LevelGenerator
 {
@@ -17,20 +16,19 @@ namespace LevelGenerator
         /// The dungeon level.
         public Dungeon dungeon;
         /// The generation in which the individual was created.
-        [JsonInclude]
         public int generation;
         /// The individual fitness.
-        [JsonInclude]
         public float fitness;
         /// The number of locked doors that must be unlocked to reach the goal.
-        [JsonInclude]
         public int neededLocks;
         /// The number of rooms that must be visited to reach the goal.
-        [JsonInclude]
         public float neededRooms;
         /// The linear coefficient of the dungeon level.
-        [JsonInclude]
         public float linearCoefficient;
+        /// The coefficient of exploration.
+        public float exploration;
+        /// The leniency degree.
+        public float leniency;
 
         /// Individual contructor.
         public Individual(

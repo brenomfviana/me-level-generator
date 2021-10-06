@@ -17,6 +17,16 @@ namespace LevelGenerator
         public int generation;
         [JsonInclude]
         public float fitness;
+        [JsonInclude]
+        public int neededLocks;
+        [JsonInclude]
+        public float neededRooms;
+        [JsonInclude]
+        public float linearCoefficient;
+        [JsonInclude]
+        public float exploration;
+        [JsonInclude]
+        public float leniency;
 
         public IndividualFile()
         {

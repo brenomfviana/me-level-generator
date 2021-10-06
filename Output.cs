@@ -184,6 +184,11 @@ namespace LevelGenerator
             );
             ifile.generation = _individual.generation;
             ifile.fitness = _individual.fitness;
+            ifile.neededLocks = _individual.neededLocks;
+            ifile.neededRooms = _individual.neededRooms;
+            ifile.linearCoefficient = _individual.linearCoefficient;
+            ifile.exploration = _individual.exploration;
+            ifile.leniency = _individual.leniency;
 
             // Set the list of rooms
             for (int i = 0; i < sizeX * 2; i++)
@@ -249,7 +254,8 @@ namespace LevelGenerator
             // Build the filename
             string filename = _basename + SEPARATOR +
                 "level" + FILENAME_SEPARATOR +
-                _coordinate.x + FILENAME_SEPARATOR + _coordinate.y + JSON;
+                _coordinate.x + FILENAME_SEPARATOR +
+                _coordinate.y + JSON;
             // Serialize and write the level file
             string json = JsonSerializer.Serialize(ifile, JSON_OPTIONS);
             File.WriteAllText(filename, json);

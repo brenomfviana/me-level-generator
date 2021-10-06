@@ -67,6 +67,10 @@ namespace LevelGenerator
                 individual.CalculateLinearCoefficient();
                 individual.dungeon.Fix(prs.enemies, ref rand);
                 Fitness.Calculate(prs, ref individual, ref rand);
+                float ce = Metric.CoefficientOfExploration(individual);
+                float le = Metric.Leniency(individual);
+                individual.exploration = ce;
+                individual.leniency = le;
                 pop.PlaceIndividual(individual);
             }
 
@@ -105,6 +109,10 @@ namespace LevelGenerator
                     offspring[i].dungeon.Fix(prs.enemies, ref rand);
                     offspring[i].CalculateLinearCoefficient();
                     Fitness.Calculate(prs, ref offspring[i], ref rand);
+                    float ce = Metric.CoefficientOfExploration(offspring[i]);
+                    float le = Metric.Leniency(offspring[i]);
+                    offspring[i].exploration = ce;
+                    offspring[i].leniency = le;
                     pop.PlaceIndividual(offspring[i]);
                 }
             }
