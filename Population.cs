@@ -121,8 +121,8 @@ namespace LevelGenerator
                     (float, float)[] listLE = SearchSpace.
                         LeniencyRanges();
                     string log = "Elite ";
-                    log += "" + listCE[e] + "-";
-                    log += "" + listLE[l];
+                    log += "CE" + listCE[e] + "-";
+                    log += "LE" + listLE[l];
                     Console.WriteLine(log);
                     if (map[e, l] is null)
                     {
