@@ -32,6 +32,9 @@ namespace LevelGenerator
 
         public List<Room> Rooms { get => rooms; }
 
+        /// The goal room.
+        private Room goal = null;
+
         /// Dungeon constructor.
         ///
         /// Create and return a new dungeon with the starting room.
@@ -142,16 +145,20 @@ namespace LevelGenerator
         /// Return the dungeon goal room.
         public Room GetGoal()
         {
+            if (goal != null)
+            {
+                return goal;
+            }
             foreach (Room room in rooms)
             {
                 if (room.type != RoomType.Locked) { continue; }
                 int _lock = lockIds.IndexOf(room.key);
                 if (_lock == lockIds.Count - 1)
                 {
-                    return room;
+                    goal = room;
                 }
             }
-            return null;
+            return goal;
         }
 
         /// Instantiates a room and tries to add it as a child of the actual room, considering its direction and position. If there is not a room in the grid at the entered coordinates, create the room, add it to the room list and also enqueue it so it can be explored later.
@@ -240,7 +247,10 @@ namespace LevelGenerator
             while (_enemies-- > 0)
             {
                 int index = Common.RandomInt((1, rooms.Count - 1), ref _rand);
-                rooms[index].enemies++;
+                if (!rooms[index].Equals(GetGoal()))
+                {
+                    rooms[index].enemies++;
+                }
             }
         }
 
@@ -491,16 +501,20 @@ namespace LevelGenerator
             // Fix the grid limits and the list of keys and locks
             Update();
             // If this dungeon does not have a lock, then add one
-            if (lockIds.Count == 0 && keyIds.Count != 0)
+            if (lockIds.Count == 0)
             {
-                RemoveLockAndKey(ref _rand);
+                if (keyIds.Count != 0)
+                {
+                    RemoveLockAndKey(ref _rand);
+                }
                 AddLockAndKey(ref _rand);
                 Update();
             }
-            else if (lockIds.Count == 0 && keyIds.Count == 0)
+            // Remove enemies from the goal room and place them in other rooms
+            if (GetGoal() != null && goal.enemies > 0)
             {
-                AddLockAndKey(ref _rand);
-                Update();
+                PlaceEnemies(goal.enemies, ref _rand);
+                goal.enemies = 0;
             }
         }
     }
