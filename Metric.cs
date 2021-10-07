@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace LevelGenerator
@@ -42,9 +43,10 @@ namespace LevelGenerator
             float sum = (float) reached.Count / dungeon.GetNumberOfRooms();
             // Get the all the rooms with keys and locks
             Room[] keys = new Room[dungeon.keyIds.Count];
-            Room[] locks = new Room[dungeon.lockIds.Count];
+            Room[] locks = new Room[dungeon.keyIds.Count];
             foreach (Room room in dungeon.rooms)
             {
+                // Place the key
                 if (room.type == RoomType.Key)
                 {
                     int ki = dungeon.keyIds.IndexOf(room.key);
@@ -53,9 +55,10 @@ namespace LevelGenerator
                         keys[ki] = room;
                     }
                 }
+                // Place the lock at the same index as its the key
                 if (room.type == RoomType.Locked)
                 {
-                    int li = dungeon.lockIds.IndexOf(room.key);
+                    int li = dungeon.keyIds.IndexOf(room.key);
                     if (li != -1)
                     {
                         locks[li] = room;
@@ -67,7 +70,7 @@ namespace LevelGenerator
             int count = 1;
             for (int i = 0; i < keys.Length; i++)
             {
-                if (i < locks.Length && keys[i] != null && locks[i] != null)
+                if (keys[i] != null && locks[i] != null)
                 {
                     List<Room> r = FloodFill(dungeon, keys[i], locks[i]);
                     sum += (float) r.Count / dungeon.GetNumberOfRooms();
