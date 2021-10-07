@@ -89,8 +89,20 @@ namespace LevelGenerator
         {
             Console.WriteLine(LevelDebug.INDENT + "G=" + generation);
             Console.WriteLine(LevelDebug.INDENT + "F=" + fitness);
-            Console.WriteLine(LevelDebug.INDENT + "MAP=");
-            LevelDebug.PrintMap(dungeon, LevelDebug.INDENT);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Rooms=" + dungeon.rooms.Count);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Keys=" + dungeon.keyIds.Count);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Locks=" + dungeon.lockIds.Count);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Enemies=" + dungeon.GetNumberOfEnemies());
+            Console.WriteLine(LevelDebug.INDENT +
+                "Linear coefficient=" + linearCoefficient);
+            Console.WriteLine(LevelDebug.INDENT + "MISSION MAP=");
+            LevelDebug.PrintMissionMap(dungeon, LevelDebug.INDENT);
+            Console.WriteLine(LevelDebug.INDENT + "ENEMY MAP=");
+            LevelDebug.PrintEnemyMap(dungeon, LevelDebug.INDENT);
         }
 
         /// Generate and return a random individual.

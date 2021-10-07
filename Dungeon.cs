@@ -116,10 +116,21 @@ namespace LevelGenerator
             }
         }
 
-        /// Return the number of rooms of the whole dungeon.
+        /// Return the number of rooms of the dungeon.
         public int GetNumberOfRooms()
         {
             return rooms.Count;
+        }
+
+        /// Return the number of enemies of the dungeon.
+        public int GetNumberOfEnemies()
+        {
+            int sum = 0;
+            foreach (Room room in rooms)
+            {
+                sum += room.enemies;
+            }
+            return sum;
         }
 
         /// Return the dungeon start room.
