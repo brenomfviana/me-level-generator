@@ -6,182 +6,197 @@ namespace LevelGenerator
 {
     class PathFinding
     {
-        //protected int auxoffset = 0;
-
-        private int nVisitedRooms = 0;
-        private int neededLocks = 0;
-        protected Dungeon dun;
-        protected List<Location> path = new List<Location>();
-
+        protected Dungeon dungeon;
+        protected Location start = null;
         protected Location target = null;
-
-        protected List<Location> locksLocation = new List<Location>();
-        protected List<Location> allLocksLocation = new List<Location>();
-
-        protected RoomGrid grid;
-
-        protected List<Location> openList = new List<Location>();
-        private List<Location> closedList = new List<Location>();
-
         protected int sizeX;
         protected int sizeY;
-
         protected int[,] map;
+        protected List<Location> path = new List<Location>();
+        protected List<Location> locksLocation = new List<Location>();
+        protected List<Location> allLocksLocation = new List<Location>();
+        protected List<Location> openList = new List<Location>();
+        private List<Location> closedList = new List<Location>();
+        private int nVisitedRooms = 0;
+        private int neededLocks = 0;
 
-        public List<Location> ClosedList { get => closedList; set => closedList = value; }
-        public int NVisitedRooms { get => nVisitedRooms; set => nVisitedRooms = value; }
-        public int NeededLocks { get => neededLocks; set => neededLocks = value; }
+        public List<Location> ClosedList {
+            get => closedList;
+            set => closedList = value;
+        }
+        public int NVisitedRooms {
+            get => nVisitedRooms;
+            set => nVisitedRooms = value;
+        }
+        public int NeededLocks {
+            get => neededLocks;
+            set => neededLocks = value;
+        }
 
-        // Constructor
+        /// Constructor.
         public PathFinding (
             Dungeon _dungeon
         ) {
-            dun = _dungeon;
-            grid = dun.grid;
-            neededLocks= 0;
+            dungeon = _dungeon;
+            neededLocks = 0;
             InitiatePathFinding();
         }
 
-        // Initiate the path finding setting map, sizes, rooms and filling the grid
+        /// Initiate the path finding setting map, sizes, rooms and filling the grid.
         private void InitiatePathFinding()
         {
-            //Size of the new grid
-            sizeX = dun.maxX - dun.minX + 1;
-            sizeY = dun.maxY - dun.minY + 1;
+            // The starting location is room (0,0)
+            start = new Location {
+                X = -2 * dungeon.minX,
+                Y = -2 * dungeon.minY
+            };
+            // Size of the new grid
+            sizeX = dungeon.maxX - dungeon.minX + 1;
+            sizeY = dungeon.maxY - dungeon.minY + 1;
             map = new int[2 * sizeX, 2 * sizeY];
-
-            //101 is EMPTY
+            // 101 is EMPTY
             for (int i = 0; i < 2 * sizeX; i++)
             {
                 for (int j = 0; j < 2 * sizeY; j++)
                 {
-                    map[i, j] = (int) Common.RoomCode.E;
+                    map[i, j] = 101;
                 }
             }
-            // Set the corridors, keys and locked rooms
-            for (int i = dun.minX; i < dun.maxX + 1; i++)
+            // Fill the new grid
+            for (int i = dungeon.minX; i < dungeon.maxX + 1; i++)
             {
-                for (int j = dun.minY; j < dun.maxY + 1; j++)
+                for (int j = dungeon.minY; j < dungeon.maxY + 1; j++)
                 {
-                    int iep = (i - dun.minX) * 2;
-                    int jep = (j - dun.minY) * 2;
-                    Room current = grid[i, j];
+                    // Convert the original coordinates (may be negative) to positive
+                    int iPositive = i - dungeon.minX;
+                    int jPositive = j - dungeon.minY;
+                    Room current = dungeon.grid[i, j];
+                    // If the position has a room, check its type and fill the grid accordingly
                     if (current != null)
                     {
+                        // 0 is a NORMAL ROOM
                         if (current.type == RoomType.Normal)
                         {
-                            map[iep, jep] = (int) Common.RoomCode.N;
+                            map[iPositive * 2, jPositive * 2] = 0;
                         }
-                        // The key ID is the sequential positive index
+                        // The sequential, positivie index of the key is its representation
                         else if (current.type == RoomType.Key)
                         {
-                            map[iep, jep] = dun.keyIds.IndexOf(current.key) + 1;
+                            map[iPositive * 2, jPositive * 2] = dungeon.keyIds.IndexOf(current.key) + 1;
                         }
-                        // If the room is locked, the room is a normal room,
-                        // and the corridor is locked; but if the lock is the
-                        // last one in the sequential order, then the room is
-                        // the goal room
+                        // If the room is locked, the room is a normal room, only the corridor is locked. But is the lock is the last one in the sequential order, than the room is the objective
                         else if (current.type == RoomType.Locked)
                         {
-                            if (dun.lockIds.IndexOf(current.key) == dun.lockIds.Count - 1)
+                            if (dungeon.lockIds.IndexOf(current.key) == dungeon.lockIds.Count - 1)
                             {
-                                map[iep, jep] = (int) Common.RoomCode.B;
-                                target = new Location { x = iep, y = jep };
+                                map[iPositive * 2, jPositive * 2] = 102;
+                                target = new Location { X = iPositive * 2, Y = jPositive * 2 };
                             }
                             else
-                                map[iep, jep] = (int) Common.RoomCode.N;
+                                map[iPositive * 2, jPositive * 2] = 0;
                         }
-                        // If the current room is a locked room and has a
-                        // parent, then the connection between then is locked
-                        // and is represented by the negative value of the
-                        // index of the key that opens the lock
                         Room parent = current.parent;
+                        // If the actual room is a locked room and has a parent, then the connection between then is locked and is represented by the negative value of the index of the key that opens the lock
                         if (parent != null)
                         {
-                            // Get the corridor between both rooms
-                            int x = parent.x - current.x + iep;
-                            int y = parent.y - current.y + jep;
-                            // If the current room is locked
+                            int x = parent.x - current.x + iPositive * 2;
+                            int y = parent.y - current.y + jPositive * 2;
                             if (current.type == RoomType.Locked)
                             {
-                                // Then, the corridor is locked
-                                locksLocation.Add(new Location { x = x, y = y, Parent = new Location { x = 2 * (parent.x - current.x) + iep, y = 2 * (parent.y - current.y) + jep } });
-                                int key = dun.keyIds.IndexOf(current.key);
-                                if (key == -1)
+                                locksLocation.Add(new Location { X = x, Y = y, Parent = new Location { X = 2 * (parent.x - current.x) + iPositive * 2, Y = 2 * (parent.y - current.y) + jPositive * 2 } });
+                                int test = dungeon.keyIds.IndexOf(current.key);
+                                if (test == -1)
                                 {
-                                    System.Console.WriteLine("There's a missing key here! What???? Its ID is " + current.key);
-                                    map[x, y] = (int) Common.RoomCode.C;
+                                    System.Console.WriteLine("There's a missing key here! What????");
+                                    Console.ReadKey();
+                                    map[x, y] = 100;
                                 }
                                 else
                                 {
-                                    map[x, y] = -(key + 1);
+                                    map[x, y] = -(dungeon.keyIds.IndexOf(current.key) + 1);
                                 }
                             }
+                            // If the connection is open, 100 represents a normal corridor
                             else
                             {
-                                // Otherwise it is an usual corridor
-                                map[x, y] = (int) Common.RoomCode.C;
+                                map[x, y] = 100;
                             }
                         }
                     }
                 }
             }
-            //Add all the locks location to the list that will hold their values through the execution of the algorithm
+            // Add all the locks location to the list that will hold their values through the execution of the algorithm
             foreach (var locked in locksLocation)
             {
                 allLocksLocation.Add(locked);
             }
         }
 
-        // Check what adjacent rooms exits and can be visited and return the valid ones
-        public static List<Location> GetWalkableAdjacentSquares(int x, int y, int sizeX, int sizeY, int[,] map)
-        {
+        /// Return a list of valid adjacent rooms (those which can be visited
+        /// from the entered coordinate).
+        public static List<Location> GetWalkableAdjacentSquares(
+            int _x,
+            int _y,
+            int _sizeX,
+            int _sizeY,
+            int[,] _map
+        ) {
             var proposedLocations = new List<Location>();
-            if (y > 0)
-                proposedLocations.Add(new Location { x = x, y = y - 1 });
-            if (y < (2 * sizeY) - 1)
-                proposedLocations.Add(new Location { x = x, y = y + 1 });
-            if (x > 0)
-                proposedLocations.Add(new Location { x = x - 1, y = y });
-            if (x < (2 * sizeX) - 1)
-                proposedLocations.Add(new Location { x = x + 1, y = y });
-
-            return proposedLocations.Where(l => (map[l.x, l.y] >= (int) Common.RoomCode.N && map[l.x, l.y] != (int) Common.RoomCode.E)).ToList();
+            if (_y > 0)
+            {
+                proposedLocations.Add(new Location { X = _x, Y = _y - 1 });
+            }
+            if (_y < 2 * _sizeY - 1)
+            {
+                proposedLocations.Add(new Location { X = _x, Y = _y + 1 });
+            }
+            if (_x > 0)
+            {
+                proposedLocations.Add(new Location { X = _x - 1, Y = _y });
+            }
+            if (_x < 2 * _sizeX - 1)
+            {
+                proposedLocations.Add(new Location { X = _x + 1, Y = _y });
+            }
+            return proposedLocations.Where(
+                    l => (_map[l.X, l.Y] >= 0 && _map[l.X, l.Y] != 101)
+                ).ToList();
         }
 
-        // Check if current location is a key room and...
-        public void ValidateKeyRoom(Location current)
-        {
-            if (map[current.x, current.y] > 0 && map[current.x, current.y] < (int) Common.RoomCode.C)
-            {
-                //If there is still a lock to be open (there may be more keys than locks in the level, so the verification is necessary) find its location and check if the key to open it is the one found
+        /// Check if current location is a key room and...
+        public void ValidateKeyRoom(
+            Location _current
+        ) {
+            if (map[_current.X, _current.Y] > 0 &&
+                map[_current.X, _current.Y] < 100
+            ) {
+                // If there is still a lock to be open (there may be more keys than locks in the level, so the verification is necessary) find its location and check if the key to open it is the one found
                 if (locksLocation.Count > 0)
                 {
                     foreach (var room in locksLocation)
                     {
-                        //If the key we found is the one that open the room we are checking now, change the lock to an open corridor and update the algorithm's knowledge
-                        if (map[room.x, room.y] == -map[current.x, current.y])
+                        // If the key we found is the one that open the room we are checking now, change the lock to an open corridor and update the algorithm's knowledge
+                        if (map[room.X, room.Y] == -map[_current.X, _current.Y])
                         {
-                            map[room.x, room.y] = (int) Common.RoomCode.C;
-                            //remove the lock from the unopenned locks location list
+                            map[room.X, room.Y] = 100;
+                            // Remove the lock from the unopenned locks location list
                             locksLocation.Remove(room);
-                            //Check if the parent room of the locked room was already closed by the algorithm (if it was in the closed list)
+                            // Check if the parent room of the locked room was already closed by the algorithm (if it was in the closed list)
                             foreach (var closedRoom in ClosedList)
                             {
-                                //If it was already closed, reopen it. Remove from the closed list and add to the open list
-                                if (closedRoom.x == room.Parent.x && closedRoom.y == room.Parent.y)
-                                {
+                                // If it was already closed, reopen it. Remove from the closed list and add to the open list
+                                if (closedRoom.X == room.Parent.X &&
+                                    closedRoom.Y == room.Parent.Y
+                                ) {
                                     ClosedList.Remove(closedRoom);
                                     nVisitedRooms--;
-                                    //Console.SetCursorPosition(0, 15 + auxoffset);
-                                    //auxoffset += 1;
-                                    //Console.WriteLine("Removed!");
                                     openList.Add(closedRoom);
-                                    //If the closed room was a locked one, also remove one of the needed locks, as it is now reopen and will be revisited
+                                    // If the closed room was a locked one, also remove one of the needed locks, as it is now reopen and will be revisited
                                     foreach (var locked in allLocksLocation)
                                     {
-                                        if (locked.x == closedRoom.x && locked.y == closedRoom.y)
-                                        {
+                                        if (locked.X == closedRoom.X &&
+                                            locked.Y == closedRoom.Y
+                                        ) {
                                             neededLocks--;
                                             break;
                                         }
@@ -196,34 +211,36 @@ namespace LevelGenerator
             }
         }
 
-        // Print all the path used by the algorithm
-        public static void PrintPathFinding(List<Location> path, int time = 10)
-        {
+        /// Print all the path used by the algorithm.
+        public static void PrintPathFinding(
+            List<Location> _path,
+            int _time = 10
+        ) {
             int i = 1;
-            foreach (var p in path)
+            foreach (var p in _path)
             {
                 Console.SetCursorPosition(58, i++);
-                Console.WriteLine(p.y.ToString() + ", " + p.x.ToString());
-
-                // show current square on the map
-                Console.SetCursorPosition(p.y, p.x + 20);
+                Console.WriteLine(p.Y.ToString() + ", " + p.X.ToString());
+                Console.SetCursorPosition(p.Y, p.X + 20);
                 Console.Write('.');
-                Console.SetCursorPosition(p.y, p.x + 20);
-                System.Threading.Thread.Sleep(time);
+                Console.SetCursorPosition(p.Y, p.X + 20);
+                System.Threading.Thread.Sleep(_time);
             }
             Console.SetCursorPosition(0, 40);
         }
 
-        // NEED FIX -> run A* in random.seed(13)
-        public static void PrintPathFound(Location current, int time = 10)
-        {
-            while (current != null)
+        /// NEED FIX -> run A* in random.seed(13).
+        public static void PrintPathFound(
+            Location _current,
+            int _time = 10
+        ) {
+            while (_current != null)
             {
-                Console.SetCursorPosition(current.y + 20, current.x + 20);
+                Console.SetCursorPosition(_current.Y + 20, _current.X + 20);
                 Console.Write('_');
-                Console.SetCursorPosition(current.y + 20, current.x + 20);
-                current = current.Parent;
-                System.Threading.Thread.Sleep(time);
+                Console.SetCursorPosition(_current.Y + 20, _current.X + 20);
+                _current = _current.Parent;
+                System.Threading.Thread.Sleep(_time);
             }
             Console.SetCursorPosition(0, 40);
         }

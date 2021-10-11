@@ -8,51 +8,47 @@ namespace LevelGenerator
         public DFS(Dungeon _dungeon)
             : base(_dungeon) {}
 
+        /// The DFS Algorithm.
         public int FindRoute(
-            Dungeon _dun,
+            Dungeon _dungeon,
             ref Random _rand
         ) {
-            if (target == null)
-            {
-                return 0;
-            }
-            //The starting location is room (0,0)
-            Location start = new Location { x = -2 * dun.minX, y = -2 * dun.minY };
             openList.Add(start);
             path.Add(start);
             while (openList.Count > 0)
             {
+                // Get the first
                 Location current = openList.First();
+
                 ValidateKeyRoom(current);
+
+                // Add the current square to the closed list
                 ClosedList.Add(current);
-                if (
-                    ((map[current.x, current.y] >= (int) Common.RoomCode.N) &&
-                    (map[current.x, current.y] < (int) Common.RoomCode.C)) ||
-                    (map[current.x, current.y] == (int) Common.RoomCode.B)
-                ) {
+                if (((map[current.X, current.Y] >= 0) && (map[current.X, current.Y] < 100)) || (map[current.X, current.Y] == 102))
+                {
                     NVisitedRooms++;
                 }
                 // Check if the actual room is a locked one. If it is, add 1 to the number of locks needed to reach the goal
                 foreach (var locked in allLocksLocation)
                 {
-                    if (locked.x == current.x && locked.y == current.y)
+                    if (locked.X == current.X && locked.Y == current.Y)
                     {
                         NeededLocks++;
                         break;
                     }
                 }
-                // remove it from the open list
+                // Remove it from the open list
                 openList.Remove(current);
-                // if we added the destination to the closed list, we've found a path
+                // If we added the destination to the closed list, we've found a path
                 if (ClosedList.Count > 0)
                 {
-                    if(ClosedList.FirstOrDefault(l => l.x == target.x && l.y == target.y) != null)
+                    if (ClosedList.FirstOrDefault(l => l.X == target.X && l.Y == target.Y) != null)
                     {
                         break;
                     }
                 }
 
-                var adjacentSquares = GetWalkableAdjacentSquares(current.x, current.y, sizeX, sizeY, map);
+                var adjacentSquares = GetWalkableAdjacentSquares(current.X, current.Y, sizeX, sizeY, map);
 
                 int value = _rand.Next();
                 adjacentSquares = adjacentSquares.OrderBy(X => value).ToList();
@@ -69,17 +65,18 @@ namespace LevelGenerator
 
                 foreach (var adjacentSquare in adjacentSquares)
                 {
-                    // if this adjacent square is already in the closed list, ignore it
-                    if (ClosedList.FirstOrDefault(l => l.x == adjacentSquare.x
-                            && l.y == adjacentSquare.y) != null)
+                    // If this adjacent square is already in the closed list, ignore it
+                    if (ClosedList.FirstOrDefault(l => l.X == adjacentSquare.X
+                            && l.Y == adjacentSquare.Y) != null)
+                    {
                         continue;
+                    }
 
-                    // if it's not in the open list...
-                    if (openList.FirstOrDefault(l => l.x == adjacentSquare.x
-                            && l.y == adjacentSquare.y) is null)
+                    // If it's not in the open list...
+                    if (openList.FirstOrDefault(l => l.X == adjacentSquare.X
+                            && l.Y == adjacentSquare.Y) == null)
                     {
                         adjacentSquare.Parent = current;
-
                         // and add it to the open list and add to your path
                         openList.Insert(0, adjacentSquare);
                         path.Add(adjacentSquare);

@@ -100,6 +100,10 @@ namespace LevelGenerator
         {
             keyIds.Clear();
             lockIds.Clear();
+            minX = RoomGrid.LEVEL_GRID_OFFSET;
+            minY = RoomGrid.LEVEL_GRID_OFFSET;
+            maxX = -RoomGrid.LEVEL_GRID_OFFSET;
+            maxY = -RoomGrid.LEVEL_GRID_OFFSET;
             foreach (Room room in rooms)
             {
                 // Update grid bounds
