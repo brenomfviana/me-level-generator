@@ -33,6 +33,22 @@ namespace LevelGenerator
         public float exploration;
         [JsonInclude]
         public float leniency;
+        [JsonInclude]
+        public float fGoal;
+        [JsonInclude]
+        public float fRooms;
+        [JsonInclude]
+        public float fKeys;
+        [JsonInclude]
+        public float fLocks;
+        [JsonInclude]
+        public float fLinearCoefficient;
+        [JsonInclude]
+        public float fEnemySparsity;
+        [JsonInclude]
+        public float fNeededRooms;
+        [JsonInclude]
+        public float fNeededLocks;
 
         public IndividualFile()
         {

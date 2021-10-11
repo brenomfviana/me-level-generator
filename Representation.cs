@@ -29,6 +29,22 @@ namespace LevelGenerator
         public float exploration;
         /// The leniency degree.
         public float leniency;
+        /// The fitness factor for the entered user goal.
+        public float fGoal;
+        /// The fitness factor for the number of rooms.
+        public float fRooms;
+        /// The fitness factor for the number of keys.
+        public float fKeys;
+        /// The fitness factor for the number of locks.
+        public float fLocks;
+        /// The fitness factor for the linear coefficient.
+        public float fLinearCoefficient;
+        /// The fitness factor for the enemy sparsity.
+        public float fEnemySparsity;
+        /// The fitness factor for the number of needed rooms.
+        public float fNeededRooms;
+        /// The fitness factor for the number of needed locks.
+        public float fNeededLocks;
 
         /// Individual contructor.
         public Individual(
@@ -87,8 +103,10 @@ namespace LevelGenerator
         /// Print the individual attributes and the dungeon map.
         public void Debug()
         {
-            Console.WriteLine(LevelDebug.INDENT + "G=" + generation);
-            Console.WriteLine(LevelDebug.INDENT + "F=" + fitness);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Generation=" + generation);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Fitness=" + fitness);
             Console.WriteLine(LevelDebug.INDENT +
                 "Rooms=" + dungeon.rooms.Count);
             Console.WriteLine(LevelDebug.INDENT +

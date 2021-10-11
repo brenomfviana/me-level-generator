@@ -177,13 +177,11 @@ namespace LevelGenerator
 
             // Prepare the level to be written
             IndividualFile ifile = new IndividualFile();
-            // Set the level dimensions
+            // Save the dungeon attributes
             ifile.dimensions = new Dimensions(
                 2 * (maxX - minX + 1),
                 2 * (maxY - minY + 1)
             );
-            ifile.generation = _individual.generation;
-            ifile.fitness = _individual.fitness;
             ifile.numberOfRooms = _individual.dungeon.rooms.Count;
             ifile.numberOfKeys = _individual.dungeon.keyIds.Count;
             ifile.numberOfLocks = _individual.dungeon.lockIds.Count;
@@ -192,6 +190,17 @@ namespace LevelGenerator
             ifile.neededRooms = _individual.neededRooms;
             ifile.exploration = _individual.exploration;
             ifile.leniency = _individual.leniency;
+            // Save the quality attributes of the dungeon
+            ifile.generation = _individual.generation;
+            ifile.fitness = _individual.fitness;
+            ifile.fGoal = _individual.fGoal;
+            ifile.fRooms = _individual.fRooms;
+            ifile.fKeys = _individual.fKeys;
+            ifile.fLocks = _individual.fLocks;
+            ifile.fLinearCoefficient = _individual.fLinearCoefficient;
+            ifile.fEnemySparsity = _individual.fEnemySparsity;
+            ifile.fNeededRooms = _individual.fNeededRooms;
+            ifile.fNeededLocks = _individual.fNeededLocks;
 
             // Set the list of rooms
             for (int i = 0; i < sizeX * 2; i++)

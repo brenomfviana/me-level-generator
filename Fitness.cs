@@ -32,10 +32,15 @@ namespace LevelGenerator
             float linearCoefficient = _individual.linearCoefficient;
             // Calculate the distance between the attributes of the generated
             // dungeon to the entered parameters
-            float distance = Math.Abs(_prs.rooms - rooms) +
-                Math.Abs(_prs.keys - keys) +
-                Math.Abs(_prs.locks - locks) +
-                Math.Abs(_prs.linearCoefficient - linearCoefficient);
+            float fRooms = Math.Abs(_prs.rooms - rooms);
+            float fKeys = Math.Abs(_prs.keys - keys);
+            float fLocks = Math.Abs(_prs.locks - locks);
+            float fLC = Math.Abs(_prs.linearCoefficient - linearCoefficient);
+            _individual.fRooms = fRooms;
+            _individual.fKeys = fKeys;
+            _individual.fLocks = fLocks;
+            _individual.fLinearCoefficient = fLC;
+            float distance = fRooms + fKeys + fLocks + fLC;
             float fit = 2 * distance;
             // If the level has locked doors
             if (dungeon.lockIds.Count > 0)
@@ -51,6 +56,9 @@ namespace LevelGenerator
                         "\n  Total locks=" + dungeon.lockIds.Count +
                         "\n  Needed locks=" + _individual.neededLocks);
                 }
+                float fNeededLocks = dungeon.lockIds.Count * 0.8f -
+                    _individual.neededLocks;
+                _individual.fNeededLocks = fNeededLocks;
                 // Calculate the number of rooms needed to finish the level
                 float neededRooms = 0f;
                 for (int i = 0; i < 3; i++)
@@ -69,13 +77,19 @@ namespace LevelGenerator
                         "\n  Total rooms=" + dungeon.Rooms.Count +
                         "\n  Needed rooms=" + _individual.neededRooms);
                 }
+                float fNeededRooms = dungeon.Rooms.Count -
+                    _individual.neededRooms;
+                _individual.fNeededRooms = fNeededRooms;
                 // Update the fitness by summing the number of needed rooms and
-                // the number of needed locks, and subtracting the enemy
-                // sparsity (the higher the better)
-                fit += dungeon.lockIds.Count * 0.8f - _individual.neededLocks +
-                    dungeon.Rooms.Count - _individual.neededRooms +
-                    -EnemySparsity(dungeon, _prs.enemies);
+                // the number of needed locks
+                fit += fNeededLocks + fNeededRooms;
             }
+            _individual.fGoal = fit;
+            // Update the fitness by subtracting the enemy sparsity
+            // (the higher the better)
+            float sparsity = -EnemySparsity(dungeon, _prs.enemies);
+            _individual.fEnemySparsity = sparsity;
+            fit = fit + sparsity;
             _individual.fitness = fit;
         }
 
