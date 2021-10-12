@@ -489,7 +489,7 @@ namespace LevelGenerator
                     }
                 }
             }
-            // Fix the numer of enemies
+            // Fix the number of enemies
             int sum = 0;
             foreach (Room room in rooms)
             {

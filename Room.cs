@@ -103,9 +103,9 @@ namespace LevelGenerator
         public Room[] GetChildren()
         {
             return new Room[] {
-                    this.left,
-                    this.bottom,
-                    this.right,
+                    left,
+                    bottom,
+                    right,
                 };
         }
 
@@ -113,10 +113,10 @@ namespace LevelGenerator
         public Room[] GetNeighbors()
         {
             return new Room[] {
-                    this.parent,
-                    this.left,
-                    this.bottom,
-                    this.right,
+                    parent,
+                    left,
+                    bottom,
+                    right,
                 };
         }
 
@@ -208,17 +208,17 @@ namespace LevelGenerator
                 case Common.Direction.Right:
                     right = _child;
                     right.parent = this;
-                    right.depth = this.depth + 1;
+                    right.depth = depth + 1;
                     break;
                 case Common.Direction.Down:
                     bottom = _child;
                     bottom.parent = this;
-                    bottom.depth = this.depth + 1;
+                    bottom.depth = depth + 1;
                     break;
                 case Common.Direction.Left:
                     left = _child;
                     left.parent = this;
-                    left.depth = this.depth + 1;
+                    left.depth = depth + 1;
                     break;
             }
         }

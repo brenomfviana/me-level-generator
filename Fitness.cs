@@ -103,8 +103,10 @@ namespace LevelGenerator
             float avg_y = 0f;
             foreach (Room room in _dungeon.rooms)
             {
-                avg_x += (room.x + _dungeon.minX) * room.enemies;
-                avg_y += (room.y + _dungeon.minY) * room.enemies;
+                int xp = room.x + _dungeon.minX;
+                int yp = room.y + _dungeon.minY;
+                avg_x += xp * room.enemies;
+                avg_y += yp * room.enemies;
             }
             avg_x = avg_x / _enemies;
             avg_y = avg_y / _enemies;
@@ -112,12 +114,12 @@ namespace LevelGenerator
             float sparsity = 0f;
             foreach (Room room in _dungeon.rooms)
             {
+                int xp = room.x + _dungeon.minX;
+                int yp = room.y + _dungeon.minY;
                 double dist = 0f;
-                for (int i = 0; i < room.enemies; i++)
-                {
-                    dist += Math.Pow((room.x + _dungeon.minX) - avg_x, 2);
-                    dist += Math.Pow((room.y + _dungeon.minY) - avg_y, 2);
-                }
+                dist += Math.Pow(xp - avg_x, 2);
+                dist += Math.Pow(yp - avg_y, 2);
+                dist *= room.enemies;
                 sparsity += (float) Math.Sqrt(dist);
             }
             return sparsity / _enemies;
