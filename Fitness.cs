@@ -103,8 +103,8 @@ namespace LevelGenerator
             float avg_y = 0f;
             foreach (Room room in _dungeon.rooms)
             {
-                avg_x += room.x * room.enemies;
-                avg_y += room.y * room.enemies;
+                avg_x += (room.x + _dungeon.minX) * room.enemies;
+                avg_y += (room.y + _dungeon.minY) * room.enemies;
             }
             avg_x = avg_x / _enemies;
             avg_y = avg_y / _enemies;
@@ -112,13 +112,15 @@ namespace LevelGenerator
             float sparsity = 0f;
             foreach (Room room in _dungeon.rooms)
             {
+                double dist = 0f;
                 for (int i = 0; i < room.enemies; i++)
                 {
-                    sparsity += Math.Abs(room.x - avg_x);
-                    sparsity += Math.Abs(room.y - avg_y);
+                    dist += Math.Pow((room.x + _dungeon.minX) - avg_x, 2);
+                    dist += Math.Pow((room.y + _dungeon.minY) - avg_y, 2);
                 }
+                sparsity += (float) Math.Sqrt(dist);
             }
-            return sparsity / (_enemies + _enemies);
+            return sparsity / _enemies;
         }
 
         /// Return true if the first individual (`_i1`) is best than the second
