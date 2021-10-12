@@ -117,6 +117,12 @@ namespace LevelGenerator
                 "Enemies=" + dungeon.GetNumberOfEnemies());
             Console.WriteLine(LevelDebug.INDENT +
                 "Linear coefficient=" + linearCoefficient);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Coefficient of exploration=" + exploration);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Leniency=" + leniency);
+            Console.WriteLine(LevelDebug.INDENT +
+                "Enemy Sparsity=" + fEnemySparsity);
             Console.WriteLine(LevelDebug.INDENT + "MISSION MAP=");
             LevelDebug.PrintMissionMap(dungeon, LevelDebug.INDENT);
             Console.WriteLine(LevelDebug.INDENT + "ENEMY MAP=");
