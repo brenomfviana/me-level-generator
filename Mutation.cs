@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Diagnostics;
 
 namespace LevelGenerator
@@ -36,10 +36,22 @@ namespace LevelGenerator
                 options.Remove(idx_f);
                 int idx_t = Common.RandomElementFromList(options, ref _rand);
                 options.Remove(idx_t);
-                // Transfer enemies
+                // If the chosen room `to` has more enemies than the
+                // room `from`, then swap them
                 Room from = individual.dungeon.rooms[idx_f];
                 Room to = individual.dungeon.rooms[idx_t];
-                int transfer = Common.RandomInt((0, from.enemies), ref _rand);
+                if (to.enemies > from.enemies)
+                {
+                    Room aux = from;
+                    from = to;
+                    to = aux;
+                }
+                // Transfer enemies
+                int transfer = 0;
+                if (from.enemies > 0)
+                {
+                    transfer = Common.RandomInt((1, from.enemies), ref _rand);
+                }
                 from.enemies -= transfer;
                 to.enemies += transfer;
                 Debug.Assert(from.enemies >= 0 && to.enemies >= 0);
