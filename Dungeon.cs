@@ -95,34 +95,6 @@ namespace LevelGenerator
             return dungeon;
         }
 
-        /// Update the lists of keys and locks, and the grid limits.
-        private void Update()
-        {
-            keyIds.Clear();
-            lockIds.Clear();
-            minX = RoomGrid.LEVEL_GRID_OFFSET;
-            minY = RoomGrid.LEVEL_GRID_OFFSET;
-            maxX = -RoomGrid.LEVEL_GRID_OFFSET;
-            maxY = -RoomGrid.LEVEL_GRID_OFFSET;
-            foreach (Room room in rooms)
-            {
-                // Update grid bounds
-                minX = minX > room.x ? room.x : minX;
-                minY = minY > room.y ? room.y : minY;
-                maxX = room.x > maxX ? room.x : maxX;
-                maxY = room.y > maxY ? room.y : maxY;
-                // Find the keys and locked doors in the level
-                if (room.type == RoomType.Key)
-                {
-                    keyIds.Add(room.key);
-                }
-                if (room.type == RoomType.Locked)
-                {
-                    lockIds.Add(room.key);
-                }
-            }
-        }
-
         /// Return the number of rooms of the dungeon.
         public int GetNumberOfRooms()
         {
@@ -240,7 +212,7 @@ namespace LevelGenerator
                     }
                 }
             }
-            Update();
+            FixLocksAndKeys();
         }
 
         /// Place enemies in random rooms.
@@ -254,22 +226,6 @@ namespace LevelGenerator
                 if (!rooms[index].Equals(GetGoal()))
                 {
                     rooms[index].enemies++;
-                    _enemies--;
-                }
-            }
-        }
-
-        /// Remove enemies from random rooms.
-        public void RemoveEnemies(
-            int _enemies,
-            ref Random _rand
-        ) {
-            while (_enemies > 0)
-            {
-                int index = Common.RandomInt((1, rooms.Count - 1), ref _rand);
-                if (rooms[index].enemies > 0)
-                {
-                    rooms[index].enemies--;
                     _enemies--;
                 }
             }
@@ -470,10 +426,18 @@ namespace LevelGenerator
 
         /// Recreate the room list by visiting all the rooms in the tree and adding them to the list while also counting the number of locks and keys.
         public void Fix(
-            int _enemies,
+            Parameters _prs,
             ref Random _rand
         ) {
-            // Fix the list of rooms
+            FixRooms();
+            FixEnemies(_prs, ref _rand);
+            FixLocksAndKeys();
+            FixMissions(ref _rand);
+        }
+
+        /// Fix the list of rooms.
+        private void FixRooms()
+        {
             Queue<Room> toVisit = new Queue<Room>();
             toVisit.Enqueue(rooms[0]);
             rooms.Clear();
@@ -489,23 +453,40 @@ namespace LevelGenerator
                     }
                 }
             }
-            // Fix the number of enemies
-            int sum = 0;
+        }
+
+        /// Update the lists of keys and locks, and the grid limits.
+        private void FixLocksAndKeys()
+        {
+            keyIds.Clear();
+            lockIds.Clear();
+            minX = RoomGrid.LEVEL_GRID_OFFSET;
+            minY = RoomGrid.LEVEL_GRID_OFFSET;
+            maxX = -RoomGrid.LEVEL_GRID_OFFSET;
+            maxY = -RoomGrid.LEVEL_GRID_OFFSET;
             foreach (Room room in rooms)
             {
-                sum += room.enemies;
+                // Update grid bounds
+                minX = minX > room.x ? room.x : minX;
+                minY = minY > room.y ? room.y : minY;
+                maxX = room.x > maxX ? room.x : maxX;
+                maxY = room.y > maxY ? room.y : maxY;
+                // Find the keys and locked doors in the level
+                if (room.type == RoomType.Key)
+                {
+                    keyIds.Add(room.key);
+                }
+                if (room.type == RoomType.Locked)
+                {
+                    lockIds.Add(room.key);
+                }
             }
-            if (_enemies > sum)
-            {
-                PlaceEnemies(_enemies - sum, ref _rand);
-            }
-            else if (sum > _enemies)
-            {
-                RemoveEnemies(sum - _enemies, ref _rand);
-            }
-            // Fix the grid limits and the list of keys and locks
-            Update();
-            // If this dungeon does not have a lock, then add one
+        }
+
+        /// Add a lock if the dungeon has none.
+        private void FixMissions(
+            ref Random _rand
+        ) {
             if (lockIds.Count == 0)
             {
                 if (keyIds.Count != 0)
@@ -513,13 +494,153 @@ namespace LevelGenerator
                     RemoveLockAndKey(ref _rand);
                 }
                 AddLockAndKey(ref _rand);
-                Update();
+                FixLocksAndKeys();
+            }
+        }
+
+        /// Fix the number of enemies and enemy distribution.
+        private void FixEnemies(
+            Parameters _prs,
+            ref Random _rand
+        ) {
+            // Get the total number of enemies
+            int tEnemies = 0;
+            foreach (Room room in rooms)
+            {
+                tEnemies += room.enemies;
             }
             // Remove enemies from the goal room and place them in other rooms
             if (GetGoal() != null && goal.enemies > 0)
             {
-                PlaceEnemies(goal.enemies, ref _rand);
+                Redistribute(_prs.enemies, goal.enemies);
                 goal.enemies = 0;
+            }
+            if (_prs.enemies > tEnemies)
+            {
+                Redistribute(_prs.enemies, _prs.enemies - tEnemies);
+            }
+            else if (tEnemies > _prs.enemies)
+            {
+                RemoveEnemies(_prs.enemies, tEnemies - _prs.enemies);
+            }
+        }
+
+        /// Redistribute enemies from hard rooms to easier rooms.
+        ///
+        /// This method may change the dungeon leniency.
+        private void Redistribute(
+            int _enemies,
+            int _redistribute
+        ) {
+            // Calculate the mean number of enemies by room
+            int mean = _enemies / rooms.Count;
+            // Get the rooms with less enemies than the mean
+            List<int> easy = new List<int>();
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                if (rooms[i].Equals(rooms[0]) || rooms[i].Equals(GetGoal()))
+                {
+                    continue;
+                }
+                if (mean >= rooms[i].enemies && rooms[i].enemies > 0)
+                {
+                    easy.Add(i);
+                }
+            }
+            // If the list of easy rooms is empty, then add all non-empty rooms
+            if (easy.Count == 0)
+            {
+                for (int i = 0; i < rooms.Count; i++)
+                {
+                    if (rooms[i].Equals(rooms[0]) || rooms[i].Equals(GetGoal()))
+                    {
+                        continue;
+                    }
+                    if (rooms[i].enemies > 0)
+                    {
+                        easy.Add(i);
+                    }
+                }
+            }
+            // If the list of easy rooms is empty, then add all empty rooms
+            if (easy.Count == 0)
+            {
+                for (int i = 0; i < rooms.Count; i++)
+                {
+                    if (rooms[i].Equals(rooms[0]) || rooms[i].Equals(GetGoal()))
+                    {
+                        continue;
+                    }
+                    if (rooms[i].enemies == 0)
+                    {
+                        easy.Add(i);
+                    }
+                }
+            }
+            // Redistribute enemies in easier rooms
+            int r = 0;
+            while (_redistribute > 0)
+            {
+                // Add an enemy in the room
+                int index = easy[r++];
+                Room room = rooms[index];
+                room.enemies++;
+                _redistribute--;
+                // If enemies are remaining and the last room have been
+                // reached, then back to the first room
+                if (r == easy.Count) {
+                    r = 0;
+                }
+            }
+        }
+
+        /// Remove enemies from random rooms.
+        ///
+        /// This method does not change the dungeon leniency.
+        public void RemoveEnemies(
+            int _enemies,
+            int _remove
+        ) {
+            // Calculate the mean number of enemies by room
+            int mean = _enemies / rooms.Count;
+            // Get the harder rooms (rooms with more enemies than the mean)
+            List<int> hard = new List<int>();
+            for (int i = 0; i < rooms.Count; i++)
+            {
+                if (rooms[i].enemies > mean)
+                {
+                    hard.Add(i);
+                }
+            }
+            // If the list of hard rooms is empty, then add all non-empty rooms
+            if (hard.Count == 0)
+            {
+                for (int i = 0; i < rooms.Count; i++)
+                {
+                    if (rooms[i].enemies > 0)
+                    {
+                        hard.Add(i);
+                    }
+                }
+            }
+            // Remove enemies from the harder rooms
+            int r = 0;
+            while (_remove > 0)
+            {
+                // Remove an enemy from the room
+                int index = hard[r++];
+                Room room = rooms[index];
+                if (room.enemies > 0)
+                {
+                    room.enemies--;
+                    _remove--;
+                }
+                // If enemies are remaining and the last room have been
+                // reached, then back to the first room
+                if (r == hard.Count)
+                {
+                    r = 0;
+                }
             }
         }
     }
