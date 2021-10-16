@@ -15,11 +15,15 @@ This level generator receives seven arguments:
   * if the flag `-s` is entered,  then the levels on the final population
     will be written separately, each one in a single JSON file.
 - a random seed;
-- the number of generations;
+- the maximum time;
 - the initial population size;
 - the mutation chance;
-- the crossover chance, and;
-- the number of tournament competitors.
+- the number of tournament competitors;
+- the number of rooms;
+- the number of keys;
+- the number of locks;
+- the number of enemies, and;
+- the linear coefficient.
 
 ## Author
 
