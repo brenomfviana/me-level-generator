@@ -8,11 +8,15 @@
 ///   * if the flag `-s` is entered, then the levels on the final population
 ///     will be written separately, each one in a single JSON file.
 /// - a random seed;
-/// - the number of generations;
+/// - the maximum time;
 /// - the initial population size;
 /// - the mutation chance;
-/// - the crossover chance, and;
-/// - the number of tournament competitors.
+/// - the number of tournament competitors;
+/// - the number of rooms;
+/// - the number of keys;
+/// - the number of locks;
+/// - the number of enemies, and;
+/// - the linear coefficient.
 ///
 /// Author: Breno M. F. Viana.
 ///
@@ -54,7 +58,7 @@ namespace LevelGenerator
             // Define the evolutionary parameters
             Parameters prs = new Parameters(
                 int.Parse(_args[0]),  // Random seed
-                int.Parse(_args[1]),  // Number of generations
+                int.Parse(_args[1]),  // Maximum time
                 int.Parse(_args[2]),  // Initial population size
                 int.Parse(_args[3]),  // Mutation chance
                 int.Parse(_args[4]),  // Number of tournament competitors

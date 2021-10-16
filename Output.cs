@@ -69,7 +69,7 @@ namespace LevelGenerator
         ) {
             Parameters prs = _data.parameters;
             string foldername = EMPTY_STR;
-            foldername += EMPTY_STR + prs.generations + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.time + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.population + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.mutation + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.competitors;

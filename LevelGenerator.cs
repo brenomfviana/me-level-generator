@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace LevelGenerator
 {
@@ -7,6 +8,8 @@ namespace LevelGenerator
     {
         /// The number of parents to be selected for crossover.
         private static readonly int CROSSOVER_PARENTS = 2;
+        /// The size of the intermediate population.
+        private static readonly int INTERMEDIATE_POPULATION = 100;
 
         /// The evolutionary parameters.
         private Parameters prs;
@@ -64,8 +67,8 @@ namespace LevelGenerator
                 Individual individual = Individual.GetRandom(
                     prs.enemies, ref rand
                 );
+                individual.dungeon.Fix(prs, ref rand);
                 individual.CalculateLinearCoefficient();
-                individual.dungeon.Fix(prs.enemies, ref rand);
                 Fitness.Calculate(prs, ref individual, ref rand);
                 float ce = Metric.CoefficientOfExploration(individual);
                 float le = Metric.Leniency(individual);
@@ -75,46 +78,60 @@ namespace LevelGenerator
             }
 
             // Evolve the population
-            for (int g = 0; g < prs.generations; g++)
+            int g = 0;
+            DateTime start = DateTime.Now;
+            DateTime end = DateTime.Now;
+            while ((end - start).TotalSeconds < prs.time)
             {
-                // Apply the crossover operation
-                Individual[] parents = Selection.Select(
-                    CROSSOVER_PARENTS, prs.competitors, pop, ref rand
-                );
-                Individual[] offspring = Crossover.Apply(
-                    parents[0], parents[1], ref rand
-                );
-                // Apply the mutation operation with a random chance or always
-                // that the crossover was not successful
-                if (offspring.Length == 0 ||
-                    prs.mutation > Common.RandomPercent(ref rand)
-                ) {
-                    if (offspring.Length == CROSSOVER_PARENTS)
-                    {
-                        parents[0] = offspring[0];
-                        parents[1] = offspring[1];
+                List<Individual> intermediate = new List<Individual>();
+                while(intermediate.Count < INTERMEDIATE_POPULATION)
+                {
+                    // Apply the crossover operation
+                    Individual[] parents = Selection.Select(
+                        CROSSOVER_PARENTS, prs.competitors, pop, ref rand
+                    );
+                    Individual[] offspring = Crossover.Apply(
+                        parents[0], parents[1], ref rand
+                    );
+                    // Apply the mutation operation with a random chance or
+                    // always that the crossover was not successful
+                    if (offspring.Length == 0 ||
+                        prs.mutation > Common.RandomPercent(ref rand)
+                    ) {
+                        if (offspring.Length == CROSSOVER_PARENTS)
+                        {
+                            parents[0] = offspring[0];
+                            parents[1] = offspring[1];
+                        }
+                        else
+                        {
+                            offspring = new Individual[2];
+                        }
+                        offspring[0] = Mutation.Apply(parents[0], ref rand);
+                        offspring[1] = Mutation.Apply(parents[1], ref rand);
                     }
-                    else
+                    // Place the offspring in the MAP-Elites population
+                    for (int i = 0; i < offspring.Length; i++)
                     {
-                        offspring = new Individual[2];
+                        offspring[i].dungeon.Fix(prs, ref rand);
+                        offspring[i].CalculateLinearCoefficient();
+                        Fitness.Calculate(prs, ref offspring[i], ref rand);
+                        float c = Metric.CoefficientOfExploration(offspring[i]);
+                        float l = Metric.Leniency(offspring[i]);
+                        offspring[i].exploration = c;
+                        offspring[i].leniency = l;
+                        offspring[i].generation = g++;
+                        intermediate.Add(offspring[i]);
                     }
-                    offspring[0] = Mutation.Apply(parents[0], ref rand);
-                    offspring[1] = Mutation.Apply(parents[1], ref rand);
                 }
 
                 // Place the offspring in the MAP-Elites population
-                for (int i = 0; i < offspring.Length; i++)
+                for (int i = 0; i < intermediate.Count; i++)
                 {
-                    offspring[i].generation = g;
-                    offspring[i].dungeon.Fix(prs.enemies, ref rand);
-                    offspring[i].CalculateLinearCoefficient();
-                    Fitness.Calculate(prs, ref offspring[i], ref rand);
-                    float ce = Metric.CoefficientOfExploration(offspring[i]);
-                    float le = Metric.Leniency(offspring[i]);
-                    offspring[i].exploration = ce;
-                    offspring[i].leniency = le;
-                    pop.PlaceIndividual(offspring[i]);
+                    pop.PlaceIndividual(intermediate[i]);
                 }
+
+                end = DateTime.Now;
             }
 
             // Get the final population (solution)
