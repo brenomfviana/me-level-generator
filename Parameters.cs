@@ -8,9 +8,9 @@ namespace LevelGenerator
         /// The seed that initializes the random generator.
         [JsonInclude]
         public int seed { get; }
-        /// The maximum number of generations.
+        /// The maximum time.
         [JsonInclude]
-        public int generations { get; }
+        public int time { get; }
         /// The initial population size.
         [JsonInclude]
         public int population { get; }
@@ -34,7 +34,7 @@ namespace LevelGenerator
         /// Parameters constructor.
         public Parameters(
             int _seed,
-            int _generations,
+            int _time,
             int _population,
             int _mutation,
             int _competitors,
@@ -45,7 +45,7 @@ namespace LevelGenerator
             float _linearCoefficient
         ) {
             seed = _seed;
-            generations = _generations;
+            time = _time;
             population = _population;
             mutation = _mutation;
             competitors = _competitors;
