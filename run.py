@@ -1,28 +1,39 @@
 #!/bin/env python
 import os
+import sys
 import platform
 import random
 import numpy as np
 
+
+
 # --- Initialization
 
 # Initialize the random seed
-random.seed(0)
+seed = random.randrange(sys.maxsize)
+random.seed(seed)
+print("Seed:", seed)
+# random.seed(0)
 
 # Define the number of executions of each set of parameters
-executions = range(10)
+executions = range(1)
 
-# Numbers of generations
-generations = [100, 200, 300]
+
+
+# --- Define the set of parameters
+
+# Maximum times
+times = [60] # [60, 300, 600, 3600]
 
 # Initial population sizes
-populations = [15, 20, 25]
+populations = [20]
 
 # Mutation rates
 mutations = [5]
 
 # Competitors
 competitors = [3]
+
 
 
 # --- Perform experiment
@@ -37,6 +48,7 @@ else:
   exit()
 
 
+# Compile project
 os.system('dotnet publish')
 
 
@@ -53,23 +65,15 @@ def run(ge, po, mu, co):
   # Run algoritm for the current set of parameters
   os.system(executable + parameters)
 
-def plot(ge, po, mu, co, ex):
-  # Plot the charts for the current set of parameters
-  parameters = ''
-  for i in [ge, po, mu, co, ex]:
-    parameters += str(i) + ' '
-  os.system('python plot.py ' + parameters)
-
-
 # Variables to control the experiment progress
-total = len(generations) * \
+total = len(times) * \
   len(populations) * \
   len(mutations) * \
   len(competitors) * \
   len(executions)
 i = 1
 
-for ge in generations:
+for ge in times:
   for po in populations:
     for mu in mutations:
       for co in competitors:
@@ -80,12 +84,30 @@ for ge in generations:
           print("%.2f" % ((i / total) * 100))
           i += 1
 
+
+def plot(ge, po, mu, co, ex):
+  # Plot the charts for the current set of parameters
+  parameters = ''
+  for i in [ge, po, mu, co, ex]:
+    parameters += str(i) + ' '
+  os.system('python plot.py ' + parameters)
+
+# Variables to control the experiment progress
+total = len(times) * \
+  len(populations) * \
+  len(mutations) * \
+  len(competitors) * \
+  len(executions)
+i = 1
+
 # Plot all the results
 print('Plotting')
-for ge in generations:
+for ge in times:
   for po in populations:
     for mu in mutations:
         for co in competitors:
+          # Plot charts
+          plot(ge, po, mu, co, len(executions))
           # Print progress
           print("%.2f" % ((i / total) * 100))
-          plot(ge, po, mu, co, len(executions))
+          i += 1
