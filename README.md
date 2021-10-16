@@ -11,9 +11,6 @@ The output of this program is a set of levels written in JSON files.
 ## Program arguments
 
 This level generator receives seven arguments:
-- [Optional] the separately save flag (`-s`);
-  * if the flag `-s` is entered,  then the levels on the final population
-    will be written separately, each one in a single JSON file.
 - a random seed;
 - the maximum time;
 - the initial population size;
