@@ -18,11 +18,6 @@ namespace LevelGenerator
         /// List of IDs of the used keys.
         private static List<int> usedKeys = new List<int>();
 
-        /// Get method for the list of IDs of the available keys.
-        public static List<int> AvailableKeys { get => availableKeys; }
-        /// Get method for the list of IDs of the used keys.
-        public static List<int> UsedKeys { get => usedKeys; }
-
         /// Create and return the root room of a dungeon.
         ///
         /// The root room is a normal room.

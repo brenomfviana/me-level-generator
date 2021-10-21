@@ -10,7 +10,6 @@ namespace LevelGenerator
 
         /// The DFS Algorithm.
         public int FindRoute(
-            Dungeon _dungeon,
             ref Random _rand
         ) {
             openList.Add(start);
@@ -48,6 +47,7 @@ namespace LevelGenerator
                     }
                 }
 
+                // Check all adjacent squares from the current node
                 var adjacentSquares = GetWalkableAdjacentSquares(current.X, current.Y, sizeX, sizeY, map);
 
                 int value = _rand.Next();
@@ -58,7 +58,6 @@ namespace LevelGenerator
                     if (current.Parent == adjacentSquare)
                     {
                         adjacentSquares.Remove(adjacentSquare);
-                        adjacentSquares.Add(adjacentSquare);
                         break;
                     }
                 }

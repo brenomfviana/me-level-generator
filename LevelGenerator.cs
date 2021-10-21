@@ -18,6 +18,12 @@ namespace LevelGenerator
         /// The evolutionary process' collected data.
         private Data data;
 
+        /// Return the found MAP-Elites population.
+        public Population Solution { get => solution; }
+
+        /// Return the collected data from the evolutionary process.
+        public Data Data { get => data; }
+
         /// Level Generator constructor.
         public LevelGenerator(
             Parameters _prs
@@ -25,18 +31,6 @@ namespace LevelGenerator
             prs = _prs;
             data = new Data();
             data.parameters = prs;
-        }
-
-        /// Return the collected data from the evolutionary process.
-        public Data GetData()
-        {
-            return data;
-        }
-
-        /// Return the found MAP-Elites population.
-        public Population GetSolution()
-        {
-            return solution;
         }
 
         /// Generate and return a set of levels.
@@ -84,7 +78,7 @@ namespace LevelGenerator
             while ((end - start).TotalSeconds < prs.time)
             {
                 List<Individual> intermediate = new List<Individual>();
-                while(intermediate.Count < INTERMEDIATE_POPULATION)
+                while (intermediate.Count < INTERMEDIATE_POPULATION)
                 {
                     // Apply the crossover operation
                     Individual[] parents = Selection.Select(
@@ -120,7 +114,7 @@ namespace LevelGenerator
                         float l = Metric.Leniency(offspring[i]);
                         offspring[i].exploration = c;
                         offspring[i].leniency = l;
-                        offspring[i].generation = g++;
+                        offspring[i].generation = g;
                         intermediate.Add(offspring[i]);
                     }
                 }
@@ -131,6 +125,7 @@ namespace LevelGenerator
                     pop.PlaceIndividual(intermediate[i]);
                 }
 
+                g++;
                 end = DateTime.Now;
             }
 

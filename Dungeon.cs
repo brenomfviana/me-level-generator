@@ -17,6 +17,8 @@ namespace LevelGenerator
         public RoomGrid grid;
         /// The list of rooms (easier to add neighbors).
         public List<Room> rooms;
+        /// The goal room.
+        private Room goal = null;
         /// The list of dungeon key IDs.
         public List<int> keyIds;
         /// The list of locked room IDs.
@@ -30,11 +32,6 @@ namespace LevelGenerator
         /// The upper limit of the y-axis of the grid.
         public int maxY;
 
-        public List<Room> Rooms { get => rooms; }
-
-        /// The goal room.
-        private Room goal = null;
-
         /// Dungeon constructor.
         ///
         /// Create and return a new dungeon with the starting room.
@@ -42,7 +39,7 @@ namespace LevelGenerator
         {
             rooms = new List<Room>();
             Room root = RoomFactory.CreateRoot();
-            Rooms.Add(root);
+            rooms.Add(root);
             grid = new RoomGrid();
             grid[root.x, root.y] = root;
             lockIds = new List<int>();
@@ -137,7 +134,10 @@ namespace LevelGenerator
             return goal;
         }
 
-        /// Instantiates a room and tries to add it as a child of the actual room, considering its direction and position. If there is not a room in the grid at the entered coordinates, create the room, add it to the room list and also enqueue it so it can be explored later.
+        /// Instantiate a room and tries to add it as a child of the actual
+        /// room, considering its direction and position. If there is not a
+        /// room in the grid at the entered coordinates, create the room, add
+        /// it to the room list and also enqueue it so it can be explored later.
         private void InstantiateRoom(
             ref Room child,
             ref Room current,
@@ -149,7 +149,7 @@ namespace LevelGenerator
                 child = RoomFactory.CreateRoom(ref rand);
                 current.InsertChild(ref grid, ref child, dir);
                 child.parentDirection = dir;
-                Rooms.Add(child);
+                rooms.Add(child);
                 grid[child.x, child.y] = child;
             }
         }
