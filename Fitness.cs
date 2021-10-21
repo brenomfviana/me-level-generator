@@ -64,20 +64,20 @@ namespace LevelGenerator
                 for (int i = 0; i < 3; i++)
                 {
                     DFS dfs = new DFS(dungeon);
-                    dfs.FindRoute(dungeon, ref _rand);
+                    dfs.FindRoute(ref _rand);
                     neededRooms += dfs.NVisitedRooms;
                 }
                 _individual.neededRooms = neededRooms / 3.0f;
                 // Validate the calculated number of needed rooms
-                if (_individual.neededRooms > dungeon.Rooms.Count)
+                if (_individual.neededRooms > dungeon.rooms.Count)
                 {
                     throw new Exception("Inconsistency! The number of " +
                         "needed rooms is higher than the number of total " +
                         "rooms of the level." +
-                        "\n  Total rooms=" + dungeon.Rooms.Count +
+                        "\n  Total rooms=" + dungeon.rooms.Count +
                         "\n  Needed rooms=" + _individual.neededRooms);
                 }
-                float fNeededRooms = dungeon.Rooms.Count -
+                float fNeededRooms = dungeon.rooms.Count -
                     _individual.neededRooms;
                 _individual.fNeededRooms = fNeededRooms;
                 // Update the fitness by summing the number of needed rooms and
@@ -89,7 +89,9 @@ namespace LevelGenerator
             // (the higher the better)
             float sparsity = -EnemySparsity(dungeon, _prs.enemies);
             _individual.fEnemySparsity = sparsity;
-            fit = fit + sparsity;
+            float std = STDEnemyByRoom(dungeon, _prs.enemies);
+            _individual.fSTD = std;
+            fit = fit + sparsity + std;
             _individual.fitness = fit;
         }
 
@@ -123,6 +125,27 @@ namespace LevelGenerator
                 sparsity += (float) Math.Sqrt(dist);
             }
             return sparsity / _enemies;
+        }
+
+        /// Return the standard deviation of number of enemies by room.
+        private static float STDEnemyByRoom(
+            Dungeon _dungeon,
+            int _enemies
+        ) {
+            // The start and goal rooms are not count
+            float rooms = _dungeon.rooms.Count - 2;
+            float mean = _enemies / rooms;
+            // Calculate standard deviation
+            float std = 0f;
+            for (int i = 1; i < _dungeon.rooms.Count; i++)
+            {
+                Room room = _dungeon.rooms[i];
+                if (!room.Equals(_dungeon.GetGoal()))
+                {
+                    std += (float) Math.Pow(room.enemies - mean, 2);
+                }
+            }
+            return (float) Math.Sqrt(std / rooms);
         }
 
         /// Return true if the first individual (`_i1`) is best than the second

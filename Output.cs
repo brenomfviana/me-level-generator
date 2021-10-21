@@ -93,7 +93,7 @@ namespace LevelGenerator
             List<int> locks = new List<int>();
 
             // Calculate the grid bounds and get the level keys and locked doors
-            foreach (Room room in dungeon.Rooms)
+            foreach (Room room in dungeon.rooms)
             {
                 // Update grid bounds
                 minX = minX > room.x ? room.x : minX;
@@ -199,6 +199,7 @@ namespace LevelGenerator
             ifile.fLocks = _individual.fLocks;
             ifile.fLinearCoefficient = _individual.fLinearCoefficient;
             ifile.fEnemySparsity = _individual.fEnemySparsity;
+            ifile.fSTD = _individual.fSTD;
             ifile.fNeededRooms = _individual.fNeededRooms;
             ifile.fNeededLocks = _individual.fNeededLocks;
 

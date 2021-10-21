@@ -44,6 +44,8 @@ namespace LevelGenerator
         [JsonInclude]
         public float fLinearCoefficient;
         [JsonInclude]
+        public float fSTD;
+        [JsonInclude]
         public float fEnemySparsity;
         [JsonInclude]
         public float fNeededRooms;

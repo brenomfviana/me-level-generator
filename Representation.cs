@@ -41,6 +41,8 @@ namespace LevelGenerator
         public float fLinearCoefficient;
         /// The fitness factor for the enemy sparsity.
         public float fEnemySparsity;
+        /// The fitness factor for the enemy standard deviation.
+        public float fSTD;
         /// The fitness factor for the number of needed rooms.
         public float fNeededRooms;
         /// The fitness factor for the number of needed locks.
@@ -75,7 +77,7 @@ namespace LevelGenerator
         {
             linearCoefficient = 0f;
             int leafs = 0;
-            foreach (Room room in dungeon.Rooms)
+            foreach (Room room in dungeon.rooms)
             {
                 int childs = 0;
                 if (room.right != null && room.right.parent != null)
@@ -96,7 +98,7 @@ namespace LevelGenerator
                 }
                 linearCoefficient += childs;
             }
-            int total = dungeon.Rooms.Count;
+            int total = dungeon.rooms.Count;
             linearCoefficient = linearCoefficient / (total - leafs);
         }
 
