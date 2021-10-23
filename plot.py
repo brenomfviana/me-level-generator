@@ -177,6 +177,16 @@ for ex in range(executions):
   title = type + 'Enemy Sparsity'
   plot_heatmap(map, target_ex, 'fitnessEnemySparsity', np.max(map_aux), title)
 
+  # Plot the 'fitnessSTD' heatmap of the MAP-Elites
+  map = to_map(files[1:], filenames[1:], 'fSTD')
+  map_aux = copy.deepcopy(map)
+  for l in range(len(leniency)):
+    for e in range(len(exploration)):
+      if (np.isnan(map_aux[l, e])):
+        map_aux[l, e] = 0
+  title = type + 'Enemy Sparsity'
+  plot_heatmap(map, target_ex, 'fitnessSTD', np.max(map_aux), title)
+
   # Plot the 'fitnessNeededRooms' heatmap of the MAP-Elites
   map = to_map(files[1:], filenames[1:], 'fNeededRooms')
   map_aux = copy.deepcopy(map)
