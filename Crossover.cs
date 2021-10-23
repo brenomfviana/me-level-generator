@@ -7,6 +7,10 @@ namespace LevelGenerator
     /// This class holds the crossover operator.
     public class Crossover
     {
+        /// The error message of problem in swap children.
+        public static readonly string PROBLEM_IN_THE_DUNGEON =
+            "There is something wrong with the dungeon representation.";
+
         /// Choose a random room to switch between the parents and arrange
         /// every aspect of the room needed after the change. Including the
         /// grid, and also the exceptions where the new nodes overlap the old
@@ -211,7 +215,7 @@ namespace LevelGenerator
             // No room involved in this operation can be null
             Debug.Assert(
                 _room1 != null && _room2 != null && _room1.parent != null,
-                Common.PROBLEM_IN_THE_DUNGEON
+                PROBLEM_IN_THE_DUNGEON
             );
             // Set `_room2` as a child of the parent of `_room1`
             switch (_room1.parentDirection)
