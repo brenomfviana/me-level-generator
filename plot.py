@@ -1,7 +1,7 @@
-import copy
 import os
 import sys
 from pathlib import Path
+import copy
 import json
 import numpy as np
 from pandas.core import base
@@ -62,13 +62,20 @@ if not os.path.isdir(CHART_FOLDER):
   os.mkdir(CHART_FOLDER)
 
 # Calculate the basename
-basename = sys.argv[1] + '-'  # Maximum time
-basename += sys.argv[2] + '-' # Initial population size
-basename += sys.argv[3] + '-' # Mutation chance
-basename += sys.argv[4]       # Number of competitors
+basename = sys.argv[1] + '-'   # maximum time
+basename += sys.argv[2] + '-'  # initial population size
+basename += sys.argv[3] + '-'  # mutation chance
+basename += sys.argv[4] + '-'  # number of tournament competitors
+basename += sys.argv[5] + '-'  # weight or not the enemy sparsity
+basename += sys.argv[6] + '-'  # include or not empty rooms in enemy STD
+basename += sys.argv[7] + '-'  # number of rooms
+basename += sys.argv[8] + '-'  # number of keys
+basename += sys.argv[9] + '-'  # number of locks
+basename += sys.argv[10] + '-' # number of enemies
+basename += sys.argv[11]       # linear coefficient
 
 # Get the number of executions
-executions = int(sys.argv[5])
+executions = int(sys.argv[12])
 
 # Calculate the mean duration
 duration = []
@@ -219,4 +226,3 @@ jsonString = json.dumps(dict)
 jsonFile = open(target + os.path.sep + 'duration.json', 'w')
 jsonFile.write(jsonString)
 jsonFile.close()
-

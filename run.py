@@ -34,6 +34,19 @@ mutations = [5]
 # Competitors
 competitors = [3]
 
+weigths = ["True", "False"]
+
+includes = ["True", "False"]
+
+rooms = [20]
+
+keys = [4]
+
+locks = [4]
+
+enemies = [30]
+
+linear_coefficients = [1.7]
 
 
 # --- Perform experiment
@@ -52,62 +65,88 @@ else:
 os.system('dotnet publish')
 
 
-def run(ge, po, mu, co):
-  # Generate a random seed
-  rs = random.randint(0, np.iinfo(np.int32).max - 1)
+def get_parameters(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11):
   # Build the parameters
   parameters = ""
-  for i in [rs, ge, po, mu, co]:
+  for i in [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11]:
     parameters += str(i) + ' '
-  parameters += '20 4 4 30 1.7'
+  return parameters
+
+def get_total():
+  return len(times) * \
+          len(populations) * \
+          len(mutations) * \
+          len(competitors) * \
+          len(weigths) * \
+          len(includes) * \
+          len(rooms) * \
+          len(keys) * \
+          len(locks) * \
+          len(enemies) * \
+          len(linear_coefficients) * \
+          len(executions)
+
+def run(parameters):
+  # Generate a random seed
+  rs = random.randint(0, np.iinfo(np.int32).max - 1)
+  parameters = str(rs) + ' ' + parameters
   # Print parameters
-  print('Parameters=[', parameters, ']')
+  print('Parameters=[ ' + parameters + ']')
   # Run algoritm for the current set of parameters
   os.system(executable + parameters)
 
 # Variables to control the experiment progress
-total = len(times) * \
-  len(populations) * \
-  len(mutations) * \
-  len(competitors) * \
-  len(executions)
+total = get_total()
 i = 1
 
-for ge in times:
-  for po in populations:
-    for mu in mutations:
-      for co in competitors:
-        for e in executions:
-          # Run execuble
-          run(ge, po, mu, co)
-          # Print progress
-          print("%.2f" % ((i / total) * 100))
-          i += 1
+for p1 in times:
+  for p2 in populations:
+    for p3 in mutations:
+      for p4 in competitors:
+        for p5 in weigths:
+          for p6 in includes:
+            for p7 in rooms:
+              for p8 in keys:
+                for p9 in locks:
+                  for p10 in enemies:
+                    for p11 in linear_coefficients:
+                      for e in executions:
+                        # Run execuble
+                        parameters = get_parameters(p1, p2, p3, p4, p5, p6,
+                                                    p7, p8, p9, p10, p11)
+                        run(parameters)
+                        # Print progress
+                        print("%.2f" % ((i / total) * 100))
+                        i += 1
 
 
-def plot(ge, po, mu, co, ex):
-  # Plot the charts for the current set of parameters
-  parameters = ''
-  for i in [ge, po, mu, co, ex]:
-    parameters += str(i) + ' '
+# --- Plot charts of the experiment results
+
+def plot(parameters):
   os.system('python plot.py ' + parameters)
 
-# Variables to control the experiment progress
-total = len(times) * \
-  len(populations) * \
-  len(mutations) * \
-  len(competitors) * \
-  len(executions)
+# Variables to control the plotting progress
+total = get_total()
 i = 1
 
-# Plot all the results
+# Plot charts for all sets of parameters
 print('Plotting')
-for ge in times:
-  for po in populations:
-    for mu in mutations:
-        for co in competitors:
-          # Plot charts
-          plot(ge, po, mu, co, len(executions))
-          # Print progress
-          print("%.2f" % ((i / total) * 100))
-          i += 1
+for p1 in times:
+  for p2 in populations:
+    for p3 in mutations:
+      for p4 in competitors:
+        for p5 in weigths:
+          for p6 in includes:
+            for p7 in rooms:
+              for p8 in keys:
+                for p9 in locks:
+                  for p10 in enemies:
+                    for p11 in linear_coefficients:
+                      # Plot charts
+                      parameters = get_parameters(p1, p2, p3, p4, p5, p6,
+                                                  p7, p8, p9, p10, p11)
+                      parameters += str(len(executions))
+                      plot(parameters)
+                      # Print progress
+                      print("%.2f" % ((i / total) * 100))
+                      i += 1
