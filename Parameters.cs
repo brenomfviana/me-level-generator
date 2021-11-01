@@ -20,15 +20,28 @@ namespace LevelGenerator
         /// The number of competitors of tournament selection.
         [JsonInclude]
         public int competitors { get; }
+        /// If it is true, the sparsity weights the positions with the number
+        /// of enemies in the respective room.
+        [JsonInclude]
+        public bool weight { get; }
+        /// If it is true, the standard deviation will consider all the rooms
+        /// where enemies can be placed.
+        [JsonInclude]
+        public bool inclusive { get; }
         /// The aimed number of rooms.
+        [JsonInclude]
         public int rooms { get; }
         /// The aimed number of keys.
+        [JsonInclude]
         public int keys { get; }
         /// The aimed number of locks.
+        [JsonInclude]
         public int locks { get; }
         /// The aimed number of enemies.
+        [JsonInclude]
         public int enemies { get; }
         /// The aimed linear coefficient.
+        [JsonInclude]
         public float linearCoefficient { get; }
 
         /// Parameters constructor.
@@ -38,6 +51,8 @@ namespace LevelGenerator
             int _population,
             int _mutation,
             int _competitors,
+            bool _weight,
+            bool _inclusive,
             int _rooms,
             int _keys,
             int _locks,
@@ -49,6 +64,8 @@ namespace LevelGenerator
             population = _population;
             mutation = _mutation;
             competitors = _competitors;
+            weight = _weight;
+            inclusive = _inclusive;
             rooms = _rooms;
             keys = _keys;
             locks = _locks;

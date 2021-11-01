@@ -91,18 +91,23 @@ namespace LevelGenerator
             _individual.fGoal = fit;
             // Update the fitness by subtracting the enemy sparsity
             // (the higher the better)
-            float sparsity = -EnemySparsity(dungeon, _prs.enemies);
+            float sparsity = -EnemySparsity(dungeon, _prs.enemies, _prs.weight);
             _individual.fEnemySparsity = sparsity;
-            float std = STDEnemyByRoom(dungeon, _prs.enemies);
+            float std = STDEnemyByRoom(dungeon, _prs.enemies, _prs.inclusive);
             _individual.fSTD = std;
             fit = fit + sparsity + std;
             _individual.fitness = fit;
         }
 
         /// Calculate and return the enemy sparsity in the entered dungeon.
+        ///
+        /// If `weight` is true, then the sparsity weights the positions with
+        /// the number of enemies in the respective room. Otherwise, each
+        /// position will be counted once.
         private static float EnemySparsity(
             Dungeon _dungeon,
-            int _enemies
+            int _enemies,
+            bool _weight
         ) {
             // Calculate the average position of enemies
             float avg_x = 0f;
@@ -111,8 +116,8 @@ namespace LevelGenerator
             {
                 int xp = room.x + _dungeon.minX;
                 int yp = room.y + _dungeon.minY;
-                avg_x += xp * room.enemies;
-                avg_y += yp * room.enemies;
+                avg_x += xp * (_weight ? room.enemies : 1);
+                avg_y += yp * (_weight ? room.enemies : 1);
             }
             avg_x = avg_x / _enemies;
             avg_y = avg_y / _enemies;
@@ -125,27 +130,47 @@ namespace LevelGenerator
                 double dist = 0f;
                 dist += Math.Pow(xp - avg_x, 2);
                 dist += Math.Pow(yp - avg_y, 2);
-                dist *= room.enemies;
+                dist *= (_weight ? room.enemies : 1);
                 sparsity += (float) Math.Sqrt(dist);
             }
             return sparsity / _enemies;
         }
 
         /// Return the standard deviation of number of enemies by room.
+        ///
+        /// If `_inclusive` is true, then the standard deviation will consider
+        /// all the rooms where enemies can be placed. Otherwise, only
+        /// populated rooms will be considered in this calculation.
         private static float STDEnemyByRoom(
             Dungeon _dungeon,
-            int _enemies
+            int _enemies,
+            bool _inclusive
         ) {
             // The start and goal rooms are not count
-            float rooms = _dungeon.rooms.Count - 2;
+            int rooms = 0;
+            if (_inclusive)
+            {
+                rooms = _dungeon.rooms.Count - 2;
+            }
+            else
+            {
+                for (int i = 1; i < _dungeon.rooms.Count; i++)
+                {
+                    if (_dungeon.rooms[i].enemies > 0)
+                    {
+                        rooms++;
+                    }
+                }
+            }
             float mean = _enemies / rooms;
             // Calculate standard deviation
             float std = 0f;
             for (int i = 1; i < _dungeon.rooms.Count; i++)
             {
                 Room room = _dungeon.rooms[i];
-                if (!room.Equals(_dungeon.GetGoal()))
-                {
+                if ((_inclusive && !room.Equals(_dungeon.GetGoal())) ||
+                    (!_inclusive && room.enemies > 0)
+                ) {
                     std += (float) Math.Pow(room.enemies - mean, 2);
                 }
             }

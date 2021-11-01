@@ -72,7 +72,14 @@ namespace LevelGenerator
             foldername += EMPTY_STR + prs.time + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.population + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.mutation + FILENAME_SEPARATOR;
-            foldername += EMPTY_STR + prs.competitors;
+            foldername += EMPTY_STR + prs.competitors + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.weight + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.inclusive + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.rooms + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.keys + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.locks + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.enemies + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.linearCoefficient;
             return foldername;
         }
 

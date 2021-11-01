@@ -9,6 +9,8 @@
 /// - the initial population size;
 /// - the mutation chance;
 /// - the number of tournament competitors;
+/// - weight or not the enemy sparsity;
+/// - include or not empty rooms in enemy STD;
 /// - the number of rooms;
 /// - the number of keys;
 /// - the number of locks;
@@ -31,7 +33,7 @@ namespace LevelGenerator
     class Program
     {
         /// The minimum number of program parameters (arguments).
-        private const int NUMBER_OF_PARAMETERS = 10;
+        private const int NUMBER_OF_PARAMETERS = 12;
 
         /// The error code for bad arguments.
         private const int ERROR_BAD_ARGUMENTS = 0xA0;
@@ -54,16 +56,18 @@ namespace LevelGenerator
             }
             // Define the evolutionary parameters
             Parameters prs = new Parameters(
-                int.Parse(_args[0]),  // Random seed
-                int.Parse(_args[1]),  // Maximum time
-                int.Parse(_args[2]),  // Initial population size
-                int.Parse(_args[3]),  // Mutation chance
-                int.Parse(_args[4]),  // Number of tournament competitors
-                int.Parse(_args[5]),  // Number of rooms
-                int.Parse(_args[6]),  // Number of keys
-                int.Parse(_args[7]),  // Number of locks
-                int.Parse(_args[8]),  // Number of enemies
-                float.Parse(_args[9]) // Linear coefficient
+                int.Parse(_args[0]), // Random seed
+                int.Parse(_args[1]), // Maximum time
+                int.Parse(_args[2]), // Initial population size
+                int.Parse(_args[3]), // Mutation chance
+                int.Parse(_args[4]), // Number of tournament competitors
+                bool.Parse(_args[5]), // Weight or not the enemy sparsity
+                bool.Parse(_args[6]), // Include or not empty rooms in enemy STD
+                int.Parse(_args[7]), // Number of rooms
+                int.Parse(_args[8]), // Number of keys
+                int.Parse(_args[9]), // Number of locks
+                int.Parse(_args[10]), // Number of enemies
+                float.Parse(_args[11]) // Linear coefficient
             );
             // Ensure the population size is enough for the tournament
             Debug.Assert(
