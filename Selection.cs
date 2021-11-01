@@ -84,7 +84,7 @@ namespace LevelGenerator
             Coordinate coordinate = (Common.UNKNOWN, Common.UNKNOWN);
             for (int i = 0; i < _competitors; i++)
             {
-                if (winner is null || competitors[i].fitness > winner.fitness)
+                if (Fitness.IsBest(competitors[i], winner))
                 {
                     winner = competitors[i];
                     coordinate = coordinates[i];

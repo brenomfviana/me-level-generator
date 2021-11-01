@@ -104,7 +104,7 @@ namespace LevelGenerator
                         offspring[0] = Mutation.Apply(parents[0], ref rand);
                         offspring[1] = Mutation.Apply(parents[1], ref rand);
                     }
-                    // Place the offspring in the MAP-Elites population
+                    // Place the offspring in the intermediate population
                     for (int i = 0; i < offspring.Length; i++)
                     {
                         offspring[i].dungeon.Fix(prs, ref rand);
@@ -119,7 +119,7 @@ namespace LevelGenerator
                     }
                 }
 
-                // Place the offspring in the MAP-Elites population
+                // Place the intermediate population in the MAP-Elites
                 foreach (Individual individual in intermediate)
                 {
                     pop.PlaceIndividual(individual);
