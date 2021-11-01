@@ -16,6 +16,8 @@ This level generator receives seven arguments:
 - the initial population size;
 - the mutation chance;
 - the number of tournament competitors;
+- weight or not the enemy sparsity;
+- include or not empty rooms in enemy STD;
 - the number of rooms;
 - the number of keys;
 - the number of locks;
