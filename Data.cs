@@ -10,6 +10,8 @@ namespace LevelGenerator
         [JsonInclude]
         public Parameters parameters { get; set; }
         [JsonInclude]
+        public int generations { get; set; }
+        [JsonInclude]
         public double duration { get; set; }
     }
 }

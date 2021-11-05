@@ -14,6 +14,9 @@ namespace LevelGenerator
         /// The initial population size.
         [JsonInclude]
         public int population { get; }
+        /// The intermediate population size.
+        [JsonInclude]
+        public int intermediate { get; }
         /// The mutation chance.
         [JsonInclude]
         public int mutation { get; }
@@ -49,6 +52,7 @@ namespace LevelGenerator
             int _seed,
             int _time,
             int _population,
+            int _intermediate,
             int _mutation,
             int _competitors,
             bool _weight,
@@ -62,6 +66,7 @@ namespace LevelGenerator
             seed = _seed;
             time = _time;
             population = _population;
+            intermediate = _intermediate;
             mutation = _mutation;
             competitors = _competitors;
             weight = _weight;

@@ -43,7 +43,7 @@ namespace LevelGenerator
                 basename, SEARCH_FOR, SearchOption.TopDirectoryOnly
             ).Length;
             // Create a folder for the resulting set of dungeon levels
-            basename = basename + SEPARATOR + EMPTY_STR + count;
+            basename = basename + SEPARATOR + count;
             Directory.CreateDirectory(basename);
             // Save the evolutionary process data
             string datafn = basename + SEPARATOR + DATA_FILENAME + JSON;
@@ -71,6 +71,7 @@ namespace LevelGenerator
             string foldername = EMPTY_STR;
             foldername += EMPTY_STR + prs.time + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.population + FILENAME_SEPARATOR;
+            foldername += EMPTY_STR + prs.intermediate + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.mutation + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.competitors + FILENAME_SEPARATOR;
             foldername += EMPTY_STR + prs.weight + FILENAME_SEPARATOR;

@@ -8,8 +8,6 @@ namespace LevelGenerator
     {
         /// The number of parents to be selected for crossover.
         private static readonly int CROSSOVER_PARENTS = 2;
-        /// The size of the intermediate population.
-        private static readonly int INTERMEDIATE_POPULATION = 100;
 
         /// The evolutionary parameters.
         private Parameters prs;
@@ -78,7 +76,7 @@ namespace LevelGenerator
             while ((end - start).TotalSeconds < prs.time)
             {
                 List<Individual> intermediate = new List<Individual>();
-                while (intermediate.Count < INTERMEDIATE_POPULATION)
+                while (intermediate.Count < prs.intermediate)
                 {
                     // Apply the crossover operation
                     Individual[] parents = Selection.Select(
@@ -128,6 +126,8 @@ namespace LevelGenerator
                 g++;
                 end = DateTime.Now;
             }
+
+            data.generations = g;
 
             // Get the final population (solution)
             solution = pop;

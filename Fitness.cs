@@ -162,6 +162,10 @@ namespace LevelGenerator
                     }
                 }
             }
+            if (rooms == 0)
+            {
+                return _dungeon.rooms.Count;
+            }
             float mean = _enemies / rooms;
             // Calculate standard deviation
             float std = 0f;
