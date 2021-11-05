@@ -14,6 +14,7 @@ This level generator receives seven arguments:
 - a random seed;
 - the maximum time;
 - the initial population size;
+- the intermediate population size;
 - the mutation chance;
 - the number of tournament competitors;
 - weight or not the enemy sparsity;
