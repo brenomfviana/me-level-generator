@@ -25,12 +25,19 @@ This level generator receives seven arguments:
 - the number of enemies, and;
 - the linear coefficient.
 
+
 ## Author
 
 - Breno M. F. Viana
+
 
 ## References
 
 [1]: Pereira, Leonardo Tortoro, et al. "Procedural generation of dungeons' maps
 and locked-door missions through an evolutionary algorithm validated with
 players." Expert Systems with Applications 180 (2021): 115009.
+
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
